@@ -31,6 +31,10 @@ import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 
+/**
+ * Utility class for writing WAV files
+ * @author kc7bfi
+ */
 public class WavWriter {
     private static final int MAX_BLOCK_SIZE = 65535;
     
@@ -51,7 +55,7 @@ public class WavWriter {
     private LittleEndianDataOutput osLE;
     
     /**
-     * The constructor
+     * The constructor.
      * @param os            The output sream
      * @param streamInfo    The FLAC stream info
      */
@@ -65,7 +69,7 @@ public class WavWriter {
     }
     
     /**
-     * The constructor
+     * The constructor.
      * @param os            The output sream
      */
     public WavWriter(DataOutput os) {
@@ -74,7 +78,7 @@ public class WavWriter {
     }
     
     /**
-     * The constructor
+     * The constructor.
      * @param os            The output sream
      * @param streamInfo    The FLAC stream info
      */
@@ -88,7 +92,7 @@ public class WavWriter {
     }
     
     /**
-     * The constructor
+     * The constructor.
      * @param os            The output sream
      */
     public WavWriter(OutputStream os) {
@@ -97,7 +101,7 @@ public class WavWriter {
     }
     
     /**
-     * Write a WAV file header
+     * Write a WAV file header.
      * @throws IOException  Thrown if error writing to output string.
      */
     public void writeHeader() throws IOException {
@@ -127,7 +131,7 @@ public class WavWriter {
     }
     
     /**
-     * Write a WAV file header
+     * Write a WAV file header.
      * @param streamInfo    The FLAC stream info
      * @throws IOException  Thrown if error writing to output string.
      */    
@@ -140,7 +144,7 @@ public class WavWriter {
     }
     
     /**
-     * Write a WAV frame record
+     * Write a WAV frame record.
      * @param frame         The FLAC frame
      * @param channelData   The decoded channel data
      * @throws IOException  Thrown if error writing to output channel
@@ -208,6 +212,11 @@ public class WavWriter {
         }
     }
     
+    /**
+     * Write the PCM data
+     * @param space The PCM data
+     * @throws IOException  Thrown if error writing to file
+     */
     public void writePCM(ByteSpace space) throws IOException {
         os.write(space.space, 0, space.pos);
     }
