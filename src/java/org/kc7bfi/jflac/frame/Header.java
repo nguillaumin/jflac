@@ -91,7 +91,7 @@ public class Header {
             rawHeader.space[rawHeader.pos++] = (byte) is.readRawUInt(8);
         }
         
-        int bsType = rawHeader.space[2] >> 4;
+        int bsType = (rawHeader.space[2] >> 4) & 0x0f;
         switch (bsType) {
             case 0 :
                 if (!isKnownFixedBlockSizeStream)
@@ -124,6 +124,7 @@ public class Header {
             default :
                 break;
         }
+        //System.out.println("BSType="+bsType+" BS="+blockSize);
         
         int srType = rawHeader.space[2] & 0x0f;
         switch (srType) {
@@ -277,7 +278,7 @@ public class Header {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "FrameHeader:" + 
+        return "FrameHeader:" +
             " BlockSize=" + blockSize +
             " SampleRate=" + sampleRate +
             " Channels=" + channels +

@@ -47,8 +47,13 @@ public class Analyser {
         } while (!metadata.isLast());
         
         // read audio frames
+        int frameNum = 0;
         for (Frame frame = decoder.getNextFrame(); frame != null; frame = decoder.getNextFrame()) {
-            System.out.println(frame.toString());
+            frameNum++;
+            System.out.println(frameNum + " " +frame.toString());
+            //if (frameNum == 183) {
+            //    for (int i = 0; i < 10; i++) System.out.println(Integer.toHexString(decoder.getInputBitStream().readRawInt(8)));
+            //}
         }
         
    }

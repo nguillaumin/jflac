@@ -108,6 +108,10 @@ public class StreamDecoder {
         return channelData;
     }
     
+    public InputBitStream getInputBitStream() {
+        return is;
+    }
+    
     /**
      * Read the FLAC stream info
      * @return  The FLAC Stream Info record
@@ -332,7 +336,7 @@ public class StreamDecoder {
     }
     
     private void frameSync() throws IOException {
-        boolean first = true;
+        boolean first = true;int cnt=0;
         
         // If we know the total number of samples in the stream, stop if we've read that many.
         // This will stop us, for example, from wasting time trying to sync on an ID3V1 tag.
@@ -365,7 +369,7 @@ public class StreamDecoder {
             }
             if (first) {
                 System.out.println("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
-                first = false;
+                if (cnt++ > 16) first = false;
             }
         }
     }
@@ -415,6 +419,7 @@ public class StreamDecoder {
             }
             // now read it
             try {
+                //System.out.println("Read SubFrame");
                 readSubframe(channel, bps);
             } catch (IOException e) {
                 System.out.println("ReadSubframe: "+e);e.printStackTrace();
@@ -488,6 +493,7 @@ public class StreamDecoder {
         int x;
         
         x = is.readRawUInt(8); /* MAGIC NUMBER */
+        //System.out.println("Magic Number="+Integer.toHexString(x&0xff));
         
         boolean haveWastedBits = ((x & 1) != 0);
         x &= 0xfe;
