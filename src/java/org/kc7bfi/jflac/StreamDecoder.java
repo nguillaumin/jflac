@@ -312,6 +312,34 @@ public class StreamDecoder {
         }
     }
     
+    public void decodeFrames() throws IOException {
+        state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
+        while (true) {
+            switch (state) {
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                Metadata metadata = readMetadata();
+                if (metadata == null) break;
+                break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync();
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                if (!readFrame()) break;
+                callFrameListeners(frame);
+                callPCMProcessors(frame);
+                break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return;
+            default :
+                throw new IOException("Unknown state: " + state);
+            }
+        }
+    }
+    
     public void decode(SeekPoint from, SeekPoint to) throws IOException {
         // position random access file
         if (!(inputStream instanceof RandomFileInputStream)) throw new IOException("Not a RandomFileInputStream: " + inputStream.getClass().getName());
@@ -525,6 +553,7 @@ public class StreamDecoder {
     }
     
     private void frameSync() throws IOException {
+        System.out.println("frameSync "+streamInfo);
         boolean first = true;
         int cnt=0;
         
@@ -564,6 +593,7 @@ public class StreamDecoder {
                 }
             }
         } catch (EOFException e) {
+            System.out.println("EOF");
             if (!first) callErrorListeners("FindSync LOST_SYNC: Left over data in file");
             state = STREAM_DECODER_END_OF_STREAM;
         }

@@ -84,13 +84,19 @@ on SourceForge</p>
 				<include>**/*Test.java</include>
 			</includes>
 			<resources>
-			<resource>
+			  <resource>
 				<directory>testdata</directory>
 				<includes>
 					<include>*.flac</include>
 				</includes>
-			</resource>
-		</resources>
+			  </resource>
+			  <resource>
+				<directory>META-INF</directory>
+				<includes>
+					<include>**/javax.*</include>
+				</includes>
+			  </resource>
+		  </resources>
 		</unitTest>
 	</build>
 

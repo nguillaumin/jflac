@@ -2,3 +2,6 @@ eclipse
 bak 
 classes 
 target
+*.log
+
+pack.flac

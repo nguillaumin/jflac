@@ -4,6 +4,23 @@
     <title>News</title>
   </properties>
 	<body>
+		<!--
+		<section name="17th June 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.6</a> released!</p>
+			<p>I am pleased to announce an updated release of the jFLAC library.</p>
+			<p>This release includes bug fixes and some cleanup to the jFLAC library:
+			<ul>
+   				<li>FlacPacker application. This application packs a number of individual flac files into one flac file.
+   				    The separate flac files are indexed with a seek table.</li>
+   				<li>SeekTablePlayer application. This application plays a section of a flac file between two seek points.</li>
+   				<li>InputBitStream renamed to BitInputStream.</li>
+				<li>OutputBitStream renamed to BitOutputStream.</li>
+			</ul></p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
+		-->
 		<section name="17th June 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.5</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>

@@ -4,5 +4,14 @@
 	<preGoal name="xdoc:jelly-transform">
 		<attainGoal name="faq"/>
 	</preGoal>
+	
+	<preGoal name="jar:jar">
+  		<copy todir="${maven.build.dest}/META-INF">
+    		<fileset dir="${basedir}/META-INF"/>
+  		</copy>
+  		<copy todir="${maven.build.dest}/meta-inf">
+    		<fileset dir="${basedir}/META-INF"/>
+  		</copy>
+	</preGoal>
 
 </project>
