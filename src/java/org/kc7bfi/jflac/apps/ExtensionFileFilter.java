@@ -1,4 +1,6 @@
-/*
+package org.kc7bfi.jflac.apps;
+
+/**
  * Copyright (c) 2003 Sun Microsystems, Inc. All  Rights Reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +33,10 @@
  * You acknowledge that Software is not designed, licensed or intended for
  * use in the design, construction, operation or maintenance of any nuclear
  * facility.
+ * 
+ * @(#)ExampleFileFilter.java 1.6 03/01/23
  */
 
-/*
- * @(#)ExampleFileFilter.java	1.6 03/01/23
- */
-
-
-package org.kc7bfi.jflac.apps;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -64,6 +62,7 @@ import javax.swing.filechooser.FileFilter;
  * @version 1.6 01/23/03
  * @author Jeff Dinkins
  */
+
 public class ExtensionFileFilter extends FileFilter {
     
     private static String TYPE_UNKNOWN = "Type Unknown";
@@ -91,7 +90,7 @@ public class ExtensionFileFilter extends FileFilter {
      * @see #addExtension
      */
     public ExtensionFileFilter(String extension) {
-        this(extension,null);
+        this(extension, null);
     }
     
     /**
@@ -105,8 +104,8 @@ public class ExtensionFileFilter extends FileFilter {
      */
     public ExtensionFileFilter(String extension, String description) {
         this();
-        if(extension!=null) addExtension(extension);
-        if(description!=null) setDescription(description);
+        if (extension != null) addExtension(extension);
+        if (description != null) setDescription(description);
     }
     
     /**
@@ -136,7 +135,7 @@ public class ExtensionFileFilter extends FileFilter {
             // add filters one by one
             addExtension(filters[i]);
         }
-        if(description!=null) setDescription(description);
+        if (description != null) setDescription(description);
     }
     
     /**
@@ -145,18 +144,20 @@ public class ExtensionFileFilter extends FileFilter {
      *
      * Files that begin with "." are ignored.
      *
+     * @param f The file to check
+     * @return true if the file passes the filters
      * @see #getExtension
      * @see FileFilter#accepts
      */
     public boolean accept(File f) {
-        if(f != null) {
-            if(f.isDirectory()) {
+        if (f != null) {
+            if (f.isDirectory()) {
                 return true;
             }
             String extension = getExtension(f);
-            if(extension != null && filters.get(getExtension(f)) != null) {
+            if (extension != null && filters.get(getExtension(f)) != null) {
                 return true;
-            };
+            }
         }
         return false;
     }
@@ -164,16 +165,18 @@ public class ExtensionFileFilter extends FileFilter {
     /**
      * Return the extension portion of the file's name .
      *
+     * @param f The file to return extionsion
+     * @return The file's extension
      * @see #getExtension
      * @see FileFilter#accept
      */
     public String getExtension(File f) {
-        if(f != null) {
+        if (f != null) {
             String filename = f.getName();
             int i = filename.lastIndexOf('.');
-            if(i>0 && i<filename.length()-1) {
-                return filename.substring(i+1).toLowerCase();
-            };
+            if (i > 0 && i < filename.length() - 1) {
+                return filename.substring(i + 1).toLowerCase();
+            }
         }
         return null;
     }
@@ -189,9 +192,11 @@ public class ExtensionFileFilter extends FileFilter {
      *   filter.addExtension("tif");
      *
      * Note that the "." before the extension is not needed and will be ignored.
+     * 
+     * @param extension The extension to add
      */
     public void addExtension(String extension) {
-        if(filters == null) {
+        if (filters == null) {
             filters = new Hashtable(5);
         }
         filters.put(extension.toLowerCase(), this);
@@ -203,18 +208,19 @@ public class ExtensionFileFilter extends FileFilter {
      * Returns the human readable description of this filter. For
      * example: "JPEG and GIF Image Files (*.jpg, *.gif)"
      *
+     * @return the filter description
      * @see setDescription
      * @see setExtensionListInDescription
      * @see isExtensionListInDescription
      * @see FileFilter#getDescription
      */
     public String getDescription() {
-        if(fullDescription == null) {
-            if(description == null || isExtensionListInDescription()) {
-                fullDescription = description==null ? "(" : description + " (";
+        if (fullDescription == null) {
+            if (description == null || isExtensionListInDescription()) {
+                fullDescription = description == null ? "(" : description + " (";
                 // build the description from the extension list
                 Enumeration extensions = filters.keys();
-                if(extensions != null) {
+                if (extensions != null) {
                     fullDescription += "." + (String) extensions.nextElement();
                     while (extensions.hasMoreElements()) {
                         fullDescription += ", ." + (String) extensions.nextElement();
@@ -232,6 +238,7 @@ public class ExtensionFileFilter extends FileFilter {
      * Sets the human readable description of this filter. For
      * example: filter.setDescription("Gif and JPG Images");
      *
+     * @param description   The description of the filter
      * @see setDescription
      * @see setExtensionListInDescription
      * @see isExtensionListInDescription
@@ -248,6 +255,7 @@ public class ExtensionFileFilter extends FileFilter {
      * Only relevent if a description was provided in the constructor
      * or using setDescription();
      *
+     * @param b The new state of useExtensionsInDescription
      * @see getDescription
      * @see setDescription
      * @see isExtensionListInDescription
@@ -264,6 +272,7 @@ public class ExtensionFileFilter extends FileFilter {
      * Only relevent if a description was provided in the constructor
      * or using setDescription();
      *
+     * @return true if the extension list should show up in the description
      * @see getDescription
      * @see setDescription
      * @see setExtensionListInDescription
