@@ -11,7 +11,7 @@ import java.awt.FlowLayout;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +27,7 @@ import javax.swing.JTextArea;
 
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.SeekPoint;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
@@ -42,11 +43,11 @@ public class FlacPacker extends JFrame {
     private JTextArea textArea = new JTextArea(16, 50);
     private JButton addButton = new JButton("Add Files");
     private JButton makeButton = new JButton("Pack FLAC");
-    private JFileChooser chooser = new JFileChooser();
     
     private ArrayList flacFiles = new ArrayList();
     private ArrayList albumFiles = new ArrayList();
     private StreamInfo masterStreamInfo = null;
+    private byte[] buffer = new byte[64 * 1024];
     
     /**
      * Constructor.
@@ -94,6 +95,7 @@ public class FlacPacker extends JFrame {
     }
     
     private void addFilesToList() {
+        JFileChooser chooser = new JFileChooser();
         ExtensionFileFilter filter = new ExtensionFileFilter();
         filter.addExtension("flac");
         filter.setDescription("FLAC files");
@@ -107,6 +109,7 @@ public class FlacPacker extends JFrame {
     }
     
     private File getOutputFile() {
+        JFileChooser chooser = new JFileChooser();
         ExtensionFileFilter filter = new ExtensionFileFilter();
         filter.addExtension("flac");
         filter.setDescription("FLAC files");
@@ -141,10 +144,15 @@ public class FlacPacker extends JFrame {
                 masterStreamInfo.totalSamples += info.totalSamples;
                 
                 SeekPoint seekPoint = new SeekPoint(lastSampleNumber, lastStreamOffset, 0);
-                AlbumFile aFile = new AlbumFile(file, seekPoint);
+                decoder.processMetadata();
+                long frameStartOffs = decoder.getTotalBytesRead();
+                PackerFile aFile = new PackerFile(file, seekPoint, frameStartOffs);
                 albumFiles.add(aFile);
-                lastSampleNumber += info.totalSamples;
-                lastStreamOffset += file.length() - decoder.getBytesConsumed();
+                decoder.decode();
+                long frameEndOffs = decoder.getTotalBytesRead();
+                appendMsg(frameStartOffs+" "+frameEndOffs);
+                lastSampleNumber += decoder.getSamplesDecoded();
+                lastStreamOffset += frameEndOffs - frameStartOffs;
             } catch (FileNotFoundException e) {
                 appendMsg("File " + file + ": " + e);
             } catch (IOException e) {
@@ -154,9 +162,13 @@ public class FlacPacker extends JFrame {
         
         // make Seek Table
         SeekPoint[] points = new SeekPoint[albumFiles.size()];
+        SeekTable seekTable = new SeekTable(points);
+        int metadataHeader = (Metadata.STREAM_METADATA_IS_LAST_LEN + Metadata.STREAM_METADATA_TYPE_LEN + Metadata.STREAM_METADATA_LENGTH_LEN) / 8;
+        int metadataOffset = Constants.STREAM_SYNC_STRING.length + masterStreamInfo.calcLength() + seekTable.calcLength() + metadataHeader * 2;
         for (int i = 0; i < albumFiles.size(); i++) {
-            AlbumFile aFile = (AlbumFile)albumFiles.get(i);
-            appendMsg("SeekTable build " + i);
+            PackerFile aFile = (PackerFile)albumFiles.get(i);
+            appendMsg("SeekTable build " + i + " Offset=" + aFile.seekPoint.getStreamOffset() + " header=" + metadataOffset);
+            aFile.seekPoint.setStreamOffset(aFile.seekPoint.getStreamOffset() + metadataOffset);
             points[i] = aFile.seekPoint;
         }
         
@@ -168,8 +180,10 @@ public class FlacPacker extends JFrame {
         File outFile = getOutputFile();
         if (outFile == null) return;
         OutputBitStream os = null;
+        FileOutputStream fos;
         try {
-            os = new OutputBitStream(new FileOutputStream(outFile));
+            fos = new FileOutputStream(outFile);
+            os = new OutputBitStream(fos);
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
             return;
@@ -190,15 +204,19 @@ public class FlacPacker extends JFrame {
         
         // generate output file
         for (int i = 0; i < albumFiles.size(); i++) {
-            AlbumFile aFile = (AlbumFile)albumFiles.get(i);
+            PackerFile aFile = (PackerFile)albumFiles.get(i);
             appendMsg("Process file " + i + ": " + aFile.file);
             try {
                 RandomAccessFile raf = new RandomAccessFile(aFile.file, "r");
-                FileInputStream is = new FileInputStream(aFile.file);
-                StreamDecoder decoder = new StreamDecoder(is);
-                decoder.processMetadata();
+                raf.seek(aFile.firstFrameOffset);
+                for (int bytes = raf.read(buffer); bytes > 0; bytes = raf.read(buffer)) {
+                    fos.write(buffer, 0, bytes);
+                }
+                fos.flush();
             } catch (FileNotFoundException e) {
                 appendMsg("File " + aFile.file + ": " + e);
+            } catch (EOFException e) {
+                appendMsg("File " + aFile.file + ": Done!");
             } catch (IOException e) {
                 appendMsg("File " + aFile.file + ": " + e);
             }
@@ -218,18 +236,20 @@ public class FlacPacker extends JFrame {
      * This class holds the fiels and their seek points.
      * @author kc7bfi
      */
-    private class AlbumFile {
+    private class PackerFile {
         protected File file;
         protected SeekPoint seekPoint;
+        protected long firstFrameOffset;
         
         /**
          * The constructor.
          * @param file      The file
          * @param seekPoint The SeekPoint
          */
-        public AlbumFile(File file, SeekPoint seekPoint) {
+        public PackerFile(File file, SeekPoint seekPoint, long firstFrameOffset) {
             this.file = file;
             this.seekPoint = seekPoint;
+            this.firstFrameOffset = firstFrameOffset;
         }
     }
 }

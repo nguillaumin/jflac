@@ -80,8 +80,29 @@ public class SeekTable extends Metadata {
         os.flushByteAligned();
     }
     
-    private int calcLength() {
+    /**
+     * Calculate the metadata block size.
+     * @return The metadata block size
+     */
+    public int calcLength() {
         return points.length * SEEKPOINT_LENGTH_BYTES;
+    }
+    
+    /**
+     * Return the selected seek point.
+     * @param idx   The seek point number
+     * @return  The selected seek point
+     */
+    public SeekPoint getSeekPoint(int idx) {
+        return points[idx];
+    }
+    
+    /**
+     * Return the number of seek points.
+     * @return the number of seek points
+     */
+    public int numberOfPoints() {
+        return points.length;
     }
     
     /**

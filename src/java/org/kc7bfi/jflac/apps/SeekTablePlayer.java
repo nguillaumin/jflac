@@ -20,7 +20,6 @@ package org.kc7bfi.jflac.apps;
  */
 
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -30,8 +29,14 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import org.kc7bfi.jflac.FrameListener;
 import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.io.RandomFileInputStream;
+import org.kc7bfi.jflac.metadata.Metadata;
+import org.kc7bfi.jflac.metadata.SeekPoint;
+import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 
@@ -40,10 +45,13 @@ import org.kc7bfi.jflac.util.ByteSpace;
  * Play a FLAC file application.
  * @author kc7bfi
  */
-public class Player implements PCMProcessor {
+public class SeekTablePlayer implements PCMProcessor, FrameListener {
     private AudioFormat fmt;
     private DataLine.Info info;
     private SourceDataLine line;
+    
+    private StreamInfo streamInfo = null;
+    private SeekTable seekTable = null;
     
     /**
      * Decode and play an input FLAC file.
@@ -51,13 +59,27 @@ public class Player implements PCMProcessor {
      * @throws IOException  Thrown if error reading file
      * @throws LineUnavailableException Thrown if error playing file
      */
-    public void decode(String inFileName) throws IOException, LineUnavailableException {
+    public void play(String inFileName, int fromSeekPoint, int toSeekPoint) throws IOException, LineUnavailableException {
         System.out.println("Play [" + inFileName + "]");
-        FileInputStream is = new FileInputStream(inFileName);
+        RandomFileInputStream is = new RandomFileInputStream(inFileName);
         
         StreamDecoder decoder = new StreamDecoder(is);
         decoder.addPCMProcessor(this);
-        decoder.decode();
+        decoder.addFrameListener(this);
+        decoder.processMetadata();
+        
+        // see if SeekTbale exists
+        if (seekTable == null) {
+            System.out.println("Missing SeekTable!");
+            return;
+        }
+        
+        SeekPoint from = seekTable.getSeekPoint(fromSeekPoint);
+        SeekPoint to = null;
+        if (toSeekPoint + 1 < seekTable.numberOfPoints()) to = seekTable.getSeekPoint(toSeekPoint + 1);
+        System.out.println("Seek From: " + from);
+        System.out.println("Seek To  : " + to);
+        decoder.decode(from, to);
         
         line.drain();
         line.close();
@@ -69,6 +91,7 @@ public class Player implements PCMProcessor {
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
+        this.streamInfo = streamInfo;
         try {
             fmt = new AudioFormat(streamInfo.sampleRate,
                     streamInfo.bitsPerSample,
@@ -92,6 +115,26 @@ public class Player implements PCMProcessor {
     public void processPCM(ByteSpace pcm) {
         line.write(pcm.space, 0, pcm.pos);
     }
+
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.Metadata)
+     */
+    public void processMetadata(Metadata metadata) {
+        if (metadata instanceof SeekTable) seekTable = (SeekTable)metadata;
+    }
+
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
+     */
+    public void processFrame(Frame frame) {
+    }
+
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.FrameListener#processError(java.lang.String)
+     */
+    public void processError(String msg) {
+        System.out.println("FLAC Error: " + msg);
+   }
     
     /**
      * The main routine.
@@ -99,11 +142,12 @@ public class Player implements PCMProcessor {
      * @param args  Command line arguments
      */
     public static void main(String[] args) {
+        String flacFile = args[0];
+        int fromSeekPoint = Integer.parseInt(args[1]);
+        int toSeekPoint = Integer.parseInt(args[2]);
         try {
-            Player decoder = new Player();
-            
-            for (int i = 0; i < args.length; i++)
-                decoder.decode(args[i]);
+            SeekTablePlayer player = new SeekTablePlayer();
+            player.play(flacFile, fromSeekPoint, toSeekPoint);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

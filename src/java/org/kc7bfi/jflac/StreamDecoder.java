@@ -33,10 +33,12 @@ import org.kc7bfi.jflac.frame.ChannelLPC;
 import org.kc7bfi.jflac.frame.ChannelVerbatim;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.frame.Header;
+import org.kc7bfi.jflac.io.RandomFileInputStream;
 import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
 import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.Padding;
+import org.kc7bfi.jflac.metadata.SeekPoint;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.metadata.Unknown;
@@ -63,8 +65,9 @@ public class StreamDecoder {
     private int channels;
     private int channelAssignment;
     private int bitsPerSample;
-    private int sampleRate; /* in Hz */
-    private int blockSize; /* in samples (per channel) */
+    private int sampleRate; // in Hz
+    private int blockSize; // in samples (per channel)
+    private InputStream inputStream = null;
     
     private HashSet frameListeners = new HashSet();
     private HashSet pcmProcessors = new HashSet();
@@ -86,8 +89,9 @@ public class StreamDecoder {
      * The constructor
      * @param is    The input stream to read data from
      */
-    public StreamDecoder(InputStream is) {
-        this.is = new InputBitStream(is);
+    public StreamDecoder(InputStream inputStream) {
+        this.inputStream = inputStream;
+        this.is = new InputBitStream(inputStream);
         state = STREAM_DECODER_UNINITIALIZED;
         lastFrameNumber = 0;
         samplesDecoded = 0;
@@ -290,8 +294,6 @@ public class StreamDecoder {
             case STREAM_DECODER_READ_METADATA :
                 Metadata metadata = readMetadata();
                 if (metadata == null) break;
-                callMetadataListeners(metadata);
-                if (metadata instanceof StreamInfo) callStreamInfoProcessors((StreamInfo)metadata);
                 break;
             case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
                 frameSync();
@@ -300,6 +302,42 @@ public class StreamDecoder {
                 if (!readFrame()) break;
                 callFrameListeners(frame);
                 callPCMProcessors(frame);
+                break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return;
+            default :
+                throw new IOException("Unknown state: " + state);
+            }
+        }
+    }
+    
+    public void decode(SeekPoint from, SeekPoint to) throws IOException {
+        // position random access file
+        if (!(inputStream instanceof RandomFileInputStream)) throw new IOException("Not a RandomFileInputStream: " + inputStream.getClass().getName());
+        ((RandomFileInputStream)inputStream).seek(from.getStreamOffset());
+        is.reset();
+        samplesDecoded = from.getSampleNumber();
+        
+        state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
+        while (true) {
+            switch (state) {
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                Metadata metadata = readMetadata();
+                if (metadata == null) break;
+                break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync();
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                if (!readFrame()) break;
+                callFrameListeners(frame);
+                callPCMProcessors(frame);
+                //System.out.println(samplesDecoded +" "+ to.getSampleNumber());
+                if (to != null && samplesDecoded >= to.getSampleNumber()) state = STREAM_DECODER_END_OF_STREAM;
                 break;
             case STREAM_DECODER_END_OF_STREAM :
             case STREAM_DECODER_ABORTED :
@@ -372,6 +410,14 @@ public class StreamDecoder {
         return is.getConsumedBlurbs();
     }
     
+    /**
+     * Bytes read.
+     * @return  The number of bytes read
+     */
+    public long getTotalBytesRead() {
+        return is.getTotalBlurbsRead();
+    }
+    
     /*
      public int getInputBytesUnconsumed() {
      return is.getInputBytesUnconsumed();
@@ -441,6 +487,7 @@ public class StreamDecoder {
         
         if (type == Metadata.METADATA_TYPE_STREAMINFO) {
             metadata = streamInfo = new StreamInfo(is, length);
+            callStreamInfoProcessors((StreamInfo)metadata);
         } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
             metadata = seekTable = new SeekTable(is, length);
         } else if (type == Metadata.METADATA_TYPE_APPLICATION) {
@@ -454,6 +501,7 @@ public class StreamDecoder {
         } else {
             metadata = new Unknown(is, length);
         }
+        callMetadataListeners(metadata);
         if (isLast) state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         return metadata;
     }
@@ -687,5 +735,12 @@ public class StreamDecoder {
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             }
         }
+    }
+    /**
+     * Get the number of samples decoded.
+     * @return Returns the samples Decoded.
+     */
+    public long getSamplesDecoded() {
+        return samplesDecoded;
     }
 }

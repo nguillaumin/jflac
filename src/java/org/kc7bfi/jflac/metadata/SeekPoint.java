@@ -80,4 +80,32 @@ public class SeekPoint {
     public String toString() {
         return "sampleNumber=" + sampleNumber + " streamOffset=" + streamOffset + " frameSamples=" + frameSamples;
     }
+    /**
+     * Return the frame samples.
+     * @return Returns the frameSamples.
+     */
+    public int getFrameSamples() {
+        return frameSamples;
+    }
+    /**
+     * return the sample number.
+     * @return Returns the sampleNumber.
+     */
+    public long getSampleNumber() {
+        return sampleNumber;
+    }
+    /**
+     * return the stream offset.
+     * @return Returns the streamOffset.
+     */
+    public long getStreamOffset() {
+        return streamOffset;
+    }
+    /**
+     * Set the stream offset.
+     * @param streamOffset The stream offset to set.
+     */
+    public void setStreamOffset(long streamOffset) {
+        this.streamOffset = streamOffset;
+    }
 }

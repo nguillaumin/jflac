@@ -117,7 +117,11 @@ public class StreamInfo extends Metadata {
         os.flushByteAligned();
     }
     
-    private int calcLength() {
+    /**
+     * Calculate the metadata block size.
+     * @return The metadata block size
+     */
+    public int calcLength() {
         int bits = STREAMINFO_MIN_BLOCK_SIZE_LEN + 
                    STREAMINFO_MAX_BLOCK_SIZE_LEN +
                    STREAMINFO_MIN_FRAME_SIZE_LEN +
@@ -126,7 +130,7 @@ public class StreamInfo extends Metadata {
                    STREAMINFO_CHANNELS_LEN +
                    STREAMINFO_BITS_PER_SAMPLE_LEN +
                    STREAMINFO_TOTAL_SAMPLES_LEN +
-                   md5sum.length;
+                   (md5sum.length * 8);
         return ((bits + 7) / 8);
     }
     
