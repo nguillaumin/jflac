@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * Application Metadata block.
+ * @author kc7bfi
+ */
 public class Application extends Metadata {
 
     private static final int APPLICATION_ID_LEN = 32; // bits
@@ -38,9 +42,7 @@ public class Application extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Application(InputBitStream is, boolean isLast, int length) throws IOException {
-        super(isLast, length);
-
+    public Application(InputBitStream is, int length) throws IOException {
         is.readByteBlockAlignedNoCRC(id, APPLICATION_ID_LEN / 8);
         length -= APPLICATION_ID_LEN / 8;
 

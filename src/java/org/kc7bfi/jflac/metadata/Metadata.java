@@ -20,28 +20,9 @@ package org.kc7bfi.jflac.metadata;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Root class for all Metadata subclasses.
+ * @author kc7bfi
+ */
 public abstract class Metadata {
-
-    /** true if this metadata block is the last, else false */
-    protected boolean isLast;
-    /** Length, in bytes, of the block data as it appears in the stream. */
-    protected int length;
-    
-    /**
-     * The constructor.
-     * @param isLast            True if last metadata record
-     * @param length            Length of the record
-     */
-    public Metadata(boolean isLast, int length) {
-        this.isLast = isLast;
-        this.length = length;
-    }
-
-    /**
-     * Test iof last metatdata record
-     * @return True if last metadata record in the chain.
-     */
-    public boolean isLast() {
-        return isLast;
-    }
 }

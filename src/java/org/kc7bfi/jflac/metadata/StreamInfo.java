@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * StreamInfo Metadata block.
+ * @author kc7bfi
+ */
 public class StreamInfo extends Metadata {
 
     private static final int STREAMINFO_MIN_BLOCK_SIZE_LEN = 16; // bits
@@ -54,9 +58,7 @@ public class StreamInfo extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public StreamInfo(InputBitStream is, boolean isLast, int length) throws IOException {
-        super(isLast, length);
-        
+    public StreamInfo(InputBitStream is, int length) throws IOException {
         int usedBits = 0;
 
         minBlockSize = is.readRawUInt(STREAMINFO_MIN_BLOCK_SIZE_LEN);
@@ -105,6 +107,7 @@ public class StreamInfo extends Metadata {
     }
     
     /**
+     * Convert to string.
      * @see java.lang.Object#toString()
      */
     public String toString() {

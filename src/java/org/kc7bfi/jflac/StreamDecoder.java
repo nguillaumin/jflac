@@ -224,7 +224,6 @@ public class StreamDecoder {
                 findMetadata();
                 Metadata metadata = readMetadata();
                 if (metadata instanceof StreamInfo) return (StreamInfo) metadata;
-                if (metadata.isLast()) return null;
             } catch (IOException e) {
                 return null;
             }
@@ -438,19 +437,19 @@ public class StreamDecoder {
         int length = is.readRawUInt(STREAM_METADATA_LENGTH_LEN);
         
         if (type == METADATA_TYPE_STREAMINFO) {
-            metadata = streamInfo = new StreamInfo(is, isLast, length);
+            metadata = streamInfo = new StreamInfo(is, length);
         } else if (type == METADATA_TYPE_SEEKTABLE) {
-            metadata = seekTable = new SeekTable(is, isLast, length);
+            metadata = seekTable = new SeekTable(is, length);
         } else if (type == METADATA_TYPE_APPLICATION) {
-            metadata = new Application(is, isLast, length);
+            metadata = new Application(is, length);
         } else if (type == METADATA_TYPE_PADDING) {
-            metadata = new Padding(is, isLast, length);
+            metadata = new Padding(is, length);
         } else if (type == METADATA_TYPE_VORBIS_COMMENT) {
-            metadata = new VorbisComment(is, isLast, length);
+            metadata = new VorbisComment(is, length);
         } else if (type == METADATA_TYPE_CUESHEET) {
-            metadata = new CueSheet(is, isLast, length);
+            metadata = new CueSheet(is, length);
         } else {
-            metadata = new Unknown(is,  isLast, length);
+            metadata = new Unknown(is, length);
         }
         if (isLast) state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         return metadata;

@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * VorbisComment Metadata block.
+ * @author kc7bfi
+ */
 public class VorbisComment extends Metadata {
     
     //private static final int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
@@ -39,9 +43,7 @@ public class VorbisComment extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public VorbisComment(InputBitStream is, boolean isLast, int length) throws IOException {
-        super(isLast, length);
-        
+    public VorbisComment(InputBitStream is, int length) throws IOException {
         // read vendor string
         int len = is.readRawIntLittleEndian();
         vendorString = new byte[len];

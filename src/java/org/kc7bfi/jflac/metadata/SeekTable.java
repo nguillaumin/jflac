@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * SeekTable Metadata block.
+ * @author kc7bfi
+ */
 public class SeekTable extends Metadata {
     private static final int SEEKPOINT_LENGTH = 18;
 
@@ -36,9 +40,7 @@ public class SeekTable extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public SeekTable(InputBitStream is, boolean isLast, int length) throws IOException {
-        super(isLast, length);
-
+    public SeekTable(InputBitStream is, int length) throws IOException {
         int numPoints = length / SEEKPOINT_LENGTH;
 
         points = new SeekPoint[numPoints];
@@ -56,7 +58,6 @@ public class SeekTable extends Metadata {
      * @param points    Seek Points
      */
     public SeekTable(SeekPoint[] points) {
-        super(false, 0);
         this.points = points;
     }
 }

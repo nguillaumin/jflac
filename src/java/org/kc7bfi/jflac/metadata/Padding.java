@@ -24,7 +24,12 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * Padding Metadata block.
+ * @author kc7bfi
+ */
 public class Padding extends Metadata {
+    private int length;
 
     /**
      * The constructor.
@@ -33,13 +38,13 @@ public class Padding extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Padding(InputBitStream is, boolean isLast, int length) throws IOException {
-        super(isLast, length);
-        
+    public Padding(InputBitStream is, int length) throws IOException {
+        this.length = length;
         is.readByteBlockAlignedNoCRC(null, length);
     }
     
     /**
+     * Convert to string.
      * @see java.lang.Object#toString()
      */
     public String toString() {
