@@ -26,7 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
 import org.kc7bfi.jflac.Constants;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.io.BitOutputStream;
 import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.SeekPoint;
@@ -130,7 +130,7 @@ public class FlacPacker extends JFrame {
             File file = (File)flacFiles.get(i);
             try {
                 FileInputStream is = new FileInputStream(file);
-                StreamDecoder decoder = new StreamDecoder(is);
+                FLACDecoder decoder = new FLACDecoder(is);
                 decoder.processMetadata();
                 StreamInfo info = decoder.getStreamInfo();
                 if (masterStreamInfo == null) {

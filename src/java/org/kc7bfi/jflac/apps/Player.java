@@ -31,7 +31,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import org.kc7bfi.jflac.PCMProcessor;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 
@@ -55,7 +55,7 @@ public class Player implements PCMProcessor {
         System.out.println("Play [" + inFileName + "]");
         FileInputStream is = new FileInputStream(inFileName);
         
-        StreamDecoder decoder = new StreamDecoder(is);
+        FLACDecoder decoder = new FLACDecoder(is);
         decoder.addPCMProcessor(this);
         decoder.decode();
         

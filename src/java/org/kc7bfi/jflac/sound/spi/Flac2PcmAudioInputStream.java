@@ -26,7 +26,7 @@ import java.io.InputStream;
 import javax.sound.sampled.AudioFormat;
 
 import org.kc7bfi.jflac.PCMProcessor;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 
@@ -34,7 +34,7 @@ import org.kc7bfi.jflac.util.ByteSpace;
  * Converts an Flac bitstream into a PCM 16bits/sample audio stream.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.3 $
  */
 public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements PCMProcessor {
 
@@ -56,7 +56,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
     //private Bits bits;
 
     /** Flac Decoder. */
-    private StreamDecoder decoder;
+    private FLACDecoder decoder;
     
     /** StreamInfo MetaData. */
     private StreamInfo streamInfo;
@@ -122,7 +122,6 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
     }
     
     protected void fill() throws IOException {
-        System.out.println("fill");
         if (decodeThread == null) initDecoder();
     }
 
@@ -131,8 +130,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
      * @exception IOException
      */
     protected void initDecoder() throws IOException {
-        System.out.println("initDecoder "+in.getClass().getName());
-        decoder = new StreamDecoder(in);
+        decoder = new FLACDecoder(in);
         decoder.addPCMProcessor(this);
         decodeThread = new Thread(new Runnable() {
             public void run() {
@@ -155,7 +153,6 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
-        System.out.println("StreamInfo="+streamInfo);
         this.streamInfo = streamInfo;
     }
     
@@ -165,9 +162,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
     public void processPCM(ByteSpace pcm) {
-        System.out.println("PCM: "+pcm.pos);
         buffer.resize(pcm.pos * 2);
-        System.out.println("Buffer="+buffer.size());
         buffer.put(pcm.space, 0, pcm.pos);
     }
 }

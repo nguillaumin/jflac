@@ -24,7 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.FrameListener;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.Metadata;
 
@@ -43,7 +43,7 @@ public class Analyser implements FrameListener {
     public void analyse(String inFileName) throws IOException {
         System.out.println("FLAX Analysis for " + inFileName);
         FileInputStream is = new FileInputStream(inFileName);
-        StreamDecoder decoder = new StreamDecoder(is);
+        FLACDecoder decoder = new FLACDecoder(is);
         decoder.addFrameListener(this);
         decoder.decode();
     }

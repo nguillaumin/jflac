@@ -37,7 +37,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.spi.AudioFileReader;
 
 import org.kc7bfi.jflac.Constants;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.io.BitOutputStream;
 import org.kc7bfi.jflac.metadata.StreamInfo;
@@ -48,11 +48,11 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
     
-    private StreamDecoder decoder;
+    private FLACDecoder decoder;
     private StreamInfo streamInfo;
     
     public FlacAudioFileReader() {
@@ -238,7 +238,7 @@ public class FlacAudioFileReader extends AudioFileReader {
                         / ((mode == 0 ? 160f : (mode == 1 ? 320f : 640f)) * ((float) nframes));
             }
             */
-            decoder = new StreamDecoder(bitStream);
+            decoder = new FLACDecoder(bitStream);
             streamInfo = decoder.readStreamInfo();
             if (streamInfo == null) throw new UnsupportedAudioFileException("No StreamInfo found");
             

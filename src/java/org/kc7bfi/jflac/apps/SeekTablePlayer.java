@@ -31,7 +31,7 @@ import javax.sound.sampled.SourceDataLine;
 
 import org.kc7bfi.jflac.FrameListener;
 import org.kc7bfi.jflac.PCMProcessor;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.io.RandomFileInputStream;
 import org.kc7bfi.jflac.metadata.Metadata;
@@ -63,7 +63,7 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
         System.out.println("Play [" + inFileName + "]");
         RandomFileInputStream is = new RandomFileInputStream(inFileName);
         
-        StreamDecoder decoder = new StreamDecoder(is);
+        FLACDecoder decoder = new FLACDecoder(is);
         decoder.addPCMProcessor(this);
         decoder.addFrameListener(this);
         decoder.processMetadata();

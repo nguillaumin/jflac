@@ -23,7 +23,7 @@ package org.kc7bfi.jflac;
 import org.kc7bfi.jflac.frame.EntropyPartitionedRiceContents;
 import org.kc7bfi.jflac.io.BitOutputStream;
 
-public class StreamEncoder {
+public class FLACEncoder {
     
     private class verify_input_fifo {
         int[][] data = new int[Constants.MAX_CHANNELS][Constants.MAX_BLOCK_SIZE];
@@ -200,7 +200,7 @@ public class StreamEncoder {
      * The data for the verify section
      */
     private class VerifyData {
-        StreamDecoder decoder;
+        FLACDecoder decoder;
         int state_hint;
         boolean needs_magic_hack;
         verify_input_fifo input_fifo;
@@ -282,7 +282,7 @@ public class StreamEncoder {
      * Class constructor/destructor
      *
      */
-    public StreamEncoder() {
+    public FLACEncoder() {
         setDefaults();
         
         is_being_deleted = false;

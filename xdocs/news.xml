@@ -15,6 +15,8 @@
    				<li>SeekTablePlayer application. This application plays a section of a flac file between two seek points.</li>
    				<li>InputBitStream renamed to BitInputStream.</li>
 				<li>OutputBitStream renamed to BitOutputStream.</li>
+				<li>StreamDecoder renamed to FLACDecoder.</li>
+				<li>StreamEncoder renamed to FLACEncoder.</li>
 			</ul></p>
 			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
 			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The

@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.PCMProcessor;
-import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.WavWriter;
@@ -48,7 +48,7 @@ public class Decoder implements PCMProcessor {
         FileInputStream is = new FileInputStream(inFileName);
         FileOutputStream os = new FileOutputStream(outFileName);
         wav = new WavWriter(os);
-        StreamDecoder decoder = new StreamDecoder(is);
+        FLACDecoder decoder = new FLACDecoder(is);
         decoder.addPCMProcessor(this);
         decoder.decode();
     }

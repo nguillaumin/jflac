@@ -47,7 +47,7 @@ import org.kc7bfi.jflac.metadata.VorbisComment;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC16;
 
-public class StreamDecoder {
+public class FLACDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
     
@@ -89,7 +89,7 @@ public class StreamDecoder {
      * The constructor
      * @param is    The input stream to read data from
      */
-    public StreamDecoder(InputStream inputStream) {
+    public FLACDecoder(InputStream inputStream) {
         this.inputStream = inputStream;
         this.is = new BitInputStream(inputStream);
         state = STREAM_DECODER_UNINITIALIZED;
@@ -553,7 +553,6 @@ public class StreamDecoder {
     }
     
     private void frameSync() throws IOException {
-        System.out.println("frameSync "+streamInfo);
         boolean first = true;
         int cnt=0;
         
@@ -593,7 +592,6 @@ public class StreamDecoder {
                 }
             }
         } catch (EOFException e) {
-            System.out.println("EOF");
             if (!first) callErrorListeners("FindSync LOST_SYNC: Left over data in file");
             state = STREAM_DECODER_END_OF_STREAM;
         }
