@@ -23,8 +23,6 @@ package org.kc7bfi.jflac;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import org.kc7bfi.jflac.frame.BadHeaderException;
 import org.kc7bfi.jflac.frame.ChannelConstant;
@@ -73,8 +71,8 @@ public class FLACDecoder {
     private int blockSize; // in samples (per channel)
     private InputStream inputStream = null;
     
-    private HashSet frameListeners = new HashSet();
-    private HashSet pcmProcessors = new HashSet();
+    private FrameListeners frameListeners = new FrameListeners();
+    private PCMProcessors pcmProcessors = new PCMProcessors();
     
     // Decoder states
     private static final int STREAM_DECODER_SEARCH_FOR_METADATA = 0;
@@ -131,9 +129,7 @@ public class FLACDecoder {
      * @param listener  The frame listener to add
      */
     public void addFrameListener(FrameListener listener) {
-        synchronized (frameListeners) {
-            frameListeners.add(listener);
-        }
+        frameListeners.addFrameListener(listener);
     }
     
     /**
@@ -141,39 +137,7 @@ public class FLACDecoder {
      * @param listener  The frame listener to remove
      */
     public void removeFrameListener(FrameListener listener) {
-        synchronized (frameListeners) {
-            frameListeners.remove(listener);
-        }
-    }
-    
-    private void callMetadataListeners(Metadata metadata) {
-        synchronized (frameListeners) {
-            Iterator it = frameListeners.iterator();
-            while (it.hasNext()) {
-                FrameListener listener = (FrameListener)it.next();
-                listener.processMetadata(metadata);
-            }
-        }
-    }
-    
-    private void callFrameListeners(Frame frame) {
-        synchronized (frameListeners) {
-            Iterator it = frameListeners.iterator();
-            while (it.hasNext()) {
-                FrameListener listener = (FrameListener)it.next();
-                listener.processFrame(frame);
-            }
-        }
-    }
-    
-    private void callErrorListeners(String msg) {
-        synchronized (frameListeners) {
-            Iterator it = frameListeners.iterator();
-            while (it.hasNext()) {
-                FrameListener listener = (FrameListener)it.next();
-                listener.processError(msg);
-            }
-        }
+        frameListeners.removeFrameListener(listener);
     }
     
     /**
@@ -181,9 +145,7 @@ public class FLACDecoder {
      * @param processor  The processor listener to add
      */
     public void addPCMProcessor(PCMProcessor processor) {
-        synchronized (pcmProcessors) {
-            pcmProcessors.add(processor);
-        }
+        pcmProcessors.addPCMProcessor(processor);
     }
      
     /**
@@ -191,29 +153,7 @@ public class FLACDecoder {
      * @param processor  The processor listener to remove
      */
     public void removePCMProcessor(PCMProcessor processor) {
-        synchronized (pcmProcessors) {
-            pcmProcessors.remove(processor);
-        }
-    }
-    
-    private void callStreamInfoProcessors(StreamInfo info) {
-        synchronized (pcmProcessors) {
-            Iterator it = pcmProcessors.iterator();
-            while (it.hasNext()) {
-                PCMProcessor processor = (PCMProcessor)it.next();
-                processor.processStreamInfo(info);
-            }
-        }
-    }
-    
-    private void callPCMProcessors(ByteData pcm) {
-        synchronized (pcmProcessors) {
-            Iterator it = pcmProcessors.iterator();
-            while (it.hasNext()) {
-                PCMProcessor processor = (PCMProcessor)it.next();
-                processor.processPCM(pcm);
-            }
-        }
+        pcmProcessors.removePCMProcessor(processor);
     }
     
     private void callPCMProcessors(Frame frame) {
@@ -245,7 +185,7 @@ public class FLACDecoder {
                 }
             }
         }
-        callPCMProcessors(space);
+        pcmProcessors.processPCM(space);
     }
     
     /**
@@ -338,7 +278,7 @@ public class FLACDecoder {
                 break;
             case STREAM_DECODER_READ_FRAME :
                 if (!readFrame()) break;
-                callFrameListeners(frame);
+                frameListeners.processFrame(frame);
                 callPCMProcessors(frame);
                 break;
             case STREAM_DECODER_END_OF_STREAM :
@@ -370,7 +310,7 @@ public class FLACDecoder {
                 break;
             case STREAM_DECODER_READ_FRAME :
                 if (!readFrame()) break;
-                callFrameListeners(frame);
+                frameListeners.processFrame(frame);
                 callPCMProcessors(frame);
                 break;
             case STREAM_DECODER_END_OF_STREAM :
@@ -410,7 +350,7 @@ public class FLACDecoder {
                 break;
             case STREAM_DECODER_READ_FRAME :
                 if (!readFrame()) break;
-                callFrameListeners(frame);
+                frameListeners.processFrame(frame);
                 callPCMProcessors(frame);
                 //System.out.println(samplesDecoded +" "+ to.getSampleNumber());
                 if (to != null && samplesDecoded >= to.getSampleNumber()) state = STREAM_DECODER_END_OF_STREAM;
@@ -573,7 +513,7 @@ public class FLACDecoder {
         
         if (type == Metadata.METADATA_TYPE_STREAMINFO) {
             metadata = streamInfo = new StreamInfo(bitStream, length);
-            callStreamInfoProcessors((StreamInfo)metadata);
+            pcmProcessors.processStreamInfo((StreamInfo)metadata);
         } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
             metadata = seekTable = new SeekTable(bitStream, length);
         } else if (type == Metadata.METADATA_TYPE_APPLICATION) {
@@ -587,7 +527,7 @@ public class FLACDecoder {
         } else {
             metadata = new Unknown(bitStream, length);
         }
-        callMetadataListeners(metadata);
+        frameListeners.processMetadata(metadata);
         if (isLast) state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         return metadata;
     }
@@ -645,12 +585,12 @@ public class FLACDecoder {
                     }
                 }
                 if (first) {
-                    callErrorListeners("FindSync LOST_SYNC: " + Integer.toHexString((x & 0xff)));
+                    frameListeners.processError("FindSync LOST_SYNC: " + Integer.toHexString((x & 0xff)));
                     first = false;
                 }
             }
         } catch (EOFException e) {
-            if (!first) callErrorListeners("FindSync LOST_SYNC: Left over data in file");
+            if (!first) frameListeners.processError("FindSync LOST_SYNC: Left over data in file");
             state = STREAM_DECODER_END_OF_STREAM;
         }
     }
@@ -677,7 +617,7 @@ public class FLACDecoder {
         try {
             frame.header = new Header(bitStream, headerWarmup, streamInfo);
         } catch (BadHeaderException e) {
-            callErrorListeners("Found bad header: " + e);
+            frameListeners.processError("Found bad header: " + e);
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         }
         if (state == STREAM_DECODER_SEARCH_FOR_FRAME_SYNC) return false;
@@ -707,7 +647,7 @@ public class FLACDecoder {
             try {
                 readSubframe(channel, bps);
             } catch (IOException e) {
-                callErrorListeners("ReadSubframe: " + e);
+                frameListeners.processError("ReadSubframe: " + e);
             }
             if (state != STREAM_DECODER_READ_FRAME) {
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
@@ -754,7 +694,7 @@ public class FLACDecoder {
             gotAFrame = true;
         } else {
             // Bad frame, emit error and zero the output signal
-            callErrorListeners("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.getCRC() & 0xffff)));
+            frameListeners.processError("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.getCRC() & 0xffff)));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].getOutput()[j] = 0;
@@ -790,7 +730,7 @@ public class FLACDecoder {
         
         // Lots of magic numbers here
         if ((x & 0x80) != 0) {
-            callErrorListeners("ReadSubframe LOST_SYNC: " + Integer.toHexString(x & 0xff));
+            frameListeners.processError("ReadSubframe LOST_SYNC: " + Integer.toHexString(x & 0xff));
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             throw new IOException("ReadSubframe LOST_SYNC: " + Integer.toHexString(x & 0xff));
             //return true;
@@ -822,7 +762,7 @@ public class FLACDecoder {
         if (!bitStream.isConsumedByteAligned()) {
             int zero = bitStream.readRawUInt(bitStream.bitsLeftForByteAlignment());
             if (zero != 0) {
-                callErrorListeners("ZeroPaddingError: " + Integer.toHexString(zero));
+                frameListeners.processError("ZeroPaddingError: " + Integer.toHexString(zero));
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             }
         }
