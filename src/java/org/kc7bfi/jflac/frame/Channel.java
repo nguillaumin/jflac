@@ -20,18 +20,25 @@ package org.kc7bfi.jflac.frame;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Base class for FLAC subframe (channel) classes.
+ * @author kc7bfi
+ */
 public abstract class Channel {
 
-    /** Partisioned Rice Encoding Methid */
+    /** Partisioned Rice Encoding Method. */
     public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE = 0;
     
-    public static final int ENTROPY_CODING_METHOD_TYPE_LEN = 2; /* bits */
-    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4; /* bits */
+    /** The size of the encoding method field (in bits). */
+    public static final int ENTROPY_CODING_METHOD_TYPE_LEN = 2;
+    
+    /** The size of the Rice Order field (in bits). */
+    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4;
 
-    /** The FLAC Frame Header */
+    /** The FLAC Frame Header. */
     protected Header header;
     
-    /** The number of waisted bits in the frame */
+    /** The number of waisted bits in the frame. */
     protected int wastedBits;
  
     /**

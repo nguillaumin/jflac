@@ -25,6 +25,10 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * Verbatim FLAC subframe (channel).
+ * @author kc7bfi
+ */
 public class ChannelVerbatim extends Channel {
     private int[] data; // A pointer to verbatim signal.
     

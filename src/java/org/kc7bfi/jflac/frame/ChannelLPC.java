@@ -27,6 +27,10 @@ import org.kc7bfi.jflac.LPCPredictor;
 import org.kc7bfi.jflac.util.BitMath;
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * LPC FLAC subframe (channel).
+ * @author kc7bfi
+ */
 public class ChannelLPC extends Channel {
     private static final int SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN = 4; /* bits */
     private static final int SUBFRAME_LPC_QLP_SHIFT_LEN = 5; /* bits */
@@ -131,7 +135,7 @@ public class ChannelLPC extends Channel {
         sb.append("\n\t\tWarmup: ");
         for (int i = 0; i < order; i++) sb.append(warmup[i] + " ");
         sb.append("\n\t\tParameter: ");
-        for (int i = 0; i < (1 <<((EntropyPartitionedRice) entropyCodingMethod).order); i++) sb.append(((EntropyPartitionedRice) entropyCodingMethod).contents.parameters[i] + " ");
+        for (int i = 0; i < (1 << ((EntropyPartitionedRice) entropyCodingMethod).order); i++) sb.append(((EntropyPartitionedRice) entropyCodingMethod).contents.parameters[i] + " ");
         //sb.append("\n\t\tResidual: ");
         //for (int i = 0; i < header.blockSize; i++) sb.append(residual[i] + " ");
         return sb.toString();

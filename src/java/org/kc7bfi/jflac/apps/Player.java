@@ -36,14 +36,24 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 
 
+/**
+ * Play a FLAC file application.
+ * @author kc7bfi
+ */
 public class Player implements PCMProcessor {
     private AudioFormat fmt;
     private DataLine.Info info;
     private SourceDataLine line;
     private boolean prefill = true;
     
+    /**
+     * Decode and play an input FLAC file.
+     * @param inFileName    The input FLAC file name
+     * @throws IOException  Thrown if error reading file
+     * @throws LineUnavailableException Thrown if error playing file
+     */
     public void decode(String inFileName) throws IOException, LineUnavailableException {
-        System.out.println("Decode ["+inFileName+"]");
+        System.out.println("Decode [" + inFileName + "]");
         FileInputStream is = new FileInputStream(inFileName);
         
         StreamDecoder decoder = new StreamDecoder(is);
@@ -53,7 +63,9 @@ public class Player implements PCMProcessor {
         line.close();
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process the StreamInfo block.
+     * @param info the StreamInfo block
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
@@ -71,7 +83,9 @@ public class Player implements PCMProcessor {
         }
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process the decoded PCM bytes.
+     * @param pcm The decoded PCM data
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
     public void processPCM(ByteSpace pcm) {
@@ -83,6 +97,11 @@ public class Player implements PCMProcessor {
         }
     }
     
+    /**
+     * The main routine.
+     * <p>args[0] is the input file name
+     * @param args  Command line arguments
+     */
     public static void main(String[] args) {
         try {
             Player decoder = new Player();
@@ -98,5 +117,3 @@ public class Player implements PCMProcessor {
         System.exit(0);
     }
 }
-
-

@@ -25,8 +25,15 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * FLAC Constant Subframe (Channel) data.
+ * This class represents a FLAC subframe (channel) for a Constant data
+ * @author kc7bfi
+ */
 public class ChannelConstant extends Channel {
-    private int value; // The constant signal value.
+    
+    /** The constant signal value. */
+    private int value;
 
     /**
      * The constructor.
@@ -47,6 +54,7 @@ public class ChannelConstant extends Channel {
     }
     
     /**
+     * toString conversion.
      * @see java.lang.Object#toString()
      */
     public String toString() {

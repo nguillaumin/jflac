@@ -30,11 +30,21 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.WavWriter;
 
+/**
+ * Decode FLAC file to WAV file application.
+ * @author kc7bfi
+ */
 public class Decoder implements PCMProcessor {
     private WavWriter wav;
     
+    /**
+     * Decode a FLAC file to a WAV file.
+     * @param inFileName    The input FLAC file name
+     * @param outFileName   The output WAV file name
+     * @throws IOException  Thrown if error reading or writing files
+     */
     public void decode(String inFileName, String outFileName) throws IOException {
-        System.out.println("Decode ["+inFileName+"]["+outFileName+"]");
+        System.out.println("Decode [" + inFileName + "][" + outFileName + "]");
         FileInputStream is = new FileInputStream(inFileName);
         FileOutputStream os = new FileOutputStream(outFileName);
         wav = new WavWriter(os);
@@ -43,7 +53,9 @@ public class Decoder implements PCMProcessor {
         decoder.decode();
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process the StreamInfo block.
+     * @param info the StreamInfo block
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo info) {
@@ -55,7 +67,9 @@ public class Decoder implements PCMProcessor {
         }
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process the decoded PCM bytes.
+     * @param pcm The decoded PCM data
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
     public void processPCM(ByteSpace pcm) {
@@ -67,6 +81,12 @@ public class Decoder implements PCMProcessor {
         }
     }
     
+    /**
+     * Main routine.
+     * <p>args[0] is the input file name
+     * <p>args[1] is the output file name
+     * @param args  Command line arguments
+     */
     public static void main(String[] args) {
         try {
             Decoder decoder = new Decoder();

@@ -26,6 +26,10 @@ import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.FixedPredictor;
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * Fixed FLAC subframe (channel).
+ * @author kc7bfi
+ */
 public class ChannelFixed extends Channel {
     private static final int MAX_FIXED_ORDER = 4;
 

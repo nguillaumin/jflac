@@ -20,22 +20,42 @@ package org.kc7bfi.jflac.frame;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * BadHeaderException.
+ * @author kc7bfi
+ */
 public class BadHeaderException extends Exception {
 
+    /**
+     * Exception constructor.
+     */
     public BadHeaderException() {
         super();
     }
 
-    public BadHeaderException(String arg0) {
-        super(arg0);
+    /**
+     * Exception constructor.
+     * @param msg   The exception message
+     */
+    public BadHeaderException(String msg) {
+        super(msg);
     }
 
-    public BadHeaderException(Throwable arg0) {
-        super(arg0);
+    /**
+     * Exception constructor.
+     * @param err   The throwable error
+     */
+    public BadHeaderException(Throwable err) {
+        super(err);
     }
 
-    public BadHeaderException(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    /**
+     * Exception constructor.
+     * @param msg   The exception message
+     * @param err   The throwable error
+     */
+    public BadHeaderException(String msg, Throwable err) {
+        super(msg, err);
     }
 
 }

@@ -20,10 +20,21 @@ package org.kc7bfi.jflac;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Fixed Predictor utility class.
+ * @author kc7bfi
+ */
 public class FixedPredictor {
     
     private static final double M_LN2 = 0.69314718055994530942;
     
+    /**
+     * Compute the best predictor order.
+     * @param data
+     * @param dataLen
+     * @param residualBitsPerSample
+     * @return
+     */
     public static int computeBestPredictor(int[] data, int dataLen, double[] residualBitsPerSample) {
         int lastError0 = data[-1];
         int lastError1 = data[-1] - data[-2];
@@ -77,6 +88,13 @@ public class FixedPredictor {
         return order;
     }
     
+    /**
+     * Compute the best predictor order.
+     * @param data
+     * @param dataLen
+     * @param residualBitsPerSample
+     * @return
+     */
     public static int computeBestPredictorWide(int[] data, int dataLen, double[] residualBitsPerSample) {
         int lastError0 = data[-1];
         int lastError1 = data[-1] - data[-2];
@@ -135,6 +153,13 @@ public class FixedPredictor {
         return order;
     }
     
+    /**
+     * Compute the residual from the compressed signal.
+     * @param data
+     * @param dataLen
+     * @param order
+     * @param residual
+     */
     public static void computeResidual(int[] data, int dataLen, int order, int[] residual) {
         int idataLen = (int) dataLen;
         
@@ -172,7 +197,7 @@ public class FixedPredictor {
     }
     
     /**
-     * Restore the signal from the fixed predictor
+     * Restore the signal from the fixed predictor.
      * @param residual  The residual data
      * @param dataLen   The length of residual data
      * @param order     The preicate order

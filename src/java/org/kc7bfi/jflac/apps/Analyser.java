@@ -28,32 +28,50 @@ import org.kc7bfi.jflac.StreamDecoder;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.Metadata;
 
+/**
+ * Analyze FLAC file application.
+ * @author kc7bfi
+ */
 public class Analyser implements FrameListener {
     private int frameNum = 0;
     
+    /**
+     * Analyse an input FLAC file.
+     * @param inFileName The input file name
+     * @throws IOException thrown if error reading file
+     */
     public void analyse(String inFileName) throws IOException {
-        System.out.println("FLAX Analysis for "+inFileName);
+        System.out.println("FLAX Analysis for " + inFileName);
         FileInputStream is = new FileInputStream(inFileName);
         StreamDecoder decoder = new StreamDecoder(is);
         decoder.addFrameListener(this);
         decoder.decode();
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process metadata records.
+     * @param metadata the metadata block
      * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
      */
     public void processMetadata(Metadata metadata) {
         System.out.println(metadata.toString());
     }
     
-    /* (non-Javadoc)
+    /**
+     * Process data frames.
+     * @param frame the data frame
      * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
      */
     public void processFrame(Frame frame) {
         frameNum++;
-        System.out.println(frameNum + " " +frame.toString());
+        System.out.println(frameNum + " " + frame.toString());
     }
     
+    /**
+     * Main routine.
+     * <p>args[0] is the FLAC file name to analyse
+     * @param args  Command arguments
+     */
     public static void main(String[] args) {
         try {
             Analyser analyser = new Analyser();

@@ -20,6 +20,10 @@ package org.kc7bfi.jflac;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * LPC Predictor utility class.
+ * @author kc7bfi
+ */
 public class LPCPredictor {
     //static private final double M_LN2 = 0.69314718055994530942;
     
@@ -198,7 +202,7 @@ public class LPCPredictor {
      */
     
     /**
-     * Restore the signal from the LPC compression
+     * Restore the signal from the LPC compression.
      * @param residual  The residual signal
      * @param dataLen   The length of the residual data
      * @param qlpCoeff
@@ -224,7 +228,7 @@ public class LPCPredictor {
     }
     
     /**
-     * Restore the signal from the LPC compression
+     * Restore the signal from the LPC compression.
      * @param residual  The residual signal
      * @param dataLen   The length of the residual data
      * @param qlpCoeff
