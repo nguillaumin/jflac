@@ -54,8 +54,18 @@ public class InputBitStream {
     private int consumedBits = 0;
     private int totalConsumedBits = 0;
     private int totalBitsRead = 0;
+    
     private short readCRC16 = 0;
-    private InputStream is;
+    
+    private InputStream inStream;
+    
+    /**
+     * The constructor.
+     * @param is    The InputStream to read bits from
+     */
+    public InputBitStream(InputStream is) {
+        this.inStream = is;
+    }
     
     private void resize(int newCapacity) {
         if (buffer.length >= newCapacity) return;
@@ -72,8 +82,9 @@ public class InputBitStream {
     }
     
     private void ensureSize(int bitsToAdd) {
-        if (buffer.length < ((bitsToAdd + 7) >> 3))
-            grow((bitsToAdd >> 3) + 2);
+        int blurbsToAdd = (bitsToAdd + 7) >> 3;
+        if (buffer.length < (inBlurbs + blurbsToAdd))
+            grow(blurbsToAdd);
     }
     
     private int readFromStream() throws IOException {
@@ -100,7 +111,7 @@ public class InputBitStream {
         int bytes = buffer.length - inBlurbs;
         
         // finally, read in some data
-        bytes = is.read(buffer, inBlurbs, bytes);
+        bytes = inStream.read(buffer, inBlurbs, bytes);
         if (bytes <= 0) throw new EOFException();
         
         // now we have to handle partial blurb cases:
@@ -108,14 +119,6 @@ public class InputBitStream {
         inBlurbs += bytes;
         totalBits += bytes << 3;
         return bytes;
-    }
-    
-    /**
-     * The constructor.
-     * @param is    The InputStream to read bits from
-     */
-    public InputBitStream(InputStream is) {
-        this.is = is;
     }
     
     /**
@@ -139,7 +142,7 @@ public class InputBitStream {
         int bitsToAdd = src.totalBits - src.totalConsumedBits;
         if (bitsToAdd == 0) return true;
         if (inBits != src.consumedBits) return false;
-        if (!ensureSize(bitsToAdd)) return false;
+        ensureSize(bitsToAdd);
         if (inBits == 0) {
             System.arraycopy(src.buffer, src.consumedBlurbs, buffer, inBlurbs, 
                     (src.inBlurbs - src.consumedBlurbs + ((src.inBits != 0) ? 1 : 0)));
