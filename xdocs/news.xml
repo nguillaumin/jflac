@@ -4,9 +4,8 @@
     <title>News</title>
   </properties>
 	<body>
-	    <!--
-		<section name="XXth June 2004">
-			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.4</a> released!</p>
+		<section name="17th June 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.5</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
 			<p>This release includes bug fixes and some cleanup to the jFLAC library:
 			<ul>
@@ -20,7 +19,6 @@
 			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
 			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
 		</section>
-		-->
 		<section name="3rd June 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.4</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>

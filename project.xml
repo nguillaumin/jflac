@@ -4,7 +4,7 @@
 	<name>Java FLAC Codec</name>
 	<id>jflac</id>
 	<groupId>jflac</groupId>
-	<currentVersion>0.4</currentVersion>
+	<currentVersion>0.5</currentVersion>
 	<organization>
 		<name>Open Roads Consulting, Inc.</name>
 		<url>http://openroadsconsulting.com/</url>
