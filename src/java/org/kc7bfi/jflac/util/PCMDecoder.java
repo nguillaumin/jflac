@@ -41,21 +41,8 @@ public class PCMDecoder {
     
     private int samplesProcessed = 0;
     private int frameCounter = 0;
-    
-    private class Buffer {
-        private byte[] s8buffer = new byte[MAX_BLOCK_SIZE * Constants.MAX_CHANNELS * 4]; /* WATCHOUT: can be up to 2 megs */
-        private int len;
-        
-        public byte[] getBuffer() {
-            return s8buffer;
-        }
-        
-        public int getLength() {
-            return len;
-        }
-    }
-    
-    private Buffer buf;
+   
+    private ByteData buf;
     
     
     /**
@@ -67,7 +54,7 @@ public class PCMDecoder {
         this.channels = streamInfo.channels;
         this.bps = streamInfo.bitsPerSample;
         this.sampleRate = streamInfo.sampleRate;
-        this.buf = new Buffer();
+        this.buf = new ByteData(streamInfo.maxFrameSize);
     }
     
     
@@ -78,7 +65,7 @@ public class PCMDecoder {
      * @return returns the decoded buffer data
      * @throws IOException  Thrown if error writing to output channel
      */
-    public Buffer getFrame(Frame frame, ChannelData[] channelData) throws IOException {
+    public ByteData getFrame(Frame frame, ChannelData[] channelData) throws IOException {
         boolean isUnsignedSamples = (bps <= 8);
         int wideSamples = frame.header.blockSize;
         int wideSample;
@@ -93,50 +80,47 @@ public class PCMDecoder {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             //System.out.print("("+(int)((byte)(channelData[channel].getOutput()[wideSample] + 0x80))+")");
-                            buf.s8buffer[sample++] = (byte) (channelData[channel].getOutput()[wideSample] + 0x80);
+                            buf.append((byte) (channelData[channel].getOutput()[wideSample] + 0x80));
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++)
-                            buf.s8buffer[sample++] = (byte) (channelData[channel].getOutput()[wideSample]);
+                            buf.append((byte) (channelData[channel].getOutput()[wideSample]));
                 }
-                buf.len = sample;
             } else if (bps == 16) {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].getOutput()[wideSample] + 0x8000);
-                            buf.s8buffer[sample++] = (byte) (val & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
+                            buf.append((byte) (val & 0xff));
+                            buf.append((byte) ((val >> 8) & 0xff));
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].getOutput()[wideSample]);
-                            buf.s8buffer[sample++] = (byte) (val & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
+                            buf.append((byte) (val & 0xff));
+                            buf.append((byte) ((val >> 8) & 0xff));
                         }
                 }
-                buf.len = sample;
             } else if (bps == 24) {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             int val = (channelData[channel].getOutput()[wideSample] + 0x800000);
-                            buf.s8buffer[sample++] = (byte) (val & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
+                            buf.append((byte) (val & 0xff));
+                            buf.append((byte) ((val >> 8) & 0xff));
+                            buf.append((byte) ((val >> 16) & 0xff));
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             int val = (channelData[channel].getOutput()[wideSample]);
-                            buf.s8buffer[sample++] = (byte) (val & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
-                            buf.s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
+                            buf.append((byte) (val & 0xff));
+                            buf.append((byte) ((val >> 8) & 0xff));
+                            buf.append((byte) ((val >> 16) & 0xff));
                         }
                 }
-                buf.len = sample;
             }
         }
         
