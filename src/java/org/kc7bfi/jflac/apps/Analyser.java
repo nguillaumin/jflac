@@ -37,23 +37,23 @@ public class Analyser implements FrameListener {
         StreamDecoder decoder = new StreamDecoder(is);
         decoder.addFrameListener(this);
         decoder.decode();
-   }
-
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
-	 */
-	public void processMetadata(Metadata metadata) {
+    }
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
+     */
+    public void processMetadata(Metadata metadata) {
         System.out.println(metadata.toString());
-	}
-
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
-	 */
-	public void processFrame(Frame frame) {
+    }
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
+     */
+    public void processFrame(Frame frame) {
         frameNum++;
         System.out.println(frameNum + " " +frame.toString());
-	}
-
+    }
+    
     public static void main(String[] args) {
         try {
             Analyser analyser = new Analyser();

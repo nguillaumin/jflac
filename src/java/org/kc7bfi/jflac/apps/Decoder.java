@@ -31,7 +31,7 @@ import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.WavWriter;
 
 public class Decoder implements PCMProcessor {
-	private WavWriter wav;
+    private WavWriter wav;
     
     public void decode(String inFileName, String outFileName) throws IOException {
         System.out.println("Decode ["+inFileName+"]["+outFileName+"]");
@@ -42,31 +42,31 @@ public class Decoder implements PCMProcessor {
         decoder.addPCMProcessor(this);
         decoder.decode();
     }
-
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
-	 */
-	public void processStreamInfo(StreamInfo info) {
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
+     */
+    public void processStreamInfo(StreamInfo info) {
         try {
-        	System.out.println("Write WAV header " + info);
-			wav.writeHeader(info);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
-	 */
-	public void processPCM(ByteSpace pcm) {
-		try {
-			System.out.println("Write PCM");
-			wav.writePCM(pcm);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+            System.out.println("Write WAV header " + info);
+            wav.writeHeader(info);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
+     */
+    public void processPCM(ByteSpace pcm) {
+        try {
+            System.out.println("Write PCM");
+            wav.writePCM(pcm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public static void main(String[] args) {
         try {
             Decoder decoder = new Decoder();

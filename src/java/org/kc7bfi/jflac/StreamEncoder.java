@@ -748,79 +748,79 @@ public class StreamEncoder {
      */
     
     public void setVerify(boolean value) {
-        if (state != STREAM_ENCODER_UNINITIALIZED) return;
-        verify = value;
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	verify = value;
     }
     
     public void setStreamableSubset(boolean value) {
-        if (state != STREAM_ENCODER_UNINITIALIZED) return;
-        streamable_subset = value;
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	streamable_subset = value;
     }
     
     public void setDoMidSideStereo(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	do_mid_side_stereo = value;
-}
-
-public void setLooseMidSideStereo(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	loose_mid_side_stereo = value;
-}
-
-public void setChannels(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	channels = value;
-}
-
-public void setBitsPerSample(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	bits_per_sample = value;
-}
-
-public void setSampleRate(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	sample_rate = value;
-}
-
-public void setBlocksize(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	blocksize = value;
-}
-
-public void setMaxLPCOrder(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	max_lpc_order = value;
-}
-
-public void setQLPCoeffPrecision(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	qlp_coeff_precision = value;
-}
-
-public void setDoQLPCoeffPrecSearch(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	do_qlp_coeff_prec_search = value;
-}
-
-public void setDoExhaustiveModelSearch(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	do_exhaustive_model_search = value;
-}
-
-public void setMinResidualPartitionOrder(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	min_residual_partition_order = value;
-}
-
-public void setMaxResidualPartitionOrder(int value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	max_residual_partition_order = value;
-}
-
-public void setTotalSamplesEstimate(long value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	total_samples_estimate = value;
-}
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	do_mid_side_stereo = value;
+    }
+    
+    public void setLooseMidSideStereo(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	loose_mid_side_stereo = value;
+    }
+    
+    public void setChannels(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	channels = value;
+    }
+    
+    public void setBitsPerSample(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	bits_per_sample = value;
+    }
+    
+    public void setSampleRate(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	sample_rate = value;
+    }
+    
+    public void setBlocksize(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	blocksize = value;
+    }
+    
+    public void setMaxLPCOrder(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	max_lpc_order = value;
+    }
+    
+    public void setQLPCoeffPrecision(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	qlp_coeff_precision = value;
+    }
+    
+    public void setDoQLPCoeffPrecSearch(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	do_qlp_coeff_prec_search = value;
+    }
+    
+    public void setDoExhaustiveModelSearch(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	do_exhaustive_model_search = value;
+    }
+    
+    public void setMinResidualPartitionOrder(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	min_residual_partition_order = value;
+    }
+    
+    public void setMaxResidualPartitionOrder(int value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	max_residual_partition_order = value;
+    }
+    
+    public void setTotalSamplesEstimate(long value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	total_samples_estimate = value;
+    }
 
 /*
 public void set_metadata(StreamMetadata **metadata, int num_blocks) {
@@ -869,24 +869,24 @@ boolean set_client_data(void *value)
  * These three functions are not static, but not publically exposed in
  * include/FLAC/ either.  They are used by the test suite.
  */
-public void disableConstantSubframes(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	disable_constant_subframes = value;
-}
-
-public void disableFixedSubframes(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	disable_fixed_subframes = value;
-}
-
-public void disableVerbatimSubframes(boolean value) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	disable_verbatim_subframes = value;
-}
-
-public int getState() {
-	return state;
-}
+    public void disableConstantSubframes(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	disable_constant_subframes = value;
+    }
+    
+    public void disableFixedSubframes(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	disable_fixed_subframes = value;
+    }
+    
+    public void disableVerbatimSubframes(boolean value) {
+    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
+    	disable_verbatim_subframes = value;
+    }
+    
+    public int getState() {
+    	return state;
+    }
 
 /*
 public int getVerifyDecoderState() {
@@ -925,74 +925,74 @@ void get_verify_decoder_error_stats(StreamEncoder *encoder, uint64 *absolute_sam
 		*got = verify.error_stats.got;
 }
 */
-
-public boolean getVerify() {
-	return verify;
-}
-
-public boolean getStreamableSubset() {
-	return streamable_subset;
-}
-
-public boolean getDoMidSideStereo() {
-	return do_mid_side_stereo;
-}
-
-public boolean getLooseMidSideStereo() {
-	return loose_mid_side_stereo;
-}
-
-public int getChannels() {
-	return channels;
-}
-
-public int getBitsPerSample() {
-	return bits_per_sample;
-}
-
-public int getSampleRate() {
-	return sample_rate;
-}
-
-public int getBlocksize() {
-	return blocksize;
-}
-
-public int getMaxLPCOrder() {
-	return max_lpc_order;
-}
-
-public int getQLPCoeffPrecision() {
-	return qlp_coeff_precision;
-}
-
-public boolean getDoQLPCoeffPrecSearch() {
-	return do_qlp_coeff_prec_search;
-}
-
-public boolean getDoEscapeCoding() {
-	return do_escape_coding;
-}
-
-public boolean getDoExhaustiveModelSearch() {
-	return do_exhaustive_model_search;
-}
-
-public int getMinResidualPartitionOrder() {
-	return min_residual_partition_order;
-}
-
-public int getMaxResidualPartitionOrder() {
-	return max_residual_partition_order;
-}
-
-public int getRiceParameterSearchDist() {
-	return rice_parameter_search_dist;
-}
-
-public long getTotalSamplesEstimate() {
-	return total_samples_estimate;
-}
+    
+    public boolean getVerify() {
+    	return verify;
+    }
+    
+    public boolean getStreamableSubset() {
+    	return streamable_subset;
+    }
+    
+    public boolean getDoMidSideStereo() {
+    	return do_mid_side_stereo;
+    }
+    
+    public boolean getLooseMidSideStereo() {
+    	return loose_mid_side_stereo;
+    }
+    
+    public int getChannels() {
+    	return channels;
+    }
+    
+    public int getBitsPerSample() {
+    	return bits_per_sample;
+    }
+    
+    public int getSampleRate() {
+    	return sample_rate;
+    }
+    
+    public int getBlocksize() {
+    	return blocksize;
+    }
+    
+    public int getMaxLPCOrder() {
+    	return max_lpc_order;
+    }
+    
+    public int getQLPCoeffPrecision() {
+    	return qlp_coeff_precision;
+    }
+    
+    public boolean getDoQLPCoeffPrecSearch() {
+    	return do_qlp_coeff_prec_search;
+    }
+    
+    public boolean getDoEscapeCoding() {
+    	return do_escape_coding;
+    }
+    
+    public boolean getDoExhaustiveModelSearch() {
+    	return do_exhaustive_model_search;
+    }
+    
+    public int getMinResidualPartitionOrder() {
+    	return min_residual_partition_order;
+    }
+    
+    public int getMaxResidualPartitionOrder() {
+    	return max_residual_partition_order;
+    }
+    
+    public int getRiceParameterSearchDist() {
+    	return rice_parameter_search_dist;
+    }
+    
+    public long getTotalSamplesEstimate() {
+    	return total_samples_estimate;
+    }
 
 /*
 public boolean process(int * buffer[], unsigned samples)
@@ -1119,36 +1119,36 @@ public boolean process_interleaved(int[] buffer, int samples) {
  * Private class methods
  *
  ***********************************************************************/
-
-public void setDefaults() {
-
-	verify = false;
-	streamable_subset = true;
-	do_mid_side_stereo = false;
-	loose_mid_side_stereo = false;
-	channels = 2;
-	bits_per_sample = 16;
-	sample_rate = 44100;
-	blocksize = 1152;
-	max_lpc_order = 0;
-	qlp_coeff_precision = 0;
-	do_qlp_coeff_prec_search = false;
-	do_exhaustive_model_search = false;
-	do_escape_coding = false;
-	min_residual_partition_order = 0;
-	max_residual_partition_order = 0;
-	rice_parameter_search_dist = 0;
-	total_samples_estimate = 0;
-	//metadata = null;
-	num_metadata_blocks = 0;
-
-	disable_constant_subframes = false;
-	disable_fixed_subframes = false;
-	disable_verbatim_subframes = false;
-	//write_callback = 0;
-	//metadata_callback = 0;
-	//client_data = 0;
-}
+    
+    public void setDefaults() {
+    	
+    	verify = false;
+    	streamable_subset = true;
+    	do_mid_side_stereo = false;
+    	loose_mid_side_stereo = false;
+    	channels = 2;
+    	bits_per_sample = 16;
+    	sample_rate = 44100;
+    	blocksize = 1152;
+    	max_lpc_order = 0;
+    	qlp_coeff_precision = 0;
+    	do_qlp_coeff_prec_search = false;
+    	do_exhaustive_model_search = false;
+    	do_escape_coding = false;
+    	min_residual_partition_order = 0;
+    	max_residual_partition_order = 0;
+    	rice_parameter_search_dist = 0;
+    	total_samples_estimate = 0;
+    	//metadata = null;
+    	num_metadata_blocks = 0;
+    	
+    	disable_constant_subframes = false;
+    	disable_fixed_subframes = false;
+    	disable_verbatim_subframes = false;
+    	//write_callback = 0;
+    	//metadata_callback = 0;
+    	//client_data = 0;
+    }
 
 /*
 void free_()

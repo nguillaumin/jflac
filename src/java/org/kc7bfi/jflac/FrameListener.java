@@ -16,7 +16,7 @@ import org.kc7bfi.jflac.metadata.Metadata;
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public interface FrameListener {
-	
-	public void processMetadata(Metadata metadata);
-	public void processFrame(Frame frame);
+    
+    public void processMetadata(Metadata metadata);
+    public void processFrame(Frame frame);
 }

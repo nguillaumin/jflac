@@ -25,13 +25,13 @@ import java.io.IOException;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class VorbisComment extends Metadata {
-
-    private static final int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
-
+    
+    //private static final int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
+    
     protected byte[] vendorString = new byte[0];
     protected int numComments = 0;
     protected VorbisString[] comments;
-
+    
     /**
      * The constructor.
      * @param is                The InputBitStream
@@ -41,12 +41,12 @@ public class VorbisComment extends Metadata {
      */
     public VorbisComment(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
-
+        
         // read vendor string
         int len = is.readRawIntLittleEndian();
         vendorString = new byte[len];
         is.readByteBlockAlignedNoCRC(vendorString, vendorString.length);
-
+        
         // read comments
         numComments = is.readRawIntLittleEndian();
         if (numComments > 0) comments = new VorbisString[numComments];
@@ -63,7 +63,7 @@ public class VorbisComment extends Metadata {
         for (int i = 0; i < numComments; i++) {
             sb.append("\n\t" + comments[i].toString());
         }
-
+        
         return sb.toString();
         
     }

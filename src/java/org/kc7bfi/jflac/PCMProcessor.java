@@ -16,7 +16,6 @@ import org.kc7bfi.jflac.util.ByteSpace;
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public interface PCMProcessor {
-	
-	public void processStreamInfo(StreamInfo streamInfo);
-	public void processPCM(ByteSpace pcm);
+    public void processStreamInfo(StreamInfo streamInfo);
+    public void processPCM(ByteSpace pcm);
 }

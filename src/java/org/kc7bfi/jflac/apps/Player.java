@@ -37,66 +37,66 @@ import org.kc7bfi.jflac.util.ByteSpace;
 
 
 public class Player implements PCMProcessor {
-	private AudioFormat fmt;
-	private DataLine.Info info;
-	private SourceDataLine line;
-	private boolean prefill = true;
-	
-	public void decode(String inFileName) throws IOException, LineUnavailableException {
-		System.out.println("Decode ["+inFileName+"]");
-		FileInputStream is = new FileInputStream(inFileName);
-		
-		StreamDecoder decoder = new StreamDecoder(is);
-		decoder.addPCMProcessor(this);
-		decoder.decode();
-		
-		line.close();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
-	 */
-	public void processStreamInfo(StreamInfo streamInfo) {
-		try {
-			fmt = new AudioFormat(streamInfo.sampleRate,
-					streamInfo.bitsPerSample,
-					streamInfo.channels,
-					true,
-					false);
-			info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
-			line = (SourceDataLine) AudioSystem.getLine(info);
-			line.open(fmt, AudioSystem.NOT_SPECIFIED);
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
-	 */
-	public void processPCM(ByteSpace pcm) {
-		line.write(pcm.space, 0, pcm.pos);
-		
-		if (prefill) {
-			line.start();	
-			prefill = false;
-		}
-	}
-	
-	public static void main(String[] args) {
-		try {
-			Player decoder = new Player();
-			decoder.decode(args[0]);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (LineUnavailableException e) {
-			e.printStackTrace();
-		}
-		
-		System.exit(0);
-	}
+    private AudioFormat fmt;
+    private DataLine.Info info;
+    private SourceDataLine line;
+    private boolean prefill = true;
+    
+    public void decode(String inFileName) throws IOException, LineUnavailableException {
+        System.out.println("Decode ["+inFileName+"]");
+        FileInputStream is = new FileInputStream(inFileName);
+        
+        StreamDecoder decoder = new StreamDecoder(is);
+        decoder.addPCMProcessor(this);
+        decoder.decode();
+        
+        line.close();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
+     */
+    public void processStreamInfo(StreamInfo streamInfo) {
+        try {
+            fmt = new AudioFormat(streamInfo.sampleRate,
+                    streamInfo.bitsPerSample,
+                    streamInfo.channels,
+                    true,
+                    false);
+            info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
+            line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(fmt, AudioSystem.NOT_SPECIFIED);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
+     */
+    public void processPCM(ByteSpace pcm) {
+        line.write(pcm.space, 0, pcm.pos);
+        
+        if (prefill) {
+            line.start();	
+            prefill = false;
+        }
+    }
+    
+    public static void main(String[] args) {
+        try {
+            Player decoder = new Player();
+            decoder.decode(args[0]);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        }
+        
+        System.exit(0);
+    }
 }
 
 

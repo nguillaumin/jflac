@@ -119,99 +119,99 @@ public class StreamDecoder {
     }
     
     public void addFrameListener(FrameListener listener) {
-    	synchronized (frameListeners) {
-    		frameListeners.add(listener);
-    	}
+        synchronized (frameListeners) {
+            frameListeners.add(listener);
+        }
     }
     
     public void removeFrameListener(FrameListener listener) {
-    	synchronized (frameListeners) {
-    		frameListeners.remove(listener);
-    	}
+        synchronized (frameListeners) {
+            frameListeners.remove(listener);
+        }
     }
     
     private void callMetadataListeners(Metadata metadata) {
-    	synchronized (frameListeners) {
-    		Iterator it = frameListeners.iterator();
-    		while (it.hasNext()) {
-    			FrameListener listener = (FrameListener)it.next();
-    			listener.processMetadata(metadata);
-    		}
-    	}
+        synchronized (frameListeners) {
+            Iterator it = frameListeners.iterator();
+            while (it.hasNext()) {
+                FrameListener listener = (FrameListener)it.next();
+                listener.processMetadata(metadata);
+            }
+        }
     }
     
     private void callFrameListeners(Frame frame) {
-    	synchronized (frameListeners) {
-    		Iterator it = frameListeners.iterator();
-    		while (it.hasNext()) {
-    			FrameListener listener = (FrameListener)it.next();
-    			listener.processFrame(frame);
-    		}
-    	}
+        synchronized (frameListeners) {
+            Iterator it = frameListeners.iterator();
+            while (it.hasNext()) {
+                FrameListener listener = (FrameListener)it.next();
+                listener.processFrame(frame);
+            }
+        }
     }
     
     public void addPCMProcessor(PCMProcessor processor) {
-    	synchronized (pcmProcessors) {
-    		pcmProcessors.add(processor);
-    	}
+        synchronized (pcmProcessors) {
+            pcmProcessors.add(processor);
+        }
     }
     
     public void removePCMProcessor(PCMProcessor processor) {
-    	synchronized (pcmProcessors) {
-    		pcmProcessors.remove(processor);
-    	}
+        synchronized (pcmProcessors) {
+            pcmProcessors.remove(processor);
+        }
     }
     
     private void callStreamInfoProcessors(StreamInfo info) {
-    	synchronized (pcmProcessors) {
-    		Iterator it = pcmProcessors.iterator();
-    		while (it.hasNext()) {
-    			PCMProcessor processor = (PCMProcessor)it.next();
-    			processor.processStreamInfo(info);
-    		}
-    	}
+        synchronized (pcmProcessors) {
+            Iterator it = pcmProcessors.iterator();
+            while (it.hasNext()) {
+                PCMProcessor processor = (PCMProcessor)it.next();
+                processor.processStreamInfo(info);
+            }
+        }
     }
     
     private void callPCMProcessors(ByteSpace pcm) {
-    	synchronized (pcmProcessors) {
-    		Iterator it = pcmProcessors.iterator();
-    		while (it.hasNext()) {
-    			PCMProcessor processor = (PCMProcessor)it.next();
-    			processor.processPCM(pcm);
-    		}
-    	}
+        synchronized (pcmProcessors) {
+            Iterator it = pcmProcessors.iterator();
+            while (it.hasNext()) {
+                PCMProcessor processor = (PCMProcessor)it.next();
+                processor.processPCM(pcm);
+            }
+        }
     }
     
     private void callPCMProcessors(Frame frame) {
-    	ByteSpace space = null;
-		if (streamInfo.bitsPerSample == 8) {
-			space = new ByteSpace(frame.header.blockSize * channels);
-				for (int i = 0; i < frame.header.blockSize; i++) {
-					for (int channel = 0; channel < channels; channel++) {
-						space.append((byte) (channelData[channel].output[i] + 0x80));
-					}
-				}
-		} else if (streamInfo.bitsPerSample == 16) {
-			space = new ByteSpace(frame.header.blockSize * channels * 2);
-			for (int i = 0; i < frame.header.blockSize; i++) {
-					for (int channel = 0; channel < channels; channel++) {
-						short val = (short) (channelData[channel].output[i]);
-						space.append((byte) (val & 0xff));
-						space.append((byte) ((val >> 8) & 0xff));
-					}
-			}
-		} else if (streamInfo.bitsPerSample == 24) {
-			space = new ByteSpace(frame.header.blockSize * channels * 3);
-			for (int i = 0; i < frame.header.blockSize; i++) {
-					for (int channel = 0; channel < channels; channel++) {
-						int val = (channelData[channel].output[i]);
-						space.append((byte) (val & 0xff));
-						space.append((byte) ((val >> 8) & 0xff));
-						space.append((byte) ((val >> 16) & 0xff));
-					}
-			}
-		}
-		callPCMProcessors(space);
+        ByteSpace space = null;
+        if (streamInfo.bitsPerSample == 8) {
+            space = new ByteSpace(frame.header.blockSize * channels);
+            for (int i = 0; i < frame.header.blockSize; i++) {
+                for (int channel = 0; channel < channels; channel++) {
+                    space.append((byte) (channelData[channel].output[i] + 0x80));
+                }
+            }
+        } else if (streamInfo.bitsPerSample == 16) {
+            space = new ByteSpace(frame.header.blockSize * channels * 2);
+            for (int i = 0; i < frame.header.blockSize; i++) {
+                for (int channel = 0; channel < channels; channel++) {
+                    short val = (short) (channelData[channel].output[i]);
+                    space.append((byte) (val & 0xff));
+                    space.append((byte) ((val >> 8) & 0xff));
+                }
+            }
+        } else if (streamInfo.bitsPerSample == 24) {
+            space = new ByteSpace(frame.header.blockSize * channels * 3);
+            for (int i = 0; i < frame.header.blockSize; i++) {
+                for (int channel = 0; channel < channels; channel++) {
+                    int val = (channelData[channel].output[i]);
+                    space.append((byte) (val & 0xff));
+                    space.append((byte) ((val >> 8) & 0xff));
+                    space.append((byte) ((val >> 16) & 0xff));
+                }
+            }
+        }
+        callPCMProcessors(space);
     }
     
     /**
@@ -235,24 +235,24 @@ public class StreamDecoder {
         
         while (true) {
             switch (state) {
-                case STREAM_DECODER_SEARCH_FOR_METADATA :
-                    findMetadata();
-                    break;
-                case STREAM_DECODER_READ_METADATA :
-                    readMetadata(); /* above function sets the status for us */
-                    return true;
-                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
-                    frameSync(); /* above function sets the status for us */
-                    break;
-                case STREAM_DECODER_READ_FRAME :
-                    readFrame();
-                    return true; /* above function sets the status for us */
-                    //break;
-                case STREAM_DECODER_END_OF_STREAM :
-                case STREAM_DECODER_ABORTED :
-                    return true;
-                default :
-                    return false;
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                readMetadata(); /* above function sets the status for us */
+                return true;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync(); /* above function sets the status for us */
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                readFrame();
+                return true; /* above function sets the status for us */
+                //break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return true;
+            default :
+                return false;
             }
         }
     }
@@ -261,18 +261,18 @@ public class StreamDecoder {
         
         while (true) {
             switch (state) {
-                case STREAM_DECODER_SEARCH_FOR_METADATA :
-                    findMetadata();
-                    break;
-                case STREAM_DECODER_READ_METADATA :
-                    readMetadata(); // above function sets the status for us
-                    break;
-                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
-                case STREAM_DECODER_READ_FRAME :
-                case STREAM_DECODER_END_OF_STREAM :
-                case STREAM_DECODER_ABORTED :
-                default :
-                    return;
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                readMetadata(); // above function sets the status for us
+                break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+            case STREAM_DECODER_READ_FRAME :
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+            default :
+                return;
             }
         }
     }
@@ -280,28 +280,28 @@ public class StreamDecoder {
     public void decode() throws IOException {
         while (true) {
             switch (state) {
-                case STREAM_DECODER_SEARCH_FOR_METADATA :
-                    findMetadata();
-                    break;
-                case STREAM_DECODER_READ_METADATA :
-                    Metadata metadata = readMetadata();
-                    if (metadata == null) break;
-                    callMetadataListeners(metadata);
-                    if (metadata instanceof StreamInfo) callStreamInfoProcessors((StreamInfo)metadata);
-                    break;
-                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
-                    frameSync();
-                    break;
-                case STREAM_DECODER_READ_FRAME :
-                    if (!readFrame()) break;
-                    callFrameListeners(frame);
-                    callPCMProcessors(frame);
-                    break;
-                case STREAM_DECODER_END_OF_STREAM :
-                case STREAM_DECODER_ABORTED :
-                    return;
-                default :
-                    throw new IOException("Unknown state: " + state);
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                Metadata metadata = readMetadata();
+                if (metadata == null) break;
+                callMetadataListeners(metadata);
+                if (metadata instanceof StreamInfo) callStreamInfoProcessors((StreamInfo)metadata);
+                break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync();
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                if (!readFrame()) break;
+                callFrameListeners(frame);
+                callPCMProcessors(frame);
+                break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return;
+            default :
+                throw new IOException("Unknown state: " + state);
             }
         }
     }
@@ -312,24 +312,24 @@ public class StreamDecoder {
         while (true) {
             //System.out.println("Process for state: "+state+" "+StreamDecoderStateString[state]);
             switch (state) {
-                case STREAM_DECODER_SEARCH_FOR_METADATA :
-                    findMetadata();
-                    break;
-                case STREAM_DECODER_READ_METADATA :
-                    readMetadata(); /* above function sets the status for us */
-                    break;
-                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
-                    frameSync(); /* above function sets the status for us */
-                    //System.exit(0);
-                    break;
-                case STREAM_DECODER_READ_FRAME :
-                    readFrame();
-                    break;
-                case STREAM_DECODER_END_OF_STREAM :
-                case STREAM_DECODER_ABORTED :
-                    return true;
-                default :
-                    return false;
+            case STREAM_DECODER_SEARCH_FOR_METADATA :
+                findMetadata();
+                break;
+            case STREAM_DECODER_READ_METADATA :
+                readMetadata(); /* above function sets the status for us */
+                break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync(); /* above function sets the status for us */
+                //System.exit(0);
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                readFrame();
+                break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return true;
+            default :
+                return false;
             }
         }
     }
@@ -340,33 +340,33 @@ public class StreamDecoder {
         while (true) {
             //System.out.println("Process for state: "+state+" "+StreamDecoderStateString[state]);
             switch (state) {
-                //case STREAM_DECODER_SEARCH_FOR_METADATA :
-                //    findMetadata();
-                //    break;
-                //case STREAM_DECODER_READ_METADATA :
-                //    readMetadata(); /* above function sets the status for us */
-                //    break;
-                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
-                    frameSync(); /* above function sets the status for us */
-                    //System.exit(0);
-                    break;
-                case STREAM_DECODER_READ_FRAME :
-                    if (readFrame()) return frame;
-                    break;
-                case STREAM_DECODER_END_OF_STREAM :
-                case STREAM_DECODER_ABORTED :
-                    return null;
-                default :
-                    return null;
+            //case STREAM_DECODER_SEARCH_FOR_METADATA :
+            //    findMetadata();
+            //    break;
+            //case STREAM_DECODER_READ_METADATA :
+            //    readMetadata(); /* above function sets the status for us */
+            //    break;
+            case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                frameSync(); /* above function sets the status for us */
+                //System.exit(0);
+                break;
+            case STREAM_DECODER_READ_FRAME :
+                if (readFrame()) return frame;
+                break;
+            case STREAM_DECODER_END_OF_STREAM :
+            case STREAM_DECODER_ABORTED :
+                return null;
+            default :
+                return null;
             }
         }
     }
     
     /*
-    public int getInputBytesUnconsumed() {
-        return is.getInputBytesUnconsumed();
-    }
-    */
+     public int getInputBytesUnconsumed() {
+     return is.getInputBytesUnconsumed();
+     }
+     */
     
     private void allocateOutput(int size, int channels) {
         if (size <= outputCapacity && channels <= outputChannels) return;
@@ -531,22 +531,22 @@ public class StreamDecoder {
             // first figure the correct bits-per-sample of the subframe
             int bps = frame.header.bitsPerSample;
             switch (frame.header.channelAssignment) {
-                case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
-                    /* no adjustment needed */
-                    break;
-                case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
-                    if (channel == 1)
-                        bps++;
+            case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
+                /* no adjustment needed */
                 break;
-                case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
-                    if (channel == 0)
-                        bps++;
-                break;
-                case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
-                    if (channel == 1)
-                        bps++;
-                break;
-                default :
+            case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
+                if (channel == 1)
+                    bps++;
+            break;
+            case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
+                if (channel == 0)
+                    bps++;
+            break;
+            case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
+                if (channel == 1)
+                    bps++;
+            break;
+            default :
             }
             // now read it
             try {
@@ -568,35 +568,35 @@ public class StreamDecoder {
         if (frameCRC == frame.crc) {
             /* Undo any special channel coding */
             switch (frame.header.channelAssignment) {
-                case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
-                    /* do nothing */
-                    break;
-                case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
-                    for (i = 0; i < frame.header.blockSize; i++)
-                        channelData[1].output[i] = channelData[0].output[i] - channelData[1].output[i];
+            case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
+                /* do nothing */
                 break;
-                case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
-                    for (i = 0; i < frame.header.blockSize; i++)
-                        channelData[0].output[i] += channelData[1].output[i];
+            case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
+                for (i = 0; i < frame.header.blockSize; i++)
+                    channelData[1].output[i] = channelData[0].output[i] - channelData[1].output[i];
+            break;
+            case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
+                for (i = 0; i < frame.header.blockSize; i++)
+                    channelData[0].output[i] += channelData[1].output[i];
+            break;
+            case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
+                for (i = 0; i < frame.header.blockSize; i++) {
+                    mid = channelData[0].output[i];
+                    side = channelData[1].output[i];
+                    //if (i < 20) System.out.print(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
+                    mid <<= 1;
+                    if ((side & 1) != 0) // i.e. if 'side' is odd...
+                        mid++;
+                    left = mid + side;
+                    right = mid - side;
+                    channelData[0].output[i] = left >> 1;
+                    channelData[1].output[i] = right >> 1;
+                    //if (i < 20) System.out.println(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
+                }
+            //System.exit(1);
+            break;
+            default :
                 break;
-                case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
-                    for (i = 0; i < frame.header.blockSize; i++) {
-                        mid = channelData[0].output[i];
-                        side = channelData[1].output[i];
-                        //if (i < 20) System.out.print(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
-                        mid <<= 1;
-                        if ((side & 1) != 0) // i.e. if 'side' is odd...
-                            mid++;
-                        left = mid + side;
-                        right = mid - side;
-                        channelData[0].output[i] = left >> 1;
-                        channelData[1].output[i] = right >> 1;
-                        //if (i < 20) System.out.println(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
-                    }
-                //System.exit(1);
-                break;
-                default :
-                    break;
             }
         } else {
             /* Bad frame, emit error and zero the output signal */

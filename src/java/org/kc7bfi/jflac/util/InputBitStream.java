@@ -29,7 +29,6 @@ public class InputBitStream {
     private static final int BITS_PER_BLURB_LOG2 = 3;
     private static final int BYTES_PER_BLURB = 1;
     private static final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
-    private static final int BITBUFFER_DEFAULT_CAPACITY = ((65536 - 64) * 8) / BITS_PER_BLURB;
     private static final long[] MASK32 = new long[]{0, 0x0000000000000001, 0x0000000000000003, 0x0000000000000007, 0x000000000000000F,
             0x000000000000001F, 0x000000000000003F, 0x000000000000007F, 0x00000000000000FF, 0x00000000000001FF, 0x00000000000003FF,
             0x00000000000007FF, 0x0000000000000FFF, 0x0000000000001FFF, 0x0000000000003FFF, 0x0000000000007FFF, 0x000000000000FFFF,
@@ -126,7 +125,7 @@ public class InputBitStream {
         totalBits += bytes << 3;
         return bytes;
     }
-
+    
     /**
      * The constructor
      * @param is    The InputStream to read bits from
@@ -162,7 +161,7 @@ public class InputBitStream {
         inBlurbs = totalBits / BITS_PER_BLURB;
         return true;
     }
-
+    
     /**
      * Reset the read CRC-16 value
      * @param seed  The initial CRC-16 value
@@ -170,7 +169,7 @@ public class InputBitStream {
     public void resetReadCRC16(short seed) {
         readCRC16 = seed;
     }
-
+    
     /**
      * return the read CRC-16 value
      * @return  The read CRC-16 value
@@ -178,7 +177,7 @@ public class InputBitStream {
     public short getReadCRC16() {
         return readCRC16;
     }
-
+    
     /**
      * return the write CRC-16 value
      * @return The write CRC-16 value
@@ -186,7 +185,7 @@ public class InputBitStream {
     public short getWriteCRC16() {
         return CRC16.calc(buffer, inBlurbs);
     }
-
+    
     /**
      * return the write CRC-8 value
      * @return  The write CRC-8 val;ue
