@@ -47,6 +47,10 @@ import org.kc7bfi.jflac.metadata.VorbisComment;
 import org.kc7bfi.jflac.util.ByteData;
 import org.kc7bfi.jflac.util.CRC16;
 
+/**
+ * A Java FLAC decoder.
+ * @author kc7bfi
+ */
 public class FLACDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     private static final byte[] ID3V2_TAG = new byte[] { 'I', 'D', '3' };
@@ -115,7 +119,7 @@ public class FLACDecoder {
     }
     
     /**
-     * Return the input but stream
+     * Return the input but stream.
      * @return  The bit stream
      */
     public BitInputStream getBitInputStream() {
