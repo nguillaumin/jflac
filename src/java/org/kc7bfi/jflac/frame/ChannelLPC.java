@@ -25,8 +25,8 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.LPCPredictor;
-import org.kc7bfi.jflac.io.InputBitStream;
 import org.kc7bfi.jflac.util.BitMath;
+import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelLPC extends ChannelBase {
     static final private int MAX_LPC_ORDER = 32;

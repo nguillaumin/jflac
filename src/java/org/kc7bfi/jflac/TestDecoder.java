@@ -26,7 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.frame.Frame;
-import org.kc7bfi.jflac.io.WavWriter;
+import org.kc7bfi.jflac.util.WavWriter;
 
 public class TestDecoder {
     static private String inFileName;

@@ -23,10 +23,10 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.Constants;
-import org.kc7bfi.jflac.io.InputBitStream;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
+import org.kc7bfi.jflac.util.InputBitStream;
 
 public class Header {
     static final public int CHANNEL_ASSIGNMENT_INDEPENDENT = 0; // independent channels

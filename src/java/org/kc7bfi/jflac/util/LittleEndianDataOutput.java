@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.io;
+package org.kc7bfi.jflac.util;
 
 /**
  * libFLAC - Free Lossless Audio Codec library

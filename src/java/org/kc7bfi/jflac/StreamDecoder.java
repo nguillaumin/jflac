@@ -30,7 +30,6 @@ import org.kc7bfi.jflac.frame.ChannelLPC;
 import org.kc7bfi.jflac.frame.ChannelVerbatim;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.frame.Header;
-import org.kc7bfi.jflac.io.InputBitStream;
 import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
 import org.kc7bfi.jflac.metadata.MetadataBase;
@@ -39,6 +38,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.metadata.Unknown;
 import org.kc7bfi.jflac.metadata.VorbisComment;
 import org.kc7bfi.jflac.util.CRC16;
+import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamDecoder {
 

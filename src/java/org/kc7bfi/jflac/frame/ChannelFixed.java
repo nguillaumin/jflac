@@ -25,7 +25,7 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FixedPredictor;
-import org.kc7bfi.jflac.io.InputBitStream;
+import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelFixed extends ChannelBase {
     static final int MAX_FIXED_ORDER = 4;

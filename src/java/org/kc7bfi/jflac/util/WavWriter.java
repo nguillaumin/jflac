@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.io;
+package org.kc7bfi.jflac.util;
 
 /**
  * libFLAC - Free Lossless Audio Codec library
@@ -30,6 +30,7 @@ import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.util.*;
 
 public class WavWriter {
     private long totalSamples;

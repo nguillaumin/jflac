@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.io.InputBitStream;
+import org.kc7bfi.jflac.util.InputBitStream;
 
 public class CueTrack {
 

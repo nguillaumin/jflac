@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.io;
+package org.kc7bfi.jflac.util;
 
 /**
  * libFLAC - Free Lossless Audio Codec library Copyright (C) 2000,2001,2002,2003
@@ -23,9 +23,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.kc7bfi.jflac.util.ByteSpace;
-import org.kc7bfi.jflac.util.CRC16;
-import org.kc7bfi.jflac.util.CRC8;
 
 public class InputBitStream {
     static private final int BITS_PER_BLURB = 8;
