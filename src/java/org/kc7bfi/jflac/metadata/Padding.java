@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.frame;
+package org.kc7bfi.jflac.metadata;
 
 /**
  * libFLAC - Free Lossless Audio Codec library
@@ -20,12 +20,29 @@ package org.kc7bfi.jflac.frame;
  * Boston, MA  02111-1307, USA.
  */
 
-public class Footer {
-    /** 
-     * CRC-16 (polynomial = x^16 + x^15 + x^2 + x^0.
-     * initialized with
-     * 0) of the bytes before the crc, back to and including the frame header
-     * sync code.
+import java.io.IOException;
+
+import org.kc7bfi.jflac.util.InputBitStream;
+
+public class Padding extends MetadataBase {
+
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
      */
-    protected short crc;
+    public Padding(InputBitStream is, boolean isLast, int length) throws IOException {
+        super(isLast, length);
+        
+        is.readByteBlockAlignedNoCRC(null, length);
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "Padding (Length=" + length + ")";
+    }
 }

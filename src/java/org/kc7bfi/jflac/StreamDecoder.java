@@ -33,6 +33,7 @@ import org.kc7bfi.jflac.frame.Header;
 import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
 import org.kc7bfi.jflac.metadata.MetadataBase;
+import org.kc7bfi.jflac.metadata.Padding;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.metadata.Unknown;
@@ -99,30 +100,6 @@ public class StreamDecoder {
         state = STREAM_DECODER_SEARCH_FOR_METADATA;
     }
     
-    //int getState() {
-    //    return state;
-    //}
-    
-    //int getChannels() {
-    //    return channels;
-    //}
-    
-    //int getChannelAssignment() {
-    //    return channelAssignment;
-    //}
-    
-    //int getBitsPerSample() {
-    //    return bitsPerSample;
-    //}
-    
-    //int getSampleRate() {
-    //    return sampleRate;
-    //}
-    
-    //int getBlockSize() {
-    //    return blockSize;
-    //}
-    
     StreamInfo getStreamInfo() {
         return streamInfo;
     }
@@ -145,19 +122,6 @@ public class StreamDecoder {
             } catch (IOException e) {
                 return null;
             }
-        }
-    }
-    
-    /**
-     * Read the next FLAC Metadata Record
-     * @return The Metadata Record
-     */
-    public MetadataBase readNextMetadata() {
-        try {
-            MetadataBase metadata = readMetadata();
-            return metadata;
-        } catch (IOException e) {
-            return null;
         }
     }
     
@@ -323,7 +287,7 @@ public class StreamDecoder {
         state = STREAM_DECODER_READ_METADATA;
     }
     
-    private MetadataBase readMetadata() throws IOException {
+    public MetadataBase readMetadata() throws IOException {
         MetadataBase metadata = null;
         
         boolean isLast = (is.readRawUInt(STREAM_METADATA_IS_LAST_LEN) != 0);
@@ -337,7 +301,7 @@ public class StreamDecoder {
         } else if (type == METADATA_TYPE_APPLICATION) {
             metadata = new Application(is, isLast, length);
         } else if (type == METADATA_TYPE_PADDING) {
-            is.readByteBlockAlignedNoCRC(null, length);
+            metadata = new Padding(is, isLast, length);
         } else if (type == METADATA_TYPE_VORBIS_COMMENT) {
             metadata = new VorbisComment(is, isLast, length);
         } else if (type == METADATA_TYPE_CUESHEET) {
@@ -426,7 +390,6 @@ public class StreamDecoder {
             System.out.println("Found bad header: "+e);
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         }
-        System.out.println("ReadFrame Header: "+frame.header.toString());
         if (state == STREAM_DECODER_SEARCH_FOR_FRAME_SYNC) return false;// gotAFrame;
         allocateOutput(frame.header.blockSize, frame.header.channels);
         for (channel = 0; channel < frame.header.channels; channel++) {
@@ -465,8 +428,8 @@ public class StreamDecoder {
         
         // Read the frame CRC-16 from the footer and check
         frameCRC = is.getReadCRC16();
-        x = is.readRawUInt(FRAME_FOOTER_CRC_LEN);
-        if (frameCRC == (short) x) {
+        frame.crc = (short)is.readRawUInt(FRAME_FOOTER_CRC_LEN);
+        if (frameCRC == frame.crc) {
             /* Undo any special channel coding */
             switch (frame.header.channelAssignment) {
                 case Header.CHANNEL_ASSIGNMENT_INDEPENDENT :
@@ -498,7 +461,7 @@ public class StreamDecoder {
             }
         } else {
             /* Bad frame, emit error and zero the output signal */
-            System.out.println("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(x));
+            System.out.println("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(frame.crc));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].output[j] = 0;
@@ -555,11 +518,8 @@ public class StreamDecoder {
             state = STREAM_DECODER_UNPARSEABLE_STREAM;
             throw new IOException("ReadSubframe Bad Subframe Type: "+Integer.toHexString(x&0xff));
         } else {
-            //FLACSubframe_LPC subframe = read_subframe_lpc_(channel, bps, ((x >> 1) & 31) + 1);
             frame.subframes[channel] = new ChannelLPC(is, frame.header, channelData[channel], bps, wastedBits, ((x >> 1) & 31) + 1);
         }
-        System.out.println("Subframe "+channel+": "+frame.subframes[channel].toString());
-        //for (int i = 0; i < frame.header.blockSize; i++) System.out.println("\tRisidual["+i+"]="+channelData[channel].residual[i]);
         if (haveWastedBits) {
             int i;
             x = frame.subframes[channel].WastedBits();

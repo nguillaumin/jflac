@@ -26,40 +26,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.frame.Frame;
-import org.kc7bfi.jflac.metadata.MetadataBase;
-import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.WavWriter;
 
-public class TestDecoder {
-    static private String inFileName;
-    static private String outFileName;
+public class Decoder {
     
-    private StreamDecoder decoder;
-    
-    public TestDecoder() {
-    }
-    
-    public void analyse() throws IOException {
-        System.out.println("["+inFileName+"]["+outFileName+"]");
+    public void decode(String inFileName, String outFileName) throws IOException {
+        System.out.println("Decode ["+inFileName+"]["+outFileName+"]");
         FileInputStream is = new FileInputStream(inFileName);
         FileOutputStream os = new FileOutputStream(outFileName);
-        decoder = new StreamDecoder(is);
-        
-        StreamInfo info = decoder.readStreamInfo();
-        System.out.println(info.toString());
-        MetadataBase metadata;
-        do {
-            metadata = decoder.readNextMetadata();
-            System.out.println(metadata.toString());
-        } while (!metadata.isLast());
-   }
-    
-    public void decode() throws IOException {
-        System.out.println("["+inFileName+"]["+outFileName+"]");
-        FileInputStream is = new FileInputStream(inFileName);
-        FileOutputStream os = new FileOutputStream(outFileName);
-        decoder = new StreamDecoder(is);
-        //decoder.processUntilEndOfStream();
+        StreamDecoder decoder = new StreamDecoder(is);
         decoder.processMetadata();
         WavWriter wav = new WavWriter(os, decoder.getStreamInfo());
         wav.writeHeader();
@@ -76,12 +51,9 @@ public class TestDecoder {
     }
 
     public static void main(String[] args) {
-        inFileName = args[0];
-        outFileName = args[1];
-        
         try {
-            TestDecoder decoder1 = new TestDecoder();
-            decoder1.analyse();
+            Decoder decoder = new Decoder();
+            decoder.decode(args[0], args[1]);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

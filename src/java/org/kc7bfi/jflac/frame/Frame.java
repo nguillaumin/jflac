@@ -30,5 +30,20 @@ public class Frame {
     public ChannelBase[] subframes = new ChannelBase[Constants.MAX_CHANNELS];
     
     /** The frame footer */
-    public Footer footer;
+    public short crc;
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Frame Header: " + header + "\n");
+        for (int i = 0; i < header.channels; i++) {
+            sb.append("\tFrame Data" + subframes[i].toString() + "\n");
+        }
+        sb.append("\tFrame Footer: " + crc);
+
+        return sb.toString();
+        
+    }
 }
