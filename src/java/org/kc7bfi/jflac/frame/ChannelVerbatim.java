@@ -25,7 +25,7 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class ChannelVerbatim extends ChannelBase {
+public class ChannelVerbatim extends Channel {
     private int[] data; // A pointer to verbatim signal.
     
     /**

@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class Padding extends MetadataBase {
+public class Padding extends Metadata {
 
     /**
      * The constructor.

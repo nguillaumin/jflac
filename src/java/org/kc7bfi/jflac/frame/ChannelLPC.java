@@ -28,7 +28,7 @@ import org.kc7bfi.jflac.LPCPredictor;
 import org.kc7bfi.jflac.util.BitMath;
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class ChannelLPC extends ChannelBase {
+public class ChannelLPC extends Channel {
     private static final int SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN = 4; /* bits */
     private static final int SUBFRAME_LPC_QLP_SHIFT_LEN = 5; /* bits */
     private static final int MAX_LPC_ORDER = 32;

@@ -25,7 +25,7 @@ import java.io.IOException;
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class ChannelConstant extends ChannelBase {
+public class ChannelConstant extends Channel {
     private int value; // The constant signal value.
 
     /**

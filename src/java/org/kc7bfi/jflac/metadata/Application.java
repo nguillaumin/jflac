@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class Application extends MetadataBase {
+public class Application extends Metadata {
 
     private static final int APPLICATION_ID_LEN = 32; // bits
 

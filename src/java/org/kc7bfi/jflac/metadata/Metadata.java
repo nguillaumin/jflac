@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.frame;
+package org.kc7bfi.jflac.metadata;
 
 /**
  * libFLAC - Free Lossless Audio Codec library
@@ -20,28 +20,28 @@ package org.kc7bfi.jflac.frame;
  * Boston, MA  02111-1307, USA.
  */
 
-public abstract class ChannelBase {
-    /** The FLAC Frame Header */
-    protected Header header;
+public abstract class Metadata {
+
+    /** true if this metadata block is the last, else false */
+    protected boolean isLast;
+    /** Length, in bytes, of the block data as it appears in the stream. */
+    protected int length;
     
-    /** The number of waisted bits in the frame */
-    protected int wastedBits;
- 
     /**
      * The constructor.
-     * @param header        The FLAC Frame Header
-     * @param wastedBits    The number of waisted bits in the frame
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
      */
-    protected ChannelBase(Header header, int wastedBits) {
-        this.header = header;
-        this.wastedBits = wastedBits;
+    public Metadata(boolean isLast, int length) {
+        this.isLast = isLast;
+        this.length = length;
     }
-    
+
     /**
-     * Return he number of waisted bits in the frame.
-     * @return The number of waisted bits in the frame
+     * Test iof last metatdata record
+     * @return True if last metadata record in the chain.
      */
-    public int WastedBits() {
-        return wastedBits;
+    public boolean isLast() {
+        return isLast;
     }
 }

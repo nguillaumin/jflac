@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class SeekTable extends MetadataBase {
+public class SeekTable extends Metadata {
     private static final int SEEKPOINT_LENGTH = 18;
     private static final long SEEKPOINT_PLACEHOLDER = 0xffffffffffffffffL;
 

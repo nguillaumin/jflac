@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class CueSheet extends MetadataBase {
+public class CueSheet extends Metadata {
 
     private static final int CUESHEET_MEDIA_CATALOG_NUMBER_LEN = 128 * 8; // bits
     private static final int CUESHEET_LEAD_IN_LEN = 64; // bits

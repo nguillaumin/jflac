@@ -22,6 +22,8 @@ package org.kc7bfi.jflac;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.kc7bfi.jflac.frame.BadHeaderException;
 import org.kc7bfi.jflac.frame.ChannelConstant;
@@ -32,7 +34,7 @@ import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.frame.Header;
 import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
-import org.kc7bfi.jflac.metadata.MetadataBase;
+import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.Padding;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
@@ -75,6 +77,8 @@ public class StreamDecoder {
     private int sampleRate; /* in Hz */
     private int blockSize; /* in samples (per channel) */
     
+    private HashSet frameListeners = new HashSet();
+    
     // Decoder states
     private static final int STREAM_DECODER_SEARCH_FOR_METADATA = 0;
     private static final int STREAM_DECODER_READ_METADATA = 1;
@@ -112,6 +116,38 @@ public class StreamDecoder {
         return is;
     }
     
+    public void addFrameListener(FrameListener listener) {
+    	synchronized (frameListeners) {
+    		frameListeners.add(listener);
+    	}
+    }
+    
+    public void removeFrameListener(FrameListener listener) {
+    	synchronized (frameListeners) {
+    		frameListeners.remove(listener);
+    	}
+    }
+    
+    private void callMetadataListeners(Metadata metadata) {
+    	synchronized (frameListeners) {
+    		Iterator it = frameListeners.iterator();
+    		while (it.hasNext()) {
+    			FrameListener listener = (FrameListener)it.next();
+    			listener.processMetadata(metadata);
+    		}
+    	}
+    }
+    
+    private void callFrameListeners(Frame frame) {
+    	synchronized (frameListeners) {
+    		Iterator it = frameListeners.iterator();
+    		while (it.hasNext()) {
+    			FrameListener listener = (FrameListener)it.next();
+    			listener.processFrame(frame);
+    		}
+    	}
+    }
+    
     /**
      * Read the FLAC stream info
      * @return  The FLAC Stream Info record
@@ -120,7 +156,7 @@ public class StreamDecoder {
         while (true) {
             try {
                 findMetadata();
-                MetadataBase metadata = readMetadata();
+                Metadata metadata = readMetadata();
                 if (metadata instanceof StreamInfo) return (StreamInfo) metadata;
                 if (metadata.isLast());
             } catch (IOException e) {
@@ -171,6 +207,31 @@ public class StreamDecoder {
                 case STREAM_DECODER_ABORTED :
                 default :
                     return;
+            }
+        }
+    }
+    
+    public void decode() throws IOException {
+        while (true) {
+            switch (state) {
+                case STREAM_DECODER_SEARCH_FOR_METADATA :
+                    findMetadata();
+                    break;
+                case STREAM_DECODER_READ_METADATA :
+                    Metadata metadata = readMetadata();
+                    if (metadata != null) callMetadataListeners(metadata);
+                    break;
+                case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
+                    frameSync();
+                    break;
+                case STREAM_DECODER_READ_FRAME :
+                    if (readFrame()) callFrameListeners(frame);
+                    break;
+                case STREAM_DECODER_END_OF_STREAM :
+                case STREAM_DECODER_ABORTED :
+                    return;
+                default :
+                    throw new IOException("Unknown state: " + state);
             }
         }
     }
@@ -291,8 +352,8 @@ public class StreamDecoder {
         state = STREAM_DECODER_READ_METADATA;
     }
     
-    public MetadataBase readMetadata() throws IOException {
-        MetadataBase metadata = null;
+    public Metadata readMetadata() throws IOException {
+        Metadata metadata = null;
         
         boolean isLast = (is.readRawUInt(STREAM_METADATA_IS_LAST_LEN) != 0);
         int type = is.readRawUInt(STREAM_METADATA_TYPE_LEN);

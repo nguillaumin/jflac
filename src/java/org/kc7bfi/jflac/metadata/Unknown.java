@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class Unknown extends MetadataBase {
+public class Unknown extends Metadata {
     protected byte[] data;
     
     /**

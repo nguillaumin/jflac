@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class VorbisComment extends MetadataBase {
+public class VorbisComment extends Metadata {
 
     private static final int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
 

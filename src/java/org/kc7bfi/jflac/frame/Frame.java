@@ -27,7 +27,7 @@ public class Frame {
     public Header header;
     
     /** The subframes - One per channel. */
-    public ChannelBase[] subframes = new ChannelBase[Constants.MAX_CHANNELS];
+    public Channel[] subframes = new Channel[Constants.MAX_CHANNELS];
     
     /** The frame footer */
     public short crc;

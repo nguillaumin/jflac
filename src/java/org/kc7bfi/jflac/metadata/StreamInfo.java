@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class StreamInfo extends MetadataBase {
+public class StreamInfo extends Metadata {
 
     private static final int STREAMINFO_MIN_BLOCK_SIZE_LEN = 16; // bits
     private static final int STREAMINFO_MAX_BLOCK_SIZE_LEN = 16; // bits

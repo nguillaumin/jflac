@@ -27,7 +27,7 @@ import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FixedPredictor;
 import org.kc7bfi.jflac.util.InputBitStream;
 
-public class ChannelFixed extends ChannelBase {
+public class ChannelFixed extends Channel {
     private static final int MAX_FIXED_ORDER = 4;
 
     private EntropyCodingMethod entropyCodingMethod; // The residual coding method.

@@ -23,36 +23,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.kc7bfi.jflac.FrameListener;
 import org.kc7bfi.jflac.StreamDecoder;
 import org.kc7bfi.jflac.frame.Frame;
-import org.kc7bfi.jflac.metadata.MetadataBase;
-import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.metadata.Metadata;
 
-public class Analyser {
+public class Analyser implements FrameListener {
+    private int frameNum = 0;
     
     public void analyse(String inFileName) throws IOException {
         System.out.println("FLAX Analysis for "+inFileName);
         FileInputStream is = new FileInputStream(inFileName);
         StreamDecoder decoder = new StreamDecoder(is);
-        
-        // read stream info
-        StreamInfo info = decoder.readStreamInfo();
-        System.out.println(info.toString());
-        
-        // read metadata
-        MetadataBase metadata;
-        do {
-            metadata = decoder.readMetadata();
-            System.out.println(metadata.toString());
-        } while (!metadata.isLast());
-        
-        // read audio frames
-        int frameNum = 0;
-        for (Frame frame = decoder.getNextFrame(); frame != null; frame = decoder.getNextFrame()) {
-            frameNum++;
-            System.out.println(frameNum + " " +frame.toString());
-        }
-        
+        decoder.addFrameListener(this);
+        decoder.decode();
    }
 
     public static void main(String[] args) {
@@ -65,4 +49,19 @@ public class Analyser {
             e.printStackTrace();
         }
     }
+
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
+	 */
+	public void processMetadata(Metadata metadata) {
+        System.out.println(metadata.toString());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
+	 */
+	public void processFrame(Frame frame) {
+        frameNum++;
+        System.out.println(frameNum + " " +frame.toString());
+	}
 }
