@@ -44,7 +44,6 @@ public class Player implements PCMProcessor {
     private AudioFormat fmt;
     private DataLine.Info info;
     private SourceDataLine line;
-    private boolean prefill = true;
     
     /**
      * Decode and play an input FLAC file.
@@ -79,6 +78,7 @@ public class Player implements PCMProcessor {
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(fmt, AudioSystem.NOT_SPECIFIED);
+            line.start();	
         } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
@@ -91,11 +91,6 @@ public class Player implements PCMProcessor {
      */
     public void processPCM(ByteSpace pcm) {
         line.write(pcm.space, 0, pcm.pos);
-        
-        if (prefill) {
-            line.start();	
-            prefill = false;
-        }
     }
     
     /**
@@ -105,8 +100,10 @@ public class Player implements PCMProcessor {
      */
     public static void main(String[] args) {
         try {
-            Player decoder = new Player();
-            decoder.decode(args[0]);
+	    Player decoder = new Player();
+
+	    for (int i=0; i<args.length; i++)
+		decoder.decode(args[i]);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
