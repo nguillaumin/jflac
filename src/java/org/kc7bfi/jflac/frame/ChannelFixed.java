@@ -81,7 +81,7 @@ public class ChannelFixed extends ChannelBase {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        StringBuffer sb = new StringBuffer("FLACSubframe_Fixed: Order=" + order + " WastedBits=" + wastedBits);
+        StringBuffer sb = new StringBuffer("FLACSubframe_Fixed: Order=" + order + " PartitionOrder=" + ((EntropyPartitionedRice)entropyCodingMethod).order + " WastedBits=" + wastedBits);
         for (int i = 0; i < order; i++) sb.append(" warmup[" + i + "]=" + warmup[i]);
         return sb.toString();
     }

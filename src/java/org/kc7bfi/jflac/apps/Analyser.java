@@ -50,7 +50,7 @@ public class Analyser {
         int frameNum = 0;
         for (Frame frame = decoder.getNextFrame(); frame != null; frame = decoder.getNextFrame()) {
             frameNum++;
-            if (frameNum < 10) System.out.println(frameNum + " " +frame.toString());
+            System.out.println(frameNum + " " +frame.toString());
         }
         
    }

@@ -5,6 +5,20 @@
   </properties>
 	<body>
 		<section name="24th May 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.3</a> released!</p>
+			<p>I am pleased to announce an updated release of the jFLAC library.</p>
+			<p>This release fixes four separate bugs with the library:
+			<ul>
+   				<li>There was a problem decoding subframes with waisted bits.</li>
+   				<li>There was a problem reading the block size of the last frame.</li>
+				<li>There was a problem performing a wide signal restoration from LPC compression.</li>
+				<li>There was a problem with 24 bps files.</li>
+			</ul></p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
+		<section name="24th May 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.2</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
 			<p>This release fixes two separate bugs with the library:

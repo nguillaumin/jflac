@@ -171,7 +171,8 @@ public class Header {
             default :
         }
         
-        int asgnType = (int) (rawHeader.space[3] >> 4);
+        int asgnType = (int) ((rawHeader.space[3] >> 4) & 0x0f);
+        //System.out.println("AsgnType="+asgnType+" "+(rawHeader.space[3] >> 4));
         if ((asgnType & 8) != 0) {
             channels = 2;
             switch (asgnType & 7) {

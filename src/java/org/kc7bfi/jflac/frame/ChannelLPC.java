@@ -103,7 +103,10 @@ public class ChannelLPC extends ChannelBase {
                 channelData.residual);
         }
         
-        //for (int i = 0; i < header.blockSize; i++) System.out.print(channelData.residual[i]+" ");
+        //System.out.println();
+        //for (int i = 0; i < header.blockSize; i++) {System.out.print(channelData.residual[i]+" ");
+        //if (i%200==0)System.out.println();
+        //}
         //System.out.println();
 
         // decode the subframe
