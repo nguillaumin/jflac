@@ -238,7 +238,7 @@ public class LPCPredictor {
             long sum = 0;
             for (int j = 0; j < order; j++)
                 sum += (long) qlpCoeff[j] * (long) (data[startAt + i - j - 1]);
-            data[startAt + i] = residual[startAt + i] + (int) (sum >> lpQuantization);
+            data[startAt + i] = residual[i] + (int) (sum >> lpQuantization);
         }
     }
     

@@ -50,10 +50,7 @@ public class Analyser {
         int frameNum = 0;
         for (Frame frame = decoder.getNextFrame(); frame != null; frame = decoder.getNextFrame()) {
             frameNum++;
-            System.out.println(frameNum + " " +frame.toString());
-            //if (frameNum == 183) {
-            //    for (int i = 0; i < 10; i++) System.out.println(Integer.toHexString(decoder.getInputBitStream().readRawInt(8)));
-            //}
+            if (frameNum < 10) System.out.println(frameNum + " " +frame.toString());
         }
         
    }

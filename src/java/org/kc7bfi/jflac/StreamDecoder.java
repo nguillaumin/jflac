@@ -452,14 +452,17 @@ public class StreamDecoder {
                     for (i = 0; i < frame.header.blockSize; i++) {
                         mid = channelData[0].output[i];
                         side = channelData[1].output[i];
+                        //if (i < 20) System.out.print(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
                         mid <<= 1;
-                        if ((side & 1) != 0) /* i.e. if 'side' is odd... */
+                        if ((side & 1) != 0) // i.e. if 'side' is odd...
                             mid++;
                         left = mid + side;
                         right = mid - side;
                         channelData[0].output[i] = left >> 1;
                         channelData[1].output[i] = right >> 1;
+                        //if (i < 20) System.out.println(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
                     }
+                //System.exit(1);
                 break;
                 default :
                     break;
