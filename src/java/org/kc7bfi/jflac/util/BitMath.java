@@ -20,6 +20,10 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Utility class for bit math.
+ * @author kc7bfi
+ */
 public final class BitMath {
     
     /**

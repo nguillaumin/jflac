@@ -40,6 +40,9 @@ public class Constants {
     /** mid+side stereo. */
     public static final int CHANNEL_ASSIGNMENT_MID_SIDE = 3;
 
+    /** FLAC Stream Sync string. */
+    public static final byte[] STREAM_SYNC_STRING = new byte[] { (byte)'f', (byte)'L', (byte)'a', (byte)'C' };
+
 
         /*
     boolean format_sample_rate_is_valid(int sample_rate) {

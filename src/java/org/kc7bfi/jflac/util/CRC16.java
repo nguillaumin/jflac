@@ -20,9 +20,13 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Utility class to calculate 16-bit CRC.
+ * @author kc7bfi
+ */
 public final class CRC16 {
 
-    /** CRC-16, poly = x^16 + x^15 + x^2 + x^0, init = 0 */
+    // CRC-16, poly = x^16 + x^15 + x^2 + x^0, init = 0
     private static final short[] CRC16Table =
         new short[] {
             (short) 0x0000,

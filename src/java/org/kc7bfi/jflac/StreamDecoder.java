@@ -52,7 +52,6 @@ public class StreamDecoder {
     private static final int METADATA_TYPE_VORBIS_COMMENT = 4;
     private static final int METADATA_TYPE_CUESHEET = 5;
     private static final int METADATA_TYPE_UNDEFINED = 6;
-    private static final byte[] STREAM_SYNC_STRING = new byte[] { (byte)'f', (byte)'L', (byte)'a', (byte)'C' };
     private static final int STREAM_METADATA_IS_LAST_LEN = 1; /* bits */
     private static final int STREAM_METADATA_TYPE_LEN = 7; /* bits */
     private static final int STREAM_METADATA_LENGTH_LEN = 24; /* bits */
@@ -396,7 +395,7 @@ public class StreamDecoder {
         int id;
         for (int i = id = 0; i < 4;) {
             int x = is.readRawUInt(8);
-            if (x == STREAM_SYNC_STRING[i]) {
+            if (x == Constants.STREAM_SYNC_STRING[i]) {
                 first = true;
                 i++;
                 id = 0;

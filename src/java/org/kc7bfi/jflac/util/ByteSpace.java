@@ -20,11 +20,16 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Expandable byte storage.
+ * @author kc7bfi
+ */
 public class ByteSpace {
-    /** The byte array where data is stored */
+    
+    /** The byte array where data is stored. */
     public byte[] space;
     
-    /** The number of bytes stored in the array */
+    /** The number of bytes stored in the array. */
     public int pos;
 
     /**
@@ -36,6 +41,10 @@ public class ByteSpace {
         pos = 0;
     }
     
+    /**
+     * Append byte to storage.
+     * @param b byte to extend
+     */
     public void append(byte b) {
     	space[pos++] = b;
     }

@@ -23,12 +23,16 @@ package org.kc7bfi.jflac.util;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * This class extends DataOutput for writing little-endian data.
+ * @author kc7bfi
+ */
 public class LittleEndianDataOutput implements DataOutput {
     
     private DataOutput out;
     
     /**
-     * The constructor
+     * The constructor.
      * @param out   The DataOutput to read on
      */
     public LittleEndianDataOutput(DataOutput out) {

@@ -20,9 +20,13 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Utility class to calculate 8-bit CRC.
+ * @author kc7bfi
+ */
 public final class CRC8 {
     
-    /** CRC-8, poly = x^8 + x^2 + x^1 + x^0, init = 0 */
+    // CRC-8, poly = x^8 + x^2 + x^1 + x^0, init = 0
     private static final byte[] CRC8Table =
         new byte[] {
             (byte) 0x00,

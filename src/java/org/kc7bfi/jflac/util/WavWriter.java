@@ -32,7 +32,7 @@ import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 
 /**
- * Utility class for writing WAV files
+ * Utility class for writing WAV files.
  * @author kc7bfi
  */
 public class WavWriter {
@@ -213,7 +213,7 @@ public class WavWriter {
     }
     
     /**
-     * Write the PCM data
+     * Write the PCM data.
      * @param space The PCM data
      * @throws IOException  Thrown if error writing to file
      */

@@ -27,8 +27,12 @@ import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 
+/**
+ * This class is a PCM FLAC decoder.
+ * @author kc7bfi
+ */
 public class PCMDecoder {
-    static final public int MAX_BLOCK_SIZE = 65535;
+    private static final int MAX_BLOCK_SIZE = 65535;
     
     private long totalSamples;
     private int channels;
@@ -38,7 +42,7 @@ public class PCMDecoder {
     private int samplesProcessed = 0;
     private int frameCounter = 0;
     
-    public class Buffer {
+    private class Buffer {
         private byte[] s8buffer = new byte[MAX_BLOCK_SIZE * Constants.MAX_CHANNELS * 4]; /* WATCHOUT: can be up to 2 megs */
         private int len;
         
@@ -55,7 +59,7 @@ public class PCMDecoder {
     
     
     /**
-     * The constructor
+     * The constructor.
      * @param streamInfo    The FLAC stream info
      */
     public PCMDecoder(StreamInfo streamInfo) {
@@ -68,9 +72,10 @@ public class PCMDecoder {
     
     
     /**
-     * Write a WAV frame record
+     * Write a WAV frame record.
      * @param frame         The FLAC frame
      * @param channelData   The decoded channel data
+     * @return returns the decoded buffer data
      * @throws IOException  Thrown if error writing to output channel
      */
     public Buffer getFrame(Frame frame, ChannelData[] channelData) throws IOException {
