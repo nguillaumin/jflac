@@ -20,7 +20,6 @@ package org.kc7bfi.jflac.apps;
  */
 
 
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,58 +30,57 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
+import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.StreamDecoder;
-import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.PCMDecoder;
+import org.kc7bfi.jflac.util.ByteSpace;
 
 
-public class Player {
+public class Player implements PCMProcessor {
+	private AudioFormat fmt;
+	private DataLine.Info info;
+	private SourceDataLine line;
+	private boolean prefill = true;
 	
 	public void decode(String inFileName) throws IOException, LineUnavailableException {
 		System.out.println("Decode ["+inFileName+"]");
 		FileInputStream is = new FileInputStream(inFileName);
 		
 		StreamDecoder decoder = new StreamDecoder(is);
-		decoder.processMetadata();
-		
-		StreamInfo streamInfo = decoder.getStreamInfo();
-		AudioFormat fmt = new AudioFormat(streamInfo.sampleRate,
-				streamInfo.bitsPerSample,
-				streamInfo.channels,
-				true,
-				false);
-		
-		DataLine.Info info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
-		SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-		
-		line.open(fmt, AudioSystem.NOT_SPECIFIED);
-		
-		PCMDecoder pcm = new PCMDecoder(decoder.getStreamInfo());
-		
-		boolean prefill = true;
-		boolean eof = false;
-		for (int f = 0; !eof; f++) {
-			try {
-				Frame frame = decoder.getNextFrame();
-				if (frame == null) break;
-				
-				PCMDecoder.Buffer buf = pcm.getFrame(frame, decoder.getChannelData());
-				
-				line.write(buf.getBuffer(), 0, buf.getLength());
-				//System.out.println("wrote "+buf.getLength());
-				
-				if (prefill) {
-					line.start();	
-					prefill = false;
-				}
-			} catch (EOFException e) {
-				System.out.println("eof");
-				eof = true;
-			}
-		}
+		decoder.addPCMProcessor(this);
+		decoder.decode();
 		
 		line.close();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
+	 */
+	public void processStreamInfo(StreamInfo streamInfo) {
+		try {
+			fmt = new AudioFormat(streamInfo.sampleRate,
+					streamInfo.bitsPerSample,
+					streamInfo.channels,
+					true,
+					false);
+			info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
+			line = (SourceDataLine) AudioSystem.getLine(info);
+			line.open(fmt, AudioSystem.NOT_SPECIFIED);
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
+	 */
+	public void processPCM(ByteSpace pcm) {
+		line.write(pcm.space, 0, pcm.pos);
+		
+		if (prefill) {
+			line.start();	
+			prefill = false;
+		}
 	}
 	
 	public static void main(String[] args) {

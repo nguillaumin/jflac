@@ -17,6 +17,6 @@ import org.kc7bfi.jflac.util.ByteSpace;
  */
 public interface PCMProcessor {
 	
-	public void processStreamInfo(StreamInfo info);
+	public void processStreamInfo(StreamInfo streamInfo);
 	public void processPCM(ByteSpace pcm);
 }
