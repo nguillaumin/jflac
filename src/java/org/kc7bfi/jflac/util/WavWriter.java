@@ -62,10 +62,10 @@ public class WavWriter {
     public WavWriter(DataOutput os, StreamInfo streamInfo) {
         this.os = os;
         this.osLE = new LittleEndianDataOutput(os);
-        this.totalSamples = streamInfo.totalSamples;
-        this.channels = streamInfo.channels;
-        this.bps = streamInfo.bitsPerSample;
-        this.sampleRate = streamInfo.sampleRate;
+        this.totalSamples = streamInfo.getTotalSamples();
+        this.channels = streamInfo.getChannels();
+        this.bps = streamInfo.getBitsPerSample();
+        this.sampleRate = streamInfo.getSampleRate();
     }
     
     /**
@@ -85,10 +85,10 @@ public class WavWriter {
     public WavWriter(OutputStream os, StreamInfo streamInfo) {
         this.os = new DataOutputStream(os);
         this.osLE = new LittleEndianDataOutput(this.os);
-        this.totalSamples = streamInfo.totalSamples;
-        this.channels = streamInfo.channels;
-        this.bps = streamInfo.bitsPerSample;
-        this.sampleRate = streamInfo.sampleRate;
+        this.totalSamples = streamInfo.getTotalSamples();
+        this.channels = streamInfo.getChannels();
+        this.bps = streamInfo.getBitsPerSample();
+        this.sampleRate = streamInfo.getSampleRate();
     }
     
     /**
@@ -136,10 +136,10 @@ public class WavWriter {
      * @throws IOException  Thrown if error writing to output string.
      */    
     public void writeHeader(StreamInfo streamInfo) throws IOException {
-        this.totalSamples = streamInfo.totalSamples;
-        this.channels = streamInfo.channels;
-        this.bps = streamInfo.bitsPerSample;
-        this.sampleRate = streamInfo.sampleRate;
+        this.totalSamples = streamInfo.getTotalSamples();
+        this.channels = streamInfo.getChannels();
+        this.bps = streamInfo.getBitsPerSample();
+        this.sampleRate = streamInfo.getSampleRate();
         writeHeader();
     }
     

@@ -135,13 +135,13 @@ public class FlacPacker extends JFrame {
                 StreamInfo info = decoder.getStreamInfo();
                 if (masterStreamInfo == null) {
                     masterStreamInfo = info;
-                    masterStreamInfo.totalSamples = 0;
+                    masterStreamInfo.setTotalSamples(0);
                 }
                 if (!info.compatiable(masterStreamInfo)) {
                     appendMsg("Bad StreamInfo " + file + ": " + info);
                     continue;
                 }
-                masterStreamInfo.totalSamples += info.totalSamples;
+                masterStreamInfo.addTotalSamples(info.getTotalSamples());
                 
                 SeekPoint seekPoint = new SeekPoint(lastSampleNumber, lastStreamOffset, 0);
                 decoder.processMetadata();

@@ -48,7 +48,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
     
@@ -238,7 +238,7 @@ public class FlacAudioFileReader extends AudioFileReader {
             streamInfo = decoder.readStreamInfo();
             if (streamInfo == null) throw new UnsupportedAudioFileException("No StreamInfo found");
             
-            format = new AudioFormat(FlacEncoding.FLAC, (float) streamInfo.sampleRate, streamInfo.bitsPerSample, streamInfo.channels, /*streamInfo.maxFrameSize*/AudioSystem.NOT_SPECIFIED, AudioSystem.NOT_SPECIFIED, false);
+            format = new AudioFormat(FlacEncoding.FLAC, (float) streamInfo.getSampleRate(), streamInfo.getBitsPerSample(), streamInfo.getChannels(), /*streamInfo.maxFrameSize*/AudioSystem.NOT_SPECIFIED, AudioSystem.NOT_SPECIFIED, false);
         //} catch (UnsupportedAudioFileException e) {
             // reset the stream for other providers
             //if (bitStream.markSupported()) {

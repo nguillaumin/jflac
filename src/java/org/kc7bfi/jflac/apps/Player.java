@@ -70,11 +70,7 @@ public class Player implements PCMProcessor {
      */
     public void processStreamInfo(StreamInfo streamInfo) {
         try {
-            fmt = new AudioFormat(streamInfo.sampleRate,
-                    streamInfo.bitsPerSample,
-                    streamInfo.channels,
-                    true,
-                    false);
+            fmt = streamInfo.getAudioFormat();
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(fmt, AudioSystem.NOT_SPECIFIED);

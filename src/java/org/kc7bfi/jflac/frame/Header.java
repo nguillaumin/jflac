@@ -71,8 +71,8 @@ public class Header {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
         ByteData rawHeader = new ByteData(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
-        boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize != streamInfo.maxBlockSize);
-        boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize == streamInfo.maxBlockSize);
+        boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() != streamInfo.getMaxBlockSize());
+        boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() == streamInfo.getMaxBlockSize());
         
         // init the raw header with the saved bits from synchronization
         rawHeader.append(headerWarmup[0]);
@@ -100,7 +100,7 @@ public class Header {
             case 0 :
                 if (!isKnownFixedBlockSizeStream)
                     throw new BadHeaderException("Unknown Block Size (0)");
-                blockSize = streamInfo.minBlockSize;
+                blockSize = streamInfo.getMinBlockSize();
                 break;
             case 1 :
                 blockSize = 192;
@@ -135,7 +135,7 @@ public class Header {
             case 0 :
                 if (streamInfo == null)
                     throw new BadHeaderException("Bad Sample Rate (0)");
-                sampleRate = streamInfo.sampleRate;
+                sampleRate = streamInfo.getSampleRate();
                 break;
             case 1 :
             case 2 :
@@ -201,7 +201,7 @@ public class Header {
         switch (bpsType) {
             case 0 :
                 if (streamInfo != null)
-                    bitsPerSample = streamInfo.bitsPerSample;
+                    bitsPerSample = streamInfo.getBitsPerSample();
                 else
                     throw new BadHeaderException("Bad BPS (" + bpsType + ")");
                 break;
@@ -241,7 +241,7 @@ public class Header {
             if (lastFrameNumber == 0xffffffff) { // i.e. non-UTF8 code...
                 throw new BadHeaderException("Bad Last Frame");
             }
-            sampleNumber = (long) streamInfo.minBlockSize * (long) lastFrameNumber;
+            sampleNumber = (long) streamInfo.getMinBlockSize() * (long) lastFrameNumber;
         }
         
         if (blocksizeHint != 0) {

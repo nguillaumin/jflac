@@ -49,11 +49,11 @@ public class PCMDecoder {
      * @param streamInfo    The FLAC stream info
      */
     public PCMDecoder(StreamInfo streamInfo) {
-        this.totalSamples = streamInfo.totalSamples;
-        this.channels = streamInfo.channels;
-        this.bps = streamInfo.bitsPerSample;
-        this.sampleRate = streamInfo.sampleRate;
-        this.buf = new ByteData(streamInfo.maxFrameSize);
+        this.totalSamples = streamInfo.getTotalSamples();
+        this.channels = streamInfo.getChannels();
+        this.bps = streamInfo.getBitsPerSample();
+        this.sampleRate = streamInfo.getSampleRate();
+        this.buf = new ByteData(streamInfo.getMaxFrameSize());
     }
     
     

@@ -95,11 +95,7 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
     public void processStreamInfo(StreamInfo streamInfo) {
         this.streamInfo = streamInfo;
         try {
-            fmt = new AudioFormat(streamInfo.sampleRate,
-                    streamInfo.bitsPerSample,
-                    streamInfo.channels,
-                    true,
-                    false);
+            fmt = streamInfo.getAudioFormat();
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(fmt, AudioSystem.NOT_SPECIFIED);

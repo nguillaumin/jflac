@@ -22,6 +22,8 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
+import javax.sound.sampled.AudioFormat;
+
 import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.io.BitOutputStream;
 
@@ -41,16 +43,16 @@ public class StreamInfo extends Metadata {
     private static final int STREAMINFO_TOTAL_SAMPLES_LEN = 36; // bits
     private static final int STREAMINFO_MD5SUM_LEN = 128; // bits
 
-    protected byte[] md5sum = new byte[16];
+    private byte[] md5sum = new byte[16];
 
-    public int minBlockSize;
-    public int maxBlockSize;
-    public int minFrameSize;
-    public int maxFrameSize;
-    public int sampleRate;
-    public int channels;
-    public int bitsPerSample;
-    public long totalSamples;
+    private int minBlockSize;
+    private int maxBlockSize;
+    private int minFrameSize;
+    private int maxFrameSize;
+    private int sampleRate;
+    private int channels;
+    private int bitsPerSample;
+    private long totalSamples;
     
     /**
      * The constructor.
@@ -159,5 +161,82 @@ public class StreamInfo extends Metadata {
             + " Channels=" + channels
             + " BPS=" + bitsPerSample
             + " TotalSamples=" + totalSamples;
+    }
+    
+    /**
+     * @return Returns the maxBlockSize.
+     */
+    public int getMaxBlockSize() {
+        return maxBlockSize;
+    }
+    
+    /**
+     * @return Returns the minBlockSize.
+     */
+    public int getMinBlockSize() {
+        return minBlockSize;
+    }
+    
+    /**
+     * @return Returns the totalSamples.
+     */
+    public long getTotalSamples() {
+        return totalSamples;
+    }
+    
+    /**
+     * @param totalSamples The totalSamples to set.
+     */
+    public void setTotalSamples(long totalSamples) {
+        this.totalSamples = totalSamples;
+    }
+    
+    /**
+     * @param totalSamples The totalSamples to add.
+     */
+    public void addTotalSamples(long totalSamples) {
+        this.totalSamples += totalSamples;
+    }
+    
+    /**
+     * @return Returns the maxFrameSize.
+     */
+    public int getMaxFrameSize() {
+        return maxFrameSize;
+    }
+    
+    /**
+     * @return Returns the minFrameSize.
+     */
+    public int getMinFrameSize() {
+        return minFrameSize;
+    }
+    
+    /**
+     * @return Returns the sampleRate.
+     */
+    public int getSampleRate() {
+        return sampleRate;
+    }
+    
+    /**
+     * @return the Java Sound AudioFormat for this stream info.
+     */
+    public AudioFormat getAudioFormat() {
+        return new AudioFormat(sampleRate, bitsPerSample, channels, true, false);
+    }
+    
+    /**
+     * @return Returns the bitsPerSample.
+     */
+    public int getBitsPerSample() {
+        return bitsPerSample;
+    }
+    
+    /**
+     * @return Returns the channels.
+     */
+    public int getChannels() {
+        return channels;
     }
 }

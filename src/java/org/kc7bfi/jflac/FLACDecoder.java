@@ -214,14 +214,14 @@ public class FLACDecoder {
     
     private void callPCMProcessors(Frame frame) {
         ByteData space = null;
-        if (streamInfo.bitsPerSample == 8) {
+        if (streamInfo.getBitsPerSample() == 8) {
             space = new ByteData(frame.header.blockSize * channels);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     space.append((byte) (channelData[channel].getOutput()[i] + 0x80));
                 }
             }
-        } else if (streamInfo.bitsPerSample == 16) {
+        } else if (streamInfo.getBitsPerSample() == 16) {
             space = new ByteData(frame.header.blockSize * channels * 2);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
@@ -230,7 +230,7 @@ public class FLACDecoder {
                     space.append((byte) ((val >> 8) & 0xff));
                 }
             }
-        } else if (streamInfo.bitsPerSample == 24) {
+        } else if (streamInfo.getBitsPerSample() == 24) {
             space = new ByteData(frame.header.blockSize * channels * 3);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
@@ -612,8 +612,8 @@ public class FLACDecoder {
         
         // If we know the total number of samples in the stream, stop if we've read that many.
         // This will stop us, for example, from wasting time trying to sync on an ID3V1 tag.
-        if (streamInfo != null && (streamInfo.totalSamples != 0)) {
-            if (samplesDecoded >= streamInfo.totalSamples) {
+        if (streamInfo != null && (streamInfo.getTotalSamples() != 0)) {
+            if (samplesDecoded >= streamInfo.getTotalSamples()) {
                 state = STREAM_DECODER_END_OF_STREAM;
                 return;
             }
