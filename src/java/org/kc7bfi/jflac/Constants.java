@@ -28,6 +28,19 @@ public class Constants {
     //public static final int STREAM_SYNC_LEN = 32; /* bits */;
     
     public static final int MAX_CHANNELS = 8;
+    public static final int MAX_BLOCK_SIZE = 65535;
+
+    /** The maximum Rice partition order permitted by the format. */
+    public static final int MAX_RICE_PARTITION_ORDER = 15;
+    
+    /** independent channels */
+    public static final int CHANNEL_ASSIGNMENT_INDEPENDENT = 0;
+    /** left+side stereo */
+    public static final int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1;
+    /** right+side stereo */
+    public static final int CHANNEL_ASSIGNMENT_RIGHT_SIDE = 2;
+    /** mid+side stereo */
+    public static final int CHANNEL_ASSIGNMENT_MID_SIDE = 3;
 
     //public static final int FRAME_HEADER_SYNC = 0x3ffe;
     //public static final int FRAME_HEADER_SYNC_LEN = 14; /* bits */

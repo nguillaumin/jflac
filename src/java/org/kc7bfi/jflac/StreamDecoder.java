@@ -56,10 +56,10 @@ public class StreamDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     
     private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
-    private static final int MAX_CHANNELS = 8;
+    //private static final int MAX_CHANNELS = 8;
     
     private InputBitStream is;
-    private ChannelData[] channelData = new ChannelData[MAX_CHANNELS];
+    private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
     private int outputCapacity = 0;
     private int outputChannels = 0;
     private int lastFrameNumber;
@@ -236,7 +236,7 @@ public class StreamDecoder {
     private void allocateOutput(int size, int channels) {
         if (size <= outputCapacity && channels <= outputChannels) return;
         
-        for (int i = 0; i < MAX_CHANNELS; i++) {
+        for (int i = 0; i < Constants.MAX_CHANNELS; i++) {
             channelData[i] = null;
         }
         
@@ -396,18 +396,18 @@ public class StreamDecoder {
             // first figure the correct bits-per-sample of the subframe
             int bps = frame.header.bitsPerSample;
             switch (frame.header.channelAssignment) {
-                case Header.CHANNEL_ASSIGNMENT_INDEPENDENT :
+                case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
                     /* no adjustment needed */
                     break;
-                case Header.CHANNEL_ASSIGNMENT_LEFT_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
                     if (channel == 1)
                         bps++;
                 break;
-                case Header.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
                     if (channel == 0)
                         bps++;
                 break;
-                case Header.CHANNEL_ASSIGNMENT_MID_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
                     if (channel == 1)
                         bps++;
                 break;
@@ -432,18 +432,18 @@ public class StreamDecoder {
         if (frameCRC == frame.crc) {
             /* Undo any special channel coding */
             switch (frame.header.channelAssignment) {
-                case Header.CHANNEL_ASSIGNMENT_INDEPENDENT :
+                case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
                     /* do nothing */
                     break;
-                case Header.CHANNEL_ASSIGNMENT_LEFT_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
                     for (i = 0; i < frame.header.blockSize; i++)
                         channelData[1].output[i] = channelData[0].output[i] - channelData[1].output[i];
                 break;
-                case Header.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
                     for (i = 0; i < frame.header.blockSize; i++)
                         channelData[0].output[i] += channelData[1].output[i];
                 break;
-                case Header.CHANNEL_ASSIGNMENT_MID_SIDE :
+                case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
                     for (i = 0; i < frame.header.blockSize; i++) {
                         mid = channelData[0].output[i];
                         side = channelData[1].output[i];

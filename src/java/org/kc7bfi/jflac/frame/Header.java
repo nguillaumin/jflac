@@ -22,20 +22,13 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
+import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class Header {
-    /** independent channels */
-    public static final int CHANNEL_ASSIGNMENT_INDEPENDENT = 0;
-    /** left+side stereo */
-    public static final int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1;
-    /** right+side stereo */
-    public static final int CHANNEL_ASSIGNMENT_RIGHT_SIDE = 2;
-    /** mid+side stereo */
-    public static final int CHANNEL_ASSIGNMENT_MID_SIDE = 3;
     
     /** The number of samples per subframe. */
     public int blockSize;
@@ -52,7 +45,8 @@ public class Header {
      * The frame number or sample number of first sample in frame.
      * use the number_type value to determine which to use. 
      */
-    public long sampleNumber;
+    public int frameNumber = -1;
+    public long sampleNumber = -1;
     
     /** 
      * CRC-8 (polynomial = x^8 + x^2 + x^1 + x^0, initialized with 0).
@@ -181,20 +175,20 @@ public class Header {
             channels = 2;
             switch (asgnType & 7) {
                 case 0 :
-                    channelAssignment = CHANNEL_ASSIGNMENT_LEFT_SIDE;
+                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE;
                     break;
                 case 1 :
-                    channelAssignment = CHANNEL_ASSIGNMENT_RIGHT_SIDE;
+                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE;
                     break;
                 case 2 :
-                    channelAssignment = CHANNEL_ASSIGNMENT_MID_SIDE;
+                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_MID_SIDE;
                     break;
                 default :
                     throw new BadHeaderException("Bad Channel Assignment (" + asgnType + ")");
             }
         } else {
             channels = (int) asgnType + 1;
-            channelAssignment = Header.CHANNEL_ASSIGNMENT_INDEPENDENT;
+            channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT;
         }
         
         int bpsType = (int) (rawHeader.space[3] & 0x0e) >> 1;

@@ -42,8 +42,17 @@ public class Frame {
             sb.append("\tFrame Data" + subframes[i].toString() + "\n");
         }
         sb.append("\tFrame Footer: " + crc);
-
+        
         return sb.toString();
         
+    }
+    
+    public static int get_max_rice_partition_order_from_blocksize(int blocksize) {
+        int maxRicePartitionOrder = 0;
+        while((blocksize & 1) == 0) {
+            maxRicePartitionOrder++;
+            blocksize >>= 1;
+        }
+        return Math.min(Constants.MAX_RICE_PARTITION_ORDER, maxRicePartitionOrder);
     }
 }
