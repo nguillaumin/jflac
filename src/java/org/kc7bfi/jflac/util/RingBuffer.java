@@ -73,6 +73,7 @@ public class RingBuffer {
         
         synchronized (signal) {
             // see if we have enough room
+            System.out.println(putAvailable() + " vs "+len);
             while (putAvailable() < len) {
                 try { signal.wait(1000); } catch (Exception e) {System.out.println("Put.Signal.wait:"+e);}
             }

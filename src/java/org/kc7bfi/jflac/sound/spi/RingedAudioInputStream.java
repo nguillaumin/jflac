@@ -36,7 +36,7 @@ import org.kc7bfi.jflac.util.RingBuffer;
  * read out by the stream user.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public abstract class RingedAudioInputStream extends AudioInputStream {
 
@@ -269,6 +269,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      * @see #in
      */
     public synchronized int read() throws IOException {
+        System.out.println("READ");
         fill();
         if (buffer.get(single, 0, 1) == -1) {
             return (-1);
@@ -329,9 +330,11 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      *                if an I/O error occurs.
      */
     public synchronized int read(byte[] b, int off, int len) throws IOException {
+        System.out.println("READ "+len);
         checkIfStillOpen();
         fill();
         int bytesRead = buffer.get(b, off, len);
+        System.out.println("READ "+len+" "+bytesRead);
         return bytesRead;
     }
 
@@ -346,6 +349,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      *                if an I/O error occurs.
      */
     public synchronized long skip(long n) throws IOException {
+        System.out.println("SKIP "+n);
         checkIfStillOpen();
         throw new IOException("skip not supported");
     }
@@ -370,6 +374,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      * @see #in
      */
     public synchronized int available() throws IOException {
+        System.out.println("AVAILABLE");
         checkIfStillOpen();
         fill();
         return buffer.getAvailable();
