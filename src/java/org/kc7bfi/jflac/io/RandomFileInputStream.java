@@ -42,7 +42,7 @@ public class RandomFileInputStream extends InputStream {
     }
     
     /**
-     * Constructor
+     * Constructor.
      * @param randomFile The file to read
      */
     public RandomFileInputStream(RandomAccessFile randomFile) {

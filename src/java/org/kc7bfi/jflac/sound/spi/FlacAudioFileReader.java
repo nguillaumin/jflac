@@ -48,7 +48,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
     
@@ -360,7 +360,7 @@ public class FlacAudioFileReader extends AudioFileReader {
         streamInfo.write(bitOutStream, false);
         
         // flush bit input stream
-        BitInputStream bis = decoder.getInputBitStream();
+        BitInputStream bis = decoder.getBitInputStream();
         int bytesLeft = bis.getInputBytesUnconsumed();
         byte[] b = new byte[bytesLeft];
         bis.readByteBlockAlignedNoCRC(b, bytesLeft);

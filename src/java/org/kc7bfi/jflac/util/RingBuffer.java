@@ -33,19 +33,34 @@ public class RingBuffer {
     protected boolean eof = false;
     protected Object signal = new Object();
     
+    /**
+     * Constructor.
+     * @param size  The size of the ring buffer
+     */
     public RingBuffer(int size) {
         bufferSize = size;
         buffer = new byte[size];
     }
     
+    /**
+     * Constructor.
+     */
     public RingBuffer() {
         this(DEFAULT_BUFFER_SIZE);
     }
     
+    /**
+     * Return the size of the ring buffer.
+     * @return  The ring buffer size
+     */
     public int size() {
         return buffer.length;
     }
     
+    /**
+     * Resize the ring buffer.
+     * @param newSize   The new size of the ring buffer
+     */
     public void resize(int newSize) {
         if (bufferSize >= newSize) return;
         byte[] newBuffer = new byte[newSize];
@@ -55,19 +70,33 @@ public class RingBuffer {
         //signal.notifyAll();
     }
     
+    /**
+     * return the space avaiable for writing.
+     * @return The byte that may be written to the ring buffer
+     */
     public int putAvailable() {
         if (putHere == getHere) return bufferSize - 1;
         if (putHere < getHere) return getHere - putHere - 1;
         return bufferSize - (putHere - getHere) - 1;
     }
     
+    /**
+     * Empty the ring buffer.
+     */
     public void empty() {
         synchronized (signal) {
-            putHere = getHere = 0;
+            putHere = 0;
+            getHere = 0;
             signal.notifyAll();
         }
     }
     
+    /**
+     * Put data into the ring buffer.
+     * @param data  The data to write
+     * @param offset    The start position in the data array
+     * @param len   The bytes from the data array to write
+     */
     public void put(byte[] data, int offset, int len) {
         if (len == 0) return;
         
@@ -94,12 +123,23 @@ public class RingBuffer {
         }
     }
     
+    /**
+     * Return the bytes available for reading.
+     * @return The number of bytes that may be read from the ring buffer
+     */
     public int getAvailable() {
         if (putHere == getHere) return 0;
         if (putHere < getHere) return bufferSize - (getHere - putHere);
         return putHere - getHere;
     }
     
+    /**
+     * Read data from the ring buffer.
+     * @param data  Where to put the data
+     * @param offset    The offset into the data array to start putting data
+     * @param len   The maximum data to read
+     * @return  The number of bytes read
+     */
     public int get(byte[] data, int offset, int len) {
         if (len == 0) return 0;
         int dataLen = 0;
@@ -134,19 +174,25 @@ public class RingBuffer {
     }
     
     /**
-     * @return Returns the eof.
+     * Return EOF status.
+     * @return True if EOF.
      */
     public boolean isEOF() {
         return eof;
     }
     
     /**
+     * Set the EOF status.
      * @param eof The eof to set.
      */
     public void setEOF(boolean eof) {
         this.eof = eof;
     }
     
+    /**
+     * Test main routine.
+     * @param args  Not used
+     */
     public static void main(String[] args) {
         RingBuffer r = new RingBuffer(9);
         byte[] b = new String("ABCDEFG").getBytes();
@@ -176,6 +222,5 @@ public class RingBuffer {
         r.put(b, 0, 3);
         r.get(g, 0, 2);
         System.out.println(new String(g));
-        
     }
 }

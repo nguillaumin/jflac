@@ -66,6 +66,7 @@ public class Frame {
     }
     
     /**
+     * return the frame's CRC.
      * @return Returns the crc.
      */
     public short getCRC() {
@@ -73,6 +74,7 @@ public class Frame {
     }
     
     /**
+     * Set the frame's CRC.
      * @param crc The crc to set.
      */
     public void setCRC(short crc) {

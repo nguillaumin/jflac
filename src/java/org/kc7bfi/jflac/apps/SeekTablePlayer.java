@@ -133,7 +133,9 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
     public void processFrame(Frame frame) {
     }
 
-    /* (non-Javadoc)
+    /**
+     * Process a decoder error.
+     * @param msg   The error message
      * @see org.kc7bfi.jflac.FrameListener#processError(java.lang.String)
      */
     public void processError(String msg) {
