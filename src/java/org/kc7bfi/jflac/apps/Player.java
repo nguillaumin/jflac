@@ -60,6 +60,7 @@ public class Player implements PCMProcessor {
         decoder.addPCMProcessor(this);
         decoder.decode();
         
+        line.drain();
         line.close();
     }
     
