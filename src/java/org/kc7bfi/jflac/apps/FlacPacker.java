@@ -202,9 +202,14 @@ public class FlacPacker extends JFrame {
     }
     
     private class AlbumFile {
-        public File file;
-        public SeekPoint seekPoint;
+        protected File file;
+        protected SeekPoint seekPoint;
         
+        /**
+         * The constructor
+         * @param file      The file
+         * @param seekPoint The SeekPoint
+         */
         public AlbumFile(File file, SeekPoint seekPoint) {
             this.file = file;
             this.seekPoint = seekPoint;
