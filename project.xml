@@ -34,7 +34,7 @@ and the <a href="apidocs/index.html">javadoc</a>.</p>
 	<url>http://jflac.sourceforge.net/</url>
 
 	<siteAddress>shell.sourceforge.net</siteAddress>
-	<siteDirectory>/home/groups/j/jf/jflac/htdocs</siteDirectory>
+	<siteDirectory>/home/groups/j/jf/jflac/htdocs/</siteDirectory>
 
 	<distributionSite>projects.sourceforge.net</distributionSite>
     <distributionDirectory>/home/groups/j/jf/jflac/htdocs/repository</distributionDirectory>
