@@ -26,8 +26,17 @@ import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelConstant extends ChannelBase {
-    protected int value; // The constant signal value.
+    private int value; // The constant signal value.
 
+    /**
+     * The constructor.
+     * @param is            The InputBitStream
+     * @param header        The FLAC Frame Header
+     * @param channelData   The decoded channel data (output)
+     * @param bps           The bits-per-second
+     * @param wastedBits    The bits waisted in the frame
+     * @throws IOException  Thrown if error reading from the InputBitStream
+     */
     public ChannelConstant(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
         super(header, wastedBits);
 
@@ -37,7 +46,10 @@ public class ChannelConstant extends ChannelBase {
         for (int i = 0; i < header.blockSize; i++) channelData.output[i] = value;
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
-        return "ChannelConstant: Value="+value+" WastedBits="+wastedBits;
+        return "ChannelConstant: Value=" + value + " WastedBits=" + wastedBits;
     }
 }

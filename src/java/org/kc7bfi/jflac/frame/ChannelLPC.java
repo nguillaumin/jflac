@@ -39,6 +39,16 @@ public class ChannelLPC extends ChannelBase {
     protected int[] warmup = new int[MAX_LPC_ORDER]; // Warmup samples to prime the predictor, length == order.
     protected int[] residual; // The residual signal, length == (blocksize minus order) samples.
 
+    /**
+     * The constructor.
+     * @param is            The InputBitStream
+     * @param header        The FLAC Frame Header
+     * @param channelData   The decoded channel data (output)
+     * @param bps           The bits-per-second
+     * @param wastedBits    The bits waisted in the frame
+     * @param order         The predicate order
+     * @throws IOException  Thrown if error reading from the InputBitStream
+     */
     public ChannelLPC(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
 

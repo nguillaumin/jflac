@@ -21,11 +21,27 @@ package org.kc7bfi.jflac.frame;
  */
 
 public abstract class ChannelBase {
+    /** The FLAC Frame Header */
     protected Header header;
-    public int wastedBits;
+    
+    /** The number of waisted bits in the frame */
+    protected int wastedBits;
  
+    /**
+     * The constructor.
+     * @param header        The FLAC Frame Header
+     * @param wastedBits    The number of waisted bits in the frame
+     */
     protected ChannelBase(Header header, int wastedBits) {
         this.header = header;
         this.wastedBits = wastedBits;
+    }
+    
+    /**
+     * Return he number of waisted bits in the frame.
+     * @return The number of waisted bits in the frame
+     */
+    public int WastedBits() {
+        return wastedBits;
     }
 }

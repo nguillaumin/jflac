@@ -28,13 +28,23 @@ import org.kc7bfi.jflac.FixedPredictor;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelFixed extends ChannelBase {
-    static final int MAX_FIXED_ORDER = 4;
+    private static final int MAX_FIXED_ORDER = 4;
 
-    protected EntropyCodingMethod entropyCodingMethod; // The residual coding method.
-    protected int order; // The polynomial order.
-    protected int[] warmup = new int[MAX_FIXED_ORDER]; // Warmup samples to prime the predictor, length == order.
-    protected int[] residual; // The residual signal, length == (blocksize minus order) samples.
+    private EntropyCodingMethod entropyCodingMethod; // The residual coding method.
+    private int order; // The polynomial order.
+    private int[] warmup = new int[MAX_FIXED_ORDER]; // Warmup samples to prime the predictor, length == order.
+    private int[] residual; // The residual signal, length == (blocksize minus order) samples.
 
+    /**
+     * The constructor.
+     * @param is            The InputBitStream
+     * @param header        The FLAC Frame Header
+     * @param channelData   The decoded channel data (output)
+     * @param bps           The bits-per-second
+     * @param wastedBits    The bits waisted in the frame
+     * @param order         The predicate order
+     * @throws IOException  Thrown if error reading from the InputBitStream
+     */
     public ChannelFixed(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
         
@@ -67,9 +77,12 @@ public class ChannelFixed extends ChannelBase {
         FixedPredictor.restoreSignal(residual, header.blockSize - order, order, channelData.output, order);
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
-        StringBuffer sb = new StringBuffer("FLACSubframe_Fixed: Order="+order+" WastedBits="+wastedBits);
-        for (int i = 0; i < order; i++) sb.append(" warmup["+i+"]="+warmup[i]);
+        StringBuffer sb = new StringBuffer("FLACSubframe_Fixed: Order=" + order + " WastedBits=" + wastedBits);
+        for (int i = 0; i < order; i++) sb.append(" warmup[" + i + "]=" + warmup[i]);
         return sb.toString();
     }
 }

@@ -563,7 +563,7 @@ public class StreamDecoder {
         int wastedBits = 0;
         if (haveWastedBits) {
             wastedBits = is.readUnaryUnsigned() + 1;
-            bps -= frame.subframes[channel].wastedBits;
+            bps -= frame.subframes[channel].WastedBits();
         }
         
         // Lots of magic numbers here
@@ -594,7 +594,7 @@ public class StreamDecoder {
         //for (int i = 0; i < frame.header.blockSize; i++) System.out.println("\tRisidual["+i+"]="+channelData[channel].residual[i]);
         if (haveWastedBits) {
             int i;
-            x = frame.subframes[channel].wastedBits;
+            x = frame.subframes[channel].WastedBits();
             for (i = 0; i < frame.header.blockSize; i++)
                 channelData[channel].output[i] <<= x;
         }

@@ -28,6 +28,15 @@ import org.kc7bfi.jflac.util.InputBitStream;
 public class ChannelVerbatim extends ChannelBase {
     protected int[] data; // A pointer to verbatim signal.
     
+    /**
+     * The constructor.
+     * @param is            The InputBitStream
+     * @param header        The FLAC Frame Header
+     * @param channelData   The decoded channel data (output)
+     * @param bps           The bits-per-second
+     * @param wastedBits    The bits waisted in the frame
+     * @throws IOException  Thrown if error reading from the InputBitStream
+     */
     public ChannelVerbatim(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
         super(header, wastedBits);
 
