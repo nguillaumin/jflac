@@ -28,4 +28,10 @@ public interface FrameListener {
      * @param frame The data frame read
      */
     public void processFrame(Frame frame);
+    
+    /**
+     * Called for each frame error detected.
+     * @param msg   The error message
+     */
+    public void processError(String msg);
 }

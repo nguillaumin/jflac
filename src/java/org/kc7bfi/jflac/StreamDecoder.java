@@ -46,9 +46,7 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
-    
     private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
-    //private static final int MAX_CHANNELS = 8;
     
     private InputBitStream is;
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
@@ -95,10 +93,18 @@ public class StreamDecoder {
         state = STREAM_DECODER_SEARCH_FOR_METADATA;
     }
     
+    /**
+     * Return the parsed StreamInfo Metadata record.
+     * @return  The StreamInfo
+     */
     public StreamInfo getStreamInfo() {
         return streamInfo;
     }
     
+    /**
+     * Return the ChannelData object.
+     * @return  The ChannelData object
+     */
     public ChannelData[] getChannelData() {
         return channelData;
     }
@@ -135,6 +141,15 @@ public class StreamDecoder {
             while (it.hasNext()) {
                 FrameListener listener = (FrameListener)it.next();
                 listener.processFrame(frame);
+            }
+        }
+    }
+    private void callErrorListeners(String msg) {
+        synchronized (frameListeners) {
+            Iterator it = frameListeners.iterator();
+            while (it.hasNext()) {
+                FrameListener listener = (FrameListener)it.next();
+                listener.processError(msg);
             }
         }
     }
@@ -298,7 +313,6 @@ public class StreamDecoder {
         //boolean got_a_frame;
         
         while (true) {
-            //System.out.println("Process for state: "+state+" "+StreamDecoderStateString[state]);
             switch (state) {
             case STREAM_DECODER_SEARCH_FOR_METADATA :
                 findMetadata();
@@ -326,7 +340,6 @@ public class StreamDecoder {
         //boolean got_a_frame;
         
         while (true) {
-            //System.out.println("Process for state: "+state+" "+StreamDecoderStateString[state]);
             switch (state) {
             //case STREAM_DECODER_SEARCH_FOR_METADATA :
             //    findMetadata();
@@ -495,7 +508,7 @@ public class StreamDecoder {
                 }
             }
             if (first) {
-                System.out.println("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
+                callErrorListeners("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
                 if (cnt++ > 16) first = false;
             }
         }
@@ -518,7 +531,7 @@ public class StreamDecoder {
         try {
             frame.header = new Header(is, headerWarmup, streamInfo);
         } catch (BadHeaderException e) {
-            System.out.println("Found bad header: "+e);
+            callErrorListeners("Found bad header: "+e);
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         }
         if (state == STREAM_DECODER_SEARCH_FOR_FRAME_SYNC) return false;// gotAFrame;
@@ -546,10 +559,9 @@ public class StreamDecoder {
             }
             // now read it
             try {
-                //System.out.println("Read SubFrame");
                 readSubframe(channel, bps);
             } catch (IOException e) {
-                System.out.println("ReadSubframe: "+e);e.printStackTrace();
+                callErrorListeners("ReadSubframe: "+e);
             }
             if (state != STREAM_DECODER_READ_FRAME) {
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
@@ -579,7 +591,6 @@ public class StreamDecoder {
                 for (i = 0; i < frame.header.blockSize; i++) {
                     mid = channelData[0].getOutput()[i];
                     side = channelData[1].getOutput()[i];
-                    //if (i < 20) System.out.print(Integer.toHexString(channelData[0].getOutput()[i])+" "+Integer.toHexString(channelData[1].getOutput()[i])+" ");
                     mid <<= 1;
                     if ((side & 1) != 0) // i.e. if 'side' is odd...
                         mid++;
@@ -587,7 +598,6 @@ public class StreamDecoder {
                     right = mid - side;
                     channelData[0].getOutput()[i] = left >> 1;
                     channelData[1].getOutput()[i] = right >> 1;
-                    //if (i < 20) System.out.println(Integer.toHexString(channelData[0].getOutput()[i])+" "+Integer.toHexString(channelData[1].getOutput()[i])+" ");
                 }
             //System.exit(1);
             break;
@@ -596,7 +606,7 @@ public class StreamDecoder {
             }
         } else {
             /* Bad frame, emit error and zero the output signal */
-            System.out.println("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(frame.crc));
+            callErrorListeners("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(frame.crc));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].getOutput()[j] = 0;
@@ -623,7 +633,6 @@ public class StreamDecoder {
         int x;
         
         x = is.readRawUInt(8); /* MAGIC NUMBER */
-        //System.out.println("Magic Number="+Integer.toHexString(x&0xff));
         
         boolean haveWastedBits = ((x & 1) != 0);
         x &= 0xfe;
@@ -636,7 +645,7 @@ public class StreamDecoder {
         
         // Lots of magic numbers here
         if ((x & 0x80) != 0) {
-            System.out.println("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
+            callErrorListeners("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             throw new IOException("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
             //return true;
@@ -668,7 +677,7 @@ public class StreamDecoder {
         if (!is.isConsumedByteAligned()) {
             int zero = is.readRawUInt(is.bitsLeftForByteAlignment());
             if (zero != 0) {
-                System.out.println("ZeroPaddingError: "+Integer.toHexString(zero));
+                callErrorListeners("ZeroPaddingError: "+Integer.toHexString(zero));
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             }
         }

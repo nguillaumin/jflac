@@ -29,23 +29,24 @@ import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.Metadata;
 
 /**
- * Analyze FLAC file application.
+ * Test FLAC file application.
  * @author kc7bfi
  */
-public class Analyser implements FrameListener {
-    private int frameNum = 0;
+public class Tester implements FrameListener {
+    private int errors = 0;
     
     /**
      * Analyse an input FLAC file.
      * @param inFileName The input file name
      * @throws IOException thrown if error reading file
      */
-    public void analyse(String inFileName) throws IOException {
-        System.out.println("FLAX Analysis for " + inFileName);
+    public void test(String inFileName) throws IOException {
+        System.out.println("FLAX Tester for " + inFileName);
         FileInputStream is = new FileInputStream(inFileName);
         StreamDecoder decoder = new StreamDecoder(is);
         decoder.addFrameListener(this);
         decoder.decode();
+        System.out.println(errors + " errors found!");
     }
     
     /**
@@ -54,7 +55,6 @@ public class Analyser implements FrameListener {
      * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
      */
     public void processMetadata(Metadata metadata) {
-        System.out.println(metadata.toString());
     }
     
     /**
@@ -63,8 +63,6 @@ public class Analyser implements FrameListener {
      * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
      */
     public void processFrame(Frame frame) {
-        frameNum++;
-        System.out.println(frameNum + " " + frame.toString());
     }
    
     /**
@@ -73,7 +71,8 @@ public class Analyser implements FrameListener {
      * @see org.kc7bfi.jflac.FrameListener#processError(java.lang.String)
      */
     public void processError(String msg) {
-        System.out.println("Frame Error: " + msg);
+        errors++;
+        System.out.println(msg);
     }
     
     /**
@@ -83,8 +82,8 @@ public class Analyser implements FrameListener {
      */
     public static void main(String[] args) {
         try {
-            Analyser analyser = new Analyser();
-            analyser.analyse(args[0]);
+            Tester tester = new Tester();
+            tester.test(args[0]);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
