@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * An entry into the Vorbis comment.
+ * @author kc7bfi
+ */
 public class VorbisString {
     //private static final int VORBIS_COMMENT_ENTRY_LENGTH_LEN = 32; // bits
 

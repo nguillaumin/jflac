@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * An entry into the seek table.
+ * @author kc7bfi
+ */
 public class SeekPoint {
 
     private static final int SEEKPOINT_SAMPLE_NUMBER_LEN = 64; // bits
@@ -45,6 +49,12 @@ public class SeekPoint {
         frameSamples = is.readRawUInt(SEEKPOINT_FRAME_SAMPLES_LEN);
     }
     
+    /**
+     * The constructor.
+     * @param sampleNumber  The sample number of the target frame
+     * @param streamOffset  The offset, in bytes, of the target frame with respect to beginning of the first frame
+     * @param frameSamples  The number of samples in the target frame
+     */
     public SeekPoint(long sampleNumber, long streamOffset, int frameSamples) {
         this.sampleNumber = sampleNumber;
         this.streamOffset = streamOffset;

@@ -22,15 +22,19 @@ package org.kc7bfi.jflac.frame;
 
 import org.kc7bfi.jflac.Constants;
 
+/**
+ * The FLAC Frame class.
+ * @author kc7bfi
+ */
 public class Frame {
-    /** The frame header */
+    /** The frame header. */
     public Header header;
     
     /** The subframes - One per channel. */
     public Channel[] subframes = new Channel[Constants.MAX_CHANNELS];
     
-    /** The frame footer */
-    public short crc;
+    /** The frame footer. */
+    private short crc;
     
     /**
      * @see java.lang.Object#toString()
@@ -47,12 +51,31 @@ public class Frame {
         
     }
     
-    public static int get_max_rice_partition_order_from_blocksize(int blocksize) {
+    /**
+     * Return the maximum Rice partition order based on the block size.
+     * @param blocksize The block size
+     * @return  The maximum Rice partition order
+     */
+    public static int getMaxRicePartitionOrderFromBlocksize(int blocksize) {
         int maxRicePartitionOrder = 0;
-        while((blocksize & 1) == 0) {
+        while ((blocksize & 1) == 0) {
             maxRicePartitionOrder++;
             blocksize >>= 1;
         }
         return Math.min(Constants.MAX_RICE_PARTITION_ORDER, maxRicePartitionOrder);
+    }
+    
+    /**
+     * @return Returns the crc.
+     */
+    public short getCRC() {
+        return crc;
+    }
+    
+    /**
+     * @param crc The crc to set.
+     */
+    public void setCRC(short crc) {
+        this.crc = crc;
     }
 }

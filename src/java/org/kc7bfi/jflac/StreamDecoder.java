@@ -573,8 +573,8 @@ public class StreamDecoder {
         
         // Read the frame CRC-16 from the footer and check
         frameCRC = is.getReadCRC16();
-        frame.crc = (short)is.readRawUInt(FRAME_FOOTER_CRC_LEN);
-        if (frameCRC == frame.crc) {
+        frame.setCRC((short)is.readRawUInt(FRAME_FOOTER_CRC_LEN));
+        if (frameCRC == frame.getCRC()) {
             /* Undo any special channel coding */
             switch (frame.header.channelAssignment) {
             case Constants.CHANNEL_ASSIGNMENT_INDEPENDENT :
@@ -609,7 +609,7 @@ public class StreamDecoder {
             gotAFrame = true;
         } else {
             // Bad frame, emit error and zero the output signal
-            callErrorListeners("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.crc & 0xffff)));
+            callErrorListeners("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.getCRC() & 0xffff)));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].getOutput()[j] = 0;
@@ -667,7 +667,7 @@ public class StreamDecoder {
         }
         if (haveWastedBits) {
             int i;
-            x = frame.subframes[channel].WastedBits();
+            x = frame.subframes[channel].getWastedBits();
             for (i = 0; i < frame.header.blockSize; i++)
                 channelData[channel].getOutput()[i] <<= x;
         }

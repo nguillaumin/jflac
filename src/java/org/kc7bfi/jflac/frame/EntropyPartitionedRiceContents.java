@@ -32,7 +32,7 @@ public class EntropyPartitionedRiceContents {
     protected int capacityByOrder = 0;
     
     /**
-     * Ensure enough menory has been allocated
+     * Ensure enough menory has been allocated.
      * @param maxPartitionOrder The maximum partition order
      */
     public void ensureSize(int maxPartitionOrder) {

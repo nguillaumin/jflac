@@ -93,7 +93,7 @@ public class FlacPacker extends JFrame {
         chooser.setMultiSelectionEnabled(true);
         chooser.setFileFilter(filter);
         int returnVal = chooser.showOpenDialog(this);
-        if(returnVal != JFileChooser.APPROVE_OPTION) return;
+        if (returnVal != JFileChooser.APPROVE_OPTION) return;
         File[] files = chooser.getSelectedFiles();
         for (int i = 0; i < files.length; i++) flacFiles.add(files[i]);
     }
@@ -105,7 +105,7 @@ public class FlacPacker extends JFrame {
         filter.setDescription("FLAC files");
         chooser.setFileFilter(filter);
         int returnVal = chooser.showOpenDialog(this);
-        if(returnVal != JFileChooser.APPROVE_OPTION) return null;
+        if (returnVal != JFileChooser.APPROVE_OPTION) return null;
         File file = chooser.getSelectedFile();
         return file;
     }
@@ -201,12 +201,16 @@ public class FlacPacker extends JFrame {
         app.show(true);
     }
     
+    /**
+     * This class holds the fiels and their seek points.
+     * @author kc7bfi
+     */
     private class AlbumFile {
         protected File file;
         protected SeekPoint seekPoint;
         
         /**
-         * The constructor
+         * The constructor.
          * @param file      The file
          * @param seekPoint The SeekPoint
          */

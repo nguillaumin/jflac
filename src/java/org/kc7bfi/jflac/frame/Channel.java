@@ -55,7 +55,7 @@ public abstract class Channel {
      * Return he number of waisted bits in the frame.
      * @return The number of waisted bits in the frame
      */
-    public int WastedBits() {
+    public int getWastedBits() {
         return wastedBits;
     }
 }

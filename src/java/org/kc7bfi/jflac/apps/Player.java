@@ -65,7 +65,7 @@ public class Player implements PCMProcessor {
     
     /**
      * Process the StreamInfo block.
-     * @param info the StreamInfo block
+     * @param streamInfo the StreamInfo block
      * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
@@ -78,7 +78,7 @@ public class Player implements PCMProcessor {
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);
             line = (SourceDataLine) AudioSystem.getLine(info);
             line.open(fmt, AudioSystem.NOT_SPECIFIED);
-            line.start();	
+            line.start();
         } catch (LineUnavailableException e) {
             e.printStackTrace();
         }
@@ -100,10 +100,10 @@ public class Player implements PCMProcessor {
      */
     public static void main(String[] args) {
         try {
-	    Player decoder = new Player();
-
-	    for (int i=0; i<args.length; i++)
-		decoder.decode(args[i]);
+            Player decoder = new Player();
+            
+            for (int i = 0; i < args.length; i++)
+                decoder.decode(args[i]);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -27,6 +27,7 @@ package org.kc7bfi.jflac.util;
 public final class BitMath {
     
     /**
+     * Compute ilog2().
      *  An example of what ilog2() computes:
      *
      * ilog2( 0) = assertion failure
@@ -59,6 +60,7 @@ public final class BitMath {
     }
     
     /**
+     * Compute silog2().
      * An example of what silog2() computes:
      *
      * silog2(-10) = 5
@@ -104,6 +106,7 @@ public final class BitMath {
     }
     
     /**
+     * Compute silog2().
      * An example of what silog2() computes:
      *
      * silog2(-10) = 5

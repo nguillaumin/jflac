@@ -31,7 +31,7 @@ public class ByteSpace {
     
     /** The number of bytes stored in the array. */
     public int pos;
-
+    
     /**
      * The default constructor.
      * @param maxSpace  The maximum space in the internal byte array.
@@ -46,7 +46,7 @@ public class ByteSpace {
      * @param b byte to extend
      */
     public void append(byte b) {
-    	space[pos++] = b;
+        space[pos++] = b;
     }
-
+    
 }

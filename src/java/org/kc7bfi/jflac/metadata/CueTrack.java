@@ -24,6 +24,10 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
 
+/**
+ * An entry into the cue sheet.
+ * @author kc7bfi
+ */
 public class CueTrack {
 
     private static final int CUESHEET_TRACK_OFFSET_LEN = 64; // bits

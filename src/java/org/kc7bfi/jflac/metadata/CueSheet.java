@@ -52,7 +52,6 @@ public class CueSheet extends Metadata {
     /**
      * The constructor.
      * @param is                The InputBitStream
-     * @param isLast            True if last metadata record
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
@@ -72,7 +71,7 @@ public class CueSheet extends Metadata {
     }
 
     /**
-     * Verifys the Cue Sheet
+     * Verifys the Cue Sheet.
      * @param checkCdDaSubset   True for check CD subset
      * @throws Violation        Thrown if invalid Cue Sheet
      */

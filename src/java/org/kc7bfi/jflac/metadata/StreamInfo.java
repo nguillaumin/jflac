@@ -55,7 +55,6 @@ public class StreamInfo extends Metadata {
     /**
      * The constructor.
      * @param is                The InputBitStream
-     * @param isLast            True if last metadata record
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
