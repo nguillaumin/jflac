@@ -20,29 +20,7 @@ package org.kc7bfi.jflac;
  * Boston, MA  02111-1307, USA.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.kc7bfi.jflac.frame.BadHeaderException;
-import org.kc7bfi.jflac.frame.ChannelBase;
-import org.kc7bfi.jflac.frame.ChannelConstant;
-import org.kc7bfi.jflac.frame.ChannelFixed;
-import org.kc7bfi.jflac.frame.ChannelLPC;
-import org.kc7bfi.jflac.frame.ChannelVerbatim;
-import org.kc7bfi.jflac.frame.EntropyPartitionedRice;
 import org.kc7bfi.jflac.frame.EntropyPartitionedRiceContents;
-import org.kc7bfi.jflac.frame.Frame;
-import org.kc7bfi.jflac.frame.Header;
-import org.kc7bfi.jflac.metadata.Application;
-import org.kc7bfi.jflac.metadata.CueSheet;
-import org.kc7bfi.jflac.metadata.MetadataBase;
-import org.kc7bfi.jflac.metadata.Padding;
-import org.kc7bfi.jflac.metadata.SeekTable;
-import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.metadata.Unknown;
-import org.kc7bfi.jflac.metadata.VorbisComment;
-import org.kc7bfi.jflac.util.CRC16;
-import org.kc7bfi.jflac.util.InputBitStream;
 import org.kc7bfi.jflac.util.OutputBitStream;
 
 public class StreamEncoder {
@@ -234,8 +212,8 @@ public class StreamEncoder {
             int sample;
             int expected;
             int got;
-        };
-    };
+        }
+    }
     private VerifyData verifyData = new VerifyData();
     boolean is_being_deleted; /* if true, call to ..._finish() from ..._delete() will not call the callbacks */
     
@@ -1370,14 +1348,13 @@ private boolean processFrame(boolean is_last_frame) {
 }
 */
 
+/*
 private boolean processSubframes(boolean is_last_frame) {
 	Header frame_header;
 	int channel, min_partition_order = min_residual_partition_order, max_partition_order;
 	boolean do_independent, do_mid_side, precompute_partition_sums;
 
-	/*
-	 * Calculate the min,max Rice partition orders
-	 */
+	// Calculate the min,max Rice partition orders
 	if (is_last_frame) {
 		max_partition_order = 0;
 	}
@@ -1389,20 +1366,16 @@ private boolean processSubframes(boolean is_last_frame) {
 
 	precompute_partition_sums = precompute_partition_sums && ((max_partition_order > min_partition_order) || do_escape_coding);
 
-	/*
-	 * Setup the frame
-	 */
+	// Setup the frame
     frame.clear();
 	frame_header.blockSize = blocksize;
 	frame_header.sampleRate = sample_rate;
 	frame_header.channels = channels;
-	frame_header.channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT; /* the default unless the encoder determines otherwise */
+	frame_header.channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT; // the default unless the encoder determines otherwise
 	frame_header.bitsPerSample = bits_per_sample;
 	frame_header.frameNumber = current_frame_number;
 
-	/*
-	 * Figure out what channel assignments to try
-	 */
+	// Figure out what channel assignments to try
 	if (do_mid_side_stereo) {
 		if (loose_mid_side_stereo) {
 			if (loose_mid_side_stereo_frame_count == 0) {
@@ -1424,9 +1397,7 @@ private boolean processSubframes(boolean is_last_frame) {
 		do_mid_side = false;
 	}
 
-	/*
-	 * Check for wasted bits; set effective bps for each subframe
-	 */
+	// Check for wasted bits; set effective bps for each subframe
 	if (do_independent) {
 		for(channel = 0; channel < channels; channel++) {
 			int w = get_wasted_bits_(integer_signal[channel], blocksize);
@@ -1443,9 +1414,7 @@ private boolean processSubframes(boolean is_last_frame) {
 		}
 	}
 
-	/*
-	 * First do a normal encoding pass of each independent channel
-	 */
+	// First do a normal encoding pass of each independent channel
 	if (do_independent) {
 		for(channel = 0; channel < channels; channel++) {
 			if (!
@@ -1469,9 +1438,7 @@ private boolean processSubframes(boolean is_last_frame) {
 		}
 	}
 
-	/*
-	 * Now do mid and side channels if requested
-	 */
+	// Now do mid and side channels if requested
 	if (do_mid_side) {
 
 		for(channel = 0; channel < 2; channel++) {
@@ -1496,23 +1463,21 @@ private boolean processSubframes(boolean is_last_frame) {
 		}
 	}
 
-	/*
-	 * Compose the frame bitbuffer
-	 */
+	// Compose the frame bitbuffer
 	if (do_mid_side) {
-		unsigned left_bps = 0, right_bps = 0; /* initialized only to prevent superfluous compiler warning */
-		ChannelBase left_subframe, right_subframe; /* initialized only to prevent superfluous compiler warning */
+		unsigned left_bps = 0, right_bps = 0; // initialized only to prevent superfluous compiler warning
+		ChannelBase left_subframe, right_subframe; // initialized only to prevent superfluous compiler warning
 		ChannelAssignment channel_assignment;
 
 		if (loose_mid_side_stereo && loose_mid_side_stereo_frame_count > 0) {
 			channel_assignment = (last_channel_assignment == CHANNEL_ASSIGNMENT_INDEPENDENT? CHANNEL_ASSIGNMENT_INDEPENDENT : CHANNEL_ASSIGNMENT_MID_SIDE);
 		}
 		else {
-			int[] bits = new int[4]; /* WATCHOUT - indexed by ChannelAssignment */
+			int[] bits = new int[4]; // WATCHOUT - indexed by ChannelAssignment
 			int min_bits;
 			int ca;
 
-			/* We have to figure out which channel assignent results in the smallest frame */
+			// We have to figure out which channel assignent results in the smallest frame
 			bits[CHANNEL_ASSIGNMENT_INDEPENDENT] = best_subframe_bits         [0] + best_subframe_bits         [1];
 			bits[CHANNEL_ASSIGNMENT_LEFT_SIDE  ] = best_subframe_bits         [0] + best_subframe_bits_mid_side[1];
 			bits[CHANNEL_ASSIGNMENT_RIGHT_SIDE ] = best_subframe_bits         [1] + best_subframe_bits_mid_side[1];
@@ -1575,7 +1540,7 @@ private boolean processSubframes(boolean is_last_frame) {
 				ASSERT(0);
 		}
 
-		/* note that encoder_add_subframe_ sets the state for us in case of an error */
+		// note that encoder_add_subframe_ sets the state for us in case of an error
 		if (!add_subframe_(frame_header, left_bps , left_subframe , frame))
 			return false;
 		if (!add_subframe_(frame_header, right_bps, right_subframe, frame))
@@ -1589,7 +1554,7 @@ private boolean processSubframes(boolean is_last_frame) {
 
 		for(channel = 0; channel < channels; channel++) {
 			if (!add_subframe_(frame_header, subframe_bps[channel], subframe_workspace[channel][best_subframe[channel]], frame)) {
-				/* the above function sets the state for us in case of an error */
+				// the above function sets the state for us in case of an error
 				return false;
 			}
 		}
@@ -1605,7 +1570,9 @@ private boolean processSubframes(boolean is_last_frame) {
 
 	return true;
 }
+*/
 
+/*
 private boolean processSubframe(int min_partition_order,
 	int max_partition_order,
 	boolean precompute_partition_sums,
@@ -1622,7 +1589,7 @@ private boolean processSubframe(int min_partition_order,
 {
 	double[] fixed_residual_bits_per_sample = new double[MAX_FIXED_ORDER+1];
 	double lpc_residual_bits_per_sample;
-	double[] autoc = new double[MAX_LPC_ORDER+1]; /* WATCHOUT: the size is important even though max_lpc_order might be less; some asm routines need all the space */
+	double[] autoc = new double[MAX_LPC_ORDER+1]; // WATCHOUT: the size is important even though max_lpc_order might be less; some asm routines need all the space
 	double[] lpc_error = new double[MAX_LPC_ORDER];
 	int min_lpc_order, max_lpc_order, lpc_order;
 	int min_fixed_order, max_fixed_order, guess_fixed_order, fixed_order;
@@ -1631,7 +1598,7 @@ private boolean processSubframe(int min_partition_order,
 	int _candidate_bits, _best_bits;
 	int _best_subframe;
 
-	/* verbatim subframe is the baseline against which we measure other compressed subframes */
+	// verbatim subframe is the baseline against which we measure other compressed subframes
 	_best_subframe = 0;
 	if (disable_verbatim_subframes && frame_header.blocksize >= MAX_FIXED_ORDER)
 		_best_bits = UINT_MAX;
@@ -1641,9 +1608,9 @@ private boolean processSubframe(int min_partition_order,
 	if (frame_header.blocksize >= MAX_FIXED_ORDER) {
 		unsigned signal_is_constant = false;
 		guess_fixed_order = local_fixed_compute_best_predictor(integer_signal+MAX_FIXED_ORDER, frame_header.blocksize-MAX_FIXED_ORDER, fixed_residual_bits_per_sample);
-		/* check for constant subframe */
+		// check for constant subframe
 		if (!disable_constant_subframes && fixed_residual_bits_per_sample[1] == 0.0) {
-			/* the above means integer_signal+MAX_FIXED_ORDER is constant, now we just have to check the warmup samples */
+			// the above means integer_signal+MAX_FIXED_ORDER is constant, now we just have to check the warmup samples
 			unsigned i;
 			signal_is_constant = true;
 			for(i = 1; i <= MAX_FIXED_ORDER; i++) {
@@ -1662,7 +1629,7 @@ private boolean processSubframe(int min_partition_order,
 		}
 		else {
 			if (!disable_fixed_subframes || (max_lpc_order == 0 && _best_bits == UINT_MAX)) {
-				/* encode fixed */
+				// encode fixed
 				if (do_exhaustive_model_search) {
 					min_fixed_order = 0;
 					max_fixed_order = MAX_FIXED_ORDER;
@@ -1672,9 +1639,9 @@ private boolean processSubframe(int min_partition_order,
 				}
 				for(fixed_order = min_fixed_order; fixed_order <= max_fixed_order; fixed_order++) {
 					if (fixed_residual_bits_per_sample[fixed_order] >= (double)subframe_bps)
-						continue; /* don't even try */
-					rice_parameter = (fixed_residual_bits_per_sample[fixed_order] > 0.0)? (unsigned)(fixed_residual_bits_per_sample[fixed_order]+0.5) : 0; /* 0.5 is for rounding */
-					rice_parameter++; /* to account for the signed->unsigned conversion during rice coding */
+						continue; // don't even try
+					rice_parameter = (fixed_residual_bits_per_sample[fixed_order] > 0.0)? (unsigned)(fixed_residual_bits_per_sample[fixed_order]+0.5) : 0; // 0.5 is for rounding
+					rice_parameter++; // to account for the signed->unsigned conversion during rice coding
 					if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
 						fprintf(stderr, "clipping rice_parameter (%u -> %u) @0\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
 						rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
@@ -1706,7 +1673,7 @@ private boolean processSubframe(int min_partition_order,
 				}
 			}
 
-			/* encode lpc */
+			// encode lpc
 			if (max_lpc_order > 0) {
 				if (max_lpc_order >= frame_header.blocksize)
 					max_lpc_order = frame_header.blocksize-1;
@@ -1714,7 +1681,7 @@ private boolean processSubframe(int min_partition_order,
 					max_lpc_order = max_lpc_order;
 				if (max_lpc_order > 0) {
 					local_lpc_compute_autocorrelation(real_signal, frame_header.blocksize, max_lpc_order+1, autoc);
-					/* if autoc[0] == 0.0, the signal is constant and we usually won't get here, but it can happen */
+					// if autoc[0] == 0.0, the signal is constant and we usually won't get here, but it can happen
 					if (autoc[0] != 0.0) {
 						lpc_compute_lp_coefficients(autoc, max_lpc_order, lp_coeff, lpc_error);
 						if (do_exhaustive_model_search) {
@@ -1727,16 +1694,16 @@ private boolean processSubframe(int min_partition_order,
 						for(lpc_order = min_lpc_order; lpc_order <= max_lpc_order; lpc_order++) {
 							lpc_residual_bits_per_sample = lpc_compute_expected_bits_per_residual_sample(lpc_error[lpc_order-1], frame_header.blocksize-lpc_order);
 							if (lpc_residual_bits_per_sample >= (double)subframe_bps)
-								continue; /* don't even try */
-							rice_parameter = (lpc_residual_bits_per_sample > 0.0)? (unsigned)(lpc_residual_bits_per_sample+0.5) : 0; /* 0.5 is for rounding */
-							rice_parameter++; /* to account for the signed->unsigned conversion during rice coding */
+								continue; // don't even try
+							rice_parameter = (lpc_residual_bits_per_sample > 0.0)? (unsigned)(lpc_residual_bits_per_sample+0.5) : 0; // 0.5 is for rounding
+							rice_parameter++; // to account for the signed->unsigned conversion during rice coding
 							if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
 								fprintf(stderr, "clipping rice_parameter (%u -> %u) @1\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
 								rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
 							}
 							if (do_qlp_coeff_prec_search) {
 								min_qlp_coeff_precision = MIN_QLP_COEFF_PRECISION;
-								/* ensure a 32-bit datapath throughout for 16bps or less */
+								// ensure a 32-bit datapath throughout for 16bps or less
 								if (subframe_bps <= 16)
 									max_qlp_coeff_precision = min(32 - subframe_bps - lpc_order, MAX_QLP_COEFF_PRECISION);
 								else
@@ -1768,7 +1735,7 @@ private boolean processSubframe(int min_partition_order,
 										subframe[!_best_subframe],
 										partitioned_rice_contents[!_best_subframe]
 									);
-								if (_candidate_bits > 0) { /* if == 0, there was a problem quantizing the lpcoeffs */
+								if (_candidate_bits > 0) { // if == 0, there was a problem quantizing the lpcoeffs
 									if (_candidate_bits < _best_bits) {
 										_best_subframe = !_best_subframe;
 										_best_bits = _candidate_bits;
@@ -1782,7 +1749,7 @@ private boolean processSubframe(int min_partition_order,
 		}
 	}
 
-	/* under rare circumstances this can happen when all but lpc subframe types are disabled: */
+	// under rare circumstances this can happen when all but lpc subframe types are disabled:
 	if (_best_bits == UINT_MAX) {
 		ASSERT(_best_subframe == 0);
 		_best_bits = evaluateVerbatimSubframe(integer_signal, frame_header.blocksize, subframe_bps, subframe[_best_subframe]);
@@ -1793,7 +1760,9 @@ private boolean processSubframe(int min_partition_order,
 
 	return true;
 }
+*/
 
+/*
 private boolean addSubframe(Header frame_header, int subframe_bps, ChannelBase subframe, BitBuffer frame) {
 	switch(subframe->type) {
 		case SUBFRAME_TYPE_CONSTANT:
@@ -1826,14 +1795,18 @@ private boolean addSubframe(Header frame_header, int subframe_bps, ChannelBase s
 
 	return true;
 }
+*/
 
+/*
 private int evaluateConstantSubframe(int signal, int subframe_bps, ChannelBase subframe) {
 	subframe->type = SUBFRAME_TYPE_CONSTANT;
 	subframe->data.constant.value = signal;
 
 	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + subframe_bps;
 }
+*/
 
+/*
 private int evaluateFixedSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int blocksize, int subframe_bps, int order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
 	unsigned i, residual_bits;
 	unsigned residual_samples = blocksize - order;
@@ -1870,14 +1843,16 @@ private int evaluateFixedSubframe(int[] signal, int[] residual, int[] abs_residu
 
 	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (order * subframe_bps) + residual_bits;
 }
+*/
 
+/*
 private int evaluateLPCSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, double[] lp_coeff, int blocksize, int subframe_bps, int order, int qlp_coeff_precision, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
 	int[] qlp_coeff = new int[MAX_LPC_ORDER];
 	int i, residual_bits;
 	int quantization, ret;
 	int residual_samples = blocksize - order;
 
-	/* try to keep qlp coeff precision such that only 32-bit math is required for decode of <=16bps streams */
+	// try to keep qlp coeff precision such that only 32-bit math is required for decode of <=16bps streams
 	if (subframe_bps <= 16) {
 		ASSERT(order > 0);
 		ASSERT(order <= MAX_LPC_ORDER);
@@ -1886,7 +1861,7 @@ private int evaluateLPCSubframe(int[] signal, int[] residual, int[] abs_residual
 
 	ret = lpc_quantize_coefficients(lp_coeff, order, qlp_coeff_precision, qlp_coeff, quantization);
 	if (ret != 0)
-		return 0; /* this is a hack to indicate to the caller that we can't do lp at this order on this subframe */
+		return 0; // this is a hack to indicate to the caller that we can't do lp at this order on this subframe
 
 	if (subframe_bps + qlp_coeff_precision + bitmath_ilog2(order) <= 32)
 		if (subframe_bps <= 16 && qlp_coeff_precision <= 16)
@@ -1929,14 +1904,18 @@ private int evaluateLPCSubframe(int[] signal, int[] residual, int[] abs_residual
 
 	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN + SUBFRAME_LPC_QLP_SHIFT_LEN + (order * (qlp_coeff_precision + subframe_bps)) + residual_bits;
 }
+*/
 
+/*
 private int evaluateVerbatimSubframe(int[] signal, int blocksize, int subframe_bps, ChannelVerbatim subframe) {
 
 	subframe.data = signal;
 
 	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (blocksize * subframe_bps);
 }
+*/
 
+/*
 private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int residual_samples, int predictor_order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, EntropyPartitionedRice best_partitioned_rice) {
 	int r;
 	unsigned residual_bits, best_residual_bits = 0;
@@ -1944,7 +1923,7 @@ private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] ab
 	unsigned best_parameters_index = 0;
 	unsigned blocksize = residual_samples + predictor_order;
 
-	/* compute abs(residual) for use later */
+	// compute abs(residual) for use later
 	for(residual_sample = 0; residual_sample < residual_samples; residual_sample++) {
 		r = residual[residual_sample];
 		abs_residual[residual_sample] = (uint32)(r<0? -r : r);
@@ -2016,10 +1995,7 @@ private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] ab
 		}
 	}
 
-	/*
-	 * We are allowed to de-the pointer based on our special knowledge;
-	 * it is to the outside world.
-	 */
+	// We are allowed to de-the pointer based on our special knowledge; it is to the outside world.
 	{
 		EntropyPartitionedRiceContents best_partitioned_rice_contents = (EntropyPartitionedRiceContents)best_partitioned_rice->contents;
 		format_entropy_coding_method_partitioned_rice_contents_ensure_size(best_partitioned_rice_contents, max(6, best_partitioned_rice->order));
@@ -2029,7 +2005,9 @@ private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] ab
 
 	return best_residual_bits;
 }
+*/
 
+/*
 private void precomputePartitionInfoSums(
 	int[] abs_residual,
 	long[] abs_residual_partition_sums,
@@ -2043,7 +2021,7 @@ private void precomputePartitionInfoSums(
 	unsigned from_partition, to_partition = 0;
 	unsigned blocksize = residual_samples + predictor_order;
 
-	/* first do max_partition_order */
+	// first do max_partition_order
 	for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
 		long abs_residual_partition_sum;
 		int abs_r;
@@ -2067,7 +2045,7 @@ private void precomputePartitionInfoSums(
 		break;
 	}
 
-	/* now merge partitions for lower orders */
+	// now merge partitions for lower orders
 	for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
 		long s;
 		int i;
@@ -2081,7 +2059,9 @@ private void precomputePartitionInfoSums(
 		}
 	}
 }
+*/
 
+/*
 private void precomputePartitionInfoEscapes(
 	int[] residual,
 	int[] raw_bits_per_partition,
@@ -2095,7 +2075,7 @@ private void precomputePartitionInfoEscapes(
 	unsigned from_partition, to_partition = 0;
 	unsigned blocksize = residual_samples + predictor_order;
 
-	/* first do max_partition_order */
+	// first do max_partition_order
 	for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
 		int r, residual_partition_min, residual_partition_max;
 		int silog2_min, silog2_max;
@@ -2124,7 +2104,7 @@ private void precomputePartitionInfoEscapes(
 		break;
 	}
 
-	/* now merge partitions for lower orders */
+	// now merge partitions for lower orders
 	for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
 		int m;
 		int i;
@@ -2138,7 +2118,9 @@ private void precomputePartitionInfoEscapes(
 		}
 	}
 }
+*/
 
+/*
 private VARIABLE_RICE_BITS(value, parameter) { return ((value) >> (parameter)); }
 
 boolean set_partitioned_rice_(
@@ -2212,7 +2194,7 @@ boolean set_partitioned_rice_(
 			for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++)
 				mean += abs_residual[residual_sample];
 			residual_sample = save_residual_sample;
-			/* calc rice_parameter ala LOCO-I */
+			// calc rice_parameter ala LOCO-I
 			for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
 				;
 			if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
@@ -2258,7 +2240,9 @@ boolean set_partitioned_rice_(
 	*bits = bits_;
 	return true;
 }
+*/
 
+/*
 boolean set_partitioned_rice_with_precompute_(
 	int[] abs_residual,
 	long[] abs_residual_partition_sums,
@@ -2339,7 +2323,7 @@ boolean set_partitioned_rice_with_precompute_(
 					partition_samples -= predictor_order;
 			}
 			mean = abs_residual_partition_sums[partition];
-			/* calc rice_parameter ala LOCO-I */
+			// calc rice_parameter ala LOCO-I
 			for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
 				;
 			if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
@@ -2393,7 +2377,9 @@ boolean set_partitioned_rice_with_precompute_(
 	*bits = bits_;
 	return true;
 }
+*/
 
+/*
 private int getWastedBits(int[] signal, int samples) {
 	int i, shift;
 	int x = 0;
@@ -2416,7 +2402,9 @@ private int getWastedBits(int[] signal, int samples) {
 
 	return shift;
 }
+*/
 
+/*
 private void appendToVerifyFifo(verify_input_fifo fifo, int[][] input, int input_offset, unsigned channels, unsigned wide_samples) {
 	unsigned channel;
 
@@ -2437,6 +2425,7 @@ private void appendToVerifyFifoInterleaved(verify_input_fifo fifo, int input[], 
 	}
 	fifo.tail = tail;
 }
+*/
 
 /*
 StreamDecoderReadStatus verify_read_callback_(StreamDecoder decoder, byte buffer[], unsigned *bytes, void *client_data)
