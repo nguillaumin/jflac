@@ -25,6 +25,7 @@ package org.kc7bfi.jflac.util;
  * @author kc7bfi
  */
 public class ByteData {
+    private static final int DEFAULT_BUFFER_SIZE = 256;
     
     /** The byte array where data is stored. */
     private byte[] data;
@@ -37,6 +38,7 @@ public class ByteData {
      * @param maxSpace  The maximum space in the internal byte array.
      */
     public ByteData(int maxSpace) {
+        if (maxSpace <= 0) maxSpace = DEFAULT_BUFFER_SIZE;
         data = new byte[maxSpace];
         len = 0;
     }

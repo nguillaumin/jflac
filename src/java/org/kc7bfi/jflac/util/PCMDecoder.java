@@ -23,7 +23,6 @@ package org.kc7bfi.jflac.util;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
-import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 

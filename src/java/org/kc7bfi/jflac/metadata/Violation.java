@@ -20,22 +20,42 @@ package org.kc7bfi.jflac.metadata;
  * Boston, MA  02111-1307, USA.
  */
 
+/**
+ * Meta data format violation exception.
+ * @author kc7bfi
+ */
 public class Violation extends Exception {
 
+    /**
+     * Constructor.
+     */
     public Violation() {
         super();
     }
 
-    public Violation(String arg0) {
-        super(arg0);
+    /**
+     * Constructor.
+     * @param msg   The error message
+     */
+    public Violation(String msg) {
+        super(msg);
     }
 
-    public Violation(Throwable arg0) {
-        super(arg0);
+    /**
+     * Constructor.
+     * @param err   The causing exception
+     */
+    public Violation(Throwable err) {
+        super(err);
     }
 
-    public Violation(String arg0, Throwable arg1) {
-        super(arg0, arg1);
+    /**
+     * Constructor.
+     * @param msg   The error message
+     * @param err   The causing exception
+     */
+    public Violation(String msg, Throwable err) {
+        super(msg, err);
     }
 
 }
