@@ -476,7 +476,8 @@ public class StreamDecoder {
     }
     
     private void frameSync() throws IOException {
-        boolean first = true;int cnt=0;
+        boolean first = true;
+        int cnt=0;
         
         // If we know the total number of samples in the stream, stop if we've read that many.
         // This will stop us, for example, from wasting time trying to sync on an ID3V1 tag.
@@ -509,7 +510,7 @@ public class StreamDecoder {
             }
             if (first) {
                 callErrorListeners("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
-                if (cnt++ > 16) first = false;
+                first = false;
             }
         }
     }
@@ -604,19 +605,18 @@ public class StreamDecoder {
             default :
                 break;
             }
+            
+            gotAFrame = true;
         } else {
-            /* Bad frame, emit error and zero the output signal */
-            callErrorListeners("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(frame.crc));
+            // Bad frame, emit error and zero the output signal
+            callErrorListeners("CRC Error: " + Integer.toHexString((frameCRC & 0xffff)) + " vs " + Integer.toHexString((frame.crc & 0xffff)));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].getOutput()[j] = 0;
-                // memset(output[channel], 0, sizeof(int32) * frame.header.blocksize);
             }
         }
         
-        gotAFrame = true;
-        
-        /* put the latest values into the public section of the decoder instance */
+        // put the latest values into the public section of the decoder instance
         channels = frame.header.channels;
         channelAssignment = frame.header.channelAssignment;
         bitsPerSample = frame.header.bitsPerSample;
@@ -626,7 +626,7 @@ public class StreamDecoder {
         samplesDecoded = frame.header.sampleNumber + frame.header.blockSize;
         
         state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
-        return true;// gotAFrame;
+        return gotAFrame;
     }
     
     private void readSubframe(int channel, int bps) throws IOException {
