@@ -540,21 +540,24 @@ public class FLACDecoder {
      * @throws IOException  On read error
      */
     private void readStreamSync() throws IOException {
-        int id;
-        for (int i = id = 0; i < 4;) {
+        int id = 0;
+        for (int i = 0; i < 4;) {
             int x = bitStream.readRawUInt(8);
             if (x == Constants.STREAM_SYNC_STRING[i]) {
                 i++;
                 id = 0;
-                continue;
-            }
-            if (x == ID3V2_TAG[id]) {
+            } else if (x == ID3V2_TAG[id]) {
                 id++;
                 i = 0;
-                if (id == 3) skipID3v2Tag();
-                continue;
+                if (id == 3) {
+                    skipID3v2Tag();
+                    id = 0;
+                }
+            } else {
+                throw new IOException("Could not find Stream Sync");
+                //i = 0;
+                //id = 0;
             }
-            i = 0;
         }
     }
     
@@ -596,7 +599,9 @@ public class FLACDecoder {
     private void skipID3v2Tag() throws IOException {
         
         // skip the version and flags bytes 
-        bitStream.readRawUInt(24);
+        int verMajor = bitStream.readRawInt(8);
+        int verMinor = bitStream.readRawInt(8);
+        int flags = bitStream.readRawInt(8);
         
         // get the size (in bytes) to skip
         int skip = 0;
