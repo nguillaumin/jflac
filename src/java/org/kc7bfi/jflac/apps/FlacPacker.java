@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -22,9 +23,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
+import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.StreamDecoder;
 import org.kc7bfi.jflac.metadata.SeekPoint;
+import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.util.OutputBitStream;
 
 
 /**
@@ -35,7 +39,7 @@ public class FlacPacker extends JFrame {
     
     private JTextArea textArea = new JTextArea(16, 50);
     private JButton addButton = new JButton("Add Files");
-    private JButton makeButton = new JButton("Make Album");
+    private JButton makeButton = new JButton("Pack FLAC");
     
     private ArrayList flacFiles = new ArrayList();
     private ArrayList albumFiles = new ArrayList();
@@ -71,7 +75,12 @@ public class FlacPacker extends JFrame {
         
         makeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                makeAlbum();
+                try {
+                    packFlac();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -89,7 +98,19 @@ public class FlacPacker extends JFrame {
         for (int i = 0; i < files.length; i++) flacFiles.add(files[i]);
     }
     
-    private void makeAlbum() {
+    private File getOutputFile() {
+        JFileChooser chooser = new JFileChooser();
+        ExtensionFileFilter filter = new ExtensionFileFilter();
+        filter.addExtension("flac");
+        filter.setDescription("FLAC files");
+        chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(this);
+        if(returnVal != JFileChooser.APPROVE_OPTION) return null;
+        File file = chooser.getSelectedFile();
+        return file;
+    }
+    
+    private SeekTable makeSeekTable() {
         long lastSampleNumber = 0;
         long lastStreamOffset = 0;
         
@@ -97,6 +118,7 @@ public class FlacPacker extends JFrame {
         for (int i = 0; i < flacFiles.size(); i++) {
             File file = (File)flacFiles.get(i);
             try {
+                System.out.print("SeekTable select " + i);
                 FileInputStream is = new FileInputStream(file);
                 StreamDecoder decoder = new StreamDecoder(is);
                 decoder.processMetadata();
@@ -123,12 +145,41 @@ public class FlacPacker extends JFrame {
         SeekPoint[] points = new SeekPoint[albumFiles.size()];
         for (int i = 0; i < albumFiles.size(); i++) {
             AlbumFile aFile = (AlbumFile)albumFiles.get(i);
+            System.out.print("SeekTable build " + i);
             points[i] = aFile.seekPoint;
         }
+        
+        return new SeekTable(points);
+    }
+    
+    private void packFlac() throws IOException {
+        // get output file
+        File outFile = getOutputFile();
+        if (outFile == null) return;
+        OutputBitStream os = null;
+        try {
+            os = new OutputBitStream(new FileOutputStream(outFile));
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+            return;
+        }
+        
+        // get seek table
+        SeekTable seekTable = makeSeekTable();
+        if (masterStreamInfo == null) return;
+        
+        // output StreamInfo
+        System.out.println("Write header");
+        os.writeByteBlock(Constants.STREAM_SYNC_STRING, Constants.STREAM_SYNC_STRING.length);
+        System.out.println("Write SI");
+        masterStreamInfo.write(os, false);
+        System.out.println("Rest");
+        // output SeekTable
         
         // generate output file
         for (int i = 0; i < albumFiles.size(); i++) {
             AlbumFile aFile = (AlbumFile)albumFiles.get(i);
+            System.out.println("Process file " + i + ": " + aFile.file);
             try {
                 FileInputStream is = new FileInputStream(aFile.file);
                 StreamDecoder decoder = new StreamDecoder(is);

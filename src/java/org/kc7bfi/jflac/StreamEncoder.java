@@ -42,62 +42,62 @@ public class StreamEncoder {
     private static final int ENCODER_IN_AUDIO = 2;
     
     // stream encoder states
-
+    
     private static final int STREAM_ENCODER_OK = 0;
     /**< The encoder is in the normal OK state. */
-
+    
     private static final int STREAM_ENCODER_VERIFY_DECODER_ERROR = 1;
     /**< An error occurred in the underlying verify stream decoder;
      * check stream_encoder_get_verify_decoder_state().
      */
-
+    
     private static final int STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA = 2;
     /**< The verify decoder detected a mismatch between the original
      * audio signal and the decoded audio signal.
      */
-
+    
     private static final int STREAM_ENCODER_INVALID_CALLBACK = 3;
     /**< The encoder was initialized before setting all the required callbacks. */
-
+    
     private static final int STREAM_ENCODER_INVALID_NUMBER_OF_CHANNELS = 4;
     /**< The encoder has an invalid setting for number of channels. */
-
+    
     private static final int STREAM_ENCODER_INVALID_BITS_PER_SAMPLE = 5;
     /**< The encoder has an invalid setting for bits-per-sample.
      * FLAC supports 4-32 bps but the reference encoder currently supports
      * only up to 24 bps.
      */
-
+    
     private static final int STREAM_ENCODER_INVALID_SAMPLE_RATE = 6;
     /**< The encoder has an invalid setting for the input sample rate. */
-
+    
     private static final int STREAM_ENCODER_INVALID_BLOCK_SIZE = 7;
     /**< The encoder has an invalid setting for the block size. */
-
+    
     private static final int STREAM_ENCODER_INVALID_MAX_LPC_ORDER = 8;
     /**< The encoder has an invalid setting for the maximum LPC order. */
-
+    
     private static final int STREAM_ENCODER_INVALID_QLP_COEFF_PRECISION = 9;
     /**< The encoder has an invalid setting for the precision of the quantized linear predictor coefficients. */
-
+    
     private static final int STREAM_ENCODER_MID_SIDE_CHANNELS_MISMATCH = 10;
     /**< Mid/side coding was specified but the number of channels is not equal to 2. */
-
+    
     private static final int STREAM_ENCODER_MID_SIDE_SAMPLE_SIZE_MISMATCH = 11;
     /**< Deprecated. */
-
+    
     private static final int STREAM_ENCODER_ILLEGAL_MID_SIDE_FORCE = 12;
     /**< Loose mid/side coding was specified but mid/side coding was not. */
-
+    
     private static final int STREAM_ENCODER_BLOCK_SIZE_TOO_SMALL_FOR_LPC_ORDER = 13;
     /**< The specified block size is less than the maximum LPC order. */
-
+    
     private static final int STREAM_ENCODER_NOT_STREAMABLE = 14;
     /**< The encoder is bound to the "streamable subset" but other settings violate it. */
-
+    
     private static final int STREAM_ENCODER_FRAMING_ERROR = 15;
     /**< An error occurred while writing the stream; usually, the write_callback returned an error. */
-
+    
     private static final int STREAM_ENCODER_INVALID_METADATA = 16;
     /**< The metadata input to the encoder is invalid, in one of the following ways:
      * - stream_encoder_set_metadata() was called with a null pointer but a block count > 0
@@ -106,22 +106,22 @@ public class StreamEncoder {
      * - It contains an illegal SEEKTABLE as checked by format_seektable_is_legal()
      * - It contains more than one SEEKTABLE block or more than one VORBIS_COMMENT block
      */
-
+    
     private static final int STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING = 17;
     /**< An error occurred while writing the stream; usually, the write_callback returned an error. */
-
+    
     private static final int STREAM_ENCODER_FATAL_ERROR_WHILE_WRITING = 18;
     /**< The write_callback returned an error. */
-
+    
     private static final int STREAM_ENCODER_MEMORY_ALLOCATION_ERROR = 19;
     /**< Memory allocation failed. */
-
+    
     private static final int STREAM_ENCODER_ALREADY_INITIALIZED = 20;
     /**< stream_encoder_init() was called when the encoder was
      * already initialized, usually because
      * stream_encoder_finish() was not called.
      */
-
+    
     private static final int STREAM_ENCODER_UNINITIALIZED = 21;
     /**< The encoder is in the uninitialized state. */
     
@@ -240,7 +240,7 @@ public class StreamEncoder {
     int num_metadata_blocks;
     
     // private
-
+    
     /***********************************************************************
      *
      * Public static class data
@@ -288,34 +288,34 @@ public class StreamEncoder {
         is_being_deleted = false;
         
         /*
-        for (int i = 0; i < Constants.MAX_CHANNELS; i++) {
-            encoder->private_->subframe_workspace_ptr[i][0] = &encoder->private_->subframe_workspace[i][0];
-            encoder->private_->subframe_workspace_ptr[i][1] = &encoder->private_->subframe_workspace[i][1];
-        }
-        for(i = 0; i < 2; i++) {
-            encoder->private_->subframe_workspace_ptr_mid_side[i][0] = &encoder->private_->subframe_workspace_mid_side[i][0];
-            encoder->private_->subframe_workspace_ptr_mid_side[i][1] = &encoder->private_->subframe_workspace_mid_side[i][1];
-        }
-        for(i = 0; i < Constants.MAX_CHANNELS; i++) {
-            encoder->private_->partitioned_rice_contents_workspace_ptr[i][0] = &encoder->private_->partitioned_rice_contents_workspace[i][0];
-            encoder->private_->partitioned_rice_contents_workspace_ptr[i][1] = &encoder->private_->partitioned_rice_contents_workspace[i][1];
-        }
-        for(i = 0; i < 2; i++) {
-            encoder->private_->partitioned_rice_contents_workspace_ptr_mid_side[i][0] = &encoder->private_->partitioned_rice_contents_workspace_mid_side[i][0];
-            encoder->private_->partitioned_rice_contents_workspace_ptr_mid_side[i][1] = &encoder->private_->partitioned_rice_contents_workspace_mid_side[i][1];
-        }
-        
-        for(i = 0; i < Constants.MAX_CHANNELS; i++) {
-            format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace[i][0]);
-            format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace[i][1]);
-        }
-        for(i = 0; i < 2; i++) {
-            format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace_mid_side[i][0]);
-            format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace_mid_side[i][1]);
-        }
-        for(i = 0; i < 2; i++)
-            format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_extra[i]);
-        */
+         for (int i = 0; i < Constants.MAX_CHANNELS; i++) {
+         encoder->private_->subframe_workspace_ptr[i][0] = &encoder->private_->subframe_workspace[i][0];
+         encoder->private_->subframe_workspace_ptr[i][1] = &encoder->private_->subframe_workspace[i][1];
+         }
+         for(i = 0; i < 2; i++) {
+         encoder->private_->subframe_workspace_ptr_mid_side[i][0] = &encoder->private_->subframe_workspace_mid_side[i][0];
+         encoder->private_->subframe_workspace_ptr_mid_side[i][1] = &encoder->private_->subframe_workspace_mid_side[i][1];
+         }
+         for(i = 0; i < Constants.MAX_CHANNELS; i++) {
+         encoder->private_->partitioned_rice_contents_workspace_ptr[i][0] = &encoder->private_->partitioned_rice_contents_workspace[i][0];
+         encoder->private_->partitioned_rice_contents_workspace_ptr[i][1] = &encoder->private_->partitioned_rice_contents_workspace[i][1];
+         }
+         for(i = 0; i < 2; i++) {
+         encoder->private_->partitioned_rice_contents_workspace_ptr_mid_side[i][0] = &encoder->private_->partitioned_rice_contents_workspace_mid_side[i][0];
+         encoder->private_->partitioned_rice_contents_workspace_ptr_mid_side[i][1] = &encoder->private_->partitioned_rice_contents_workspace_mid_side[i][1];
+         }
+         
+         for(i = 0; i < Constants.MAX_CHANNELS; i++) {
+         format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace[i][0]);
+         format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace[i][1]);
+         }
+         for(i = 0; i < 2; i++) {
+         format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace_mid_side[i][0]);
+         format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_workspace_mid_side[i][1]);
+         }
+         for(i = 0; i < 2; i++)
+         format_entropy_coding_method_partitioned_rice_contents_init(&encoder->private_->partitioned_rice_contents_extra[i]);
+         */
         
         state = STREAM_ENCODER_UNINITIALIZED;
     }
@@ -748,1164 +748,1164 @@ public class StreamEncoder {
      */
     
     public void setVerify(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	verify = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        verify = value;
     }
     
     public void setStreamableSubset(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	streamable_subset = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        streamable_subset = value;
     }
     
     public void setDoMidSideStereo(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	do_mid_side_stereo = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        do_mid_side_stereo = value;
     }
     
     public void setLooseMidSideStereo(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	loose_mid_side_stereo = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        loose_mid_side_stereo = value;
     }
     
     public void setChannels(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	channels = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        channels = value;
     }
     
     public void setBitsPerSample(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	bits_per_sample = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        bits_per_sample = value;
     }
     
     public void setSampleRate(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	sample_rate = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        sample_rate = value;
     }
     
     public void setBlocksize(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	blocksize = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        blocksize = value;
     }
     
     public void setMaxLPCOrder(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	max_lpc_order = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        max_lpc_order = value;
     }
     
     public void setQLPCoeffPrecision(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	qlp_coeff_precision = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        qlp_coeff_precision = value;
     }
     
     public void setDoQLPCoeffPrecSearch(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	do_qlp_coeff_prec_search = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        do_qlp_coeff_prec_search = value;
     }
     
     public void setDoExhaustiveModelSearch(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	do_exhaustive_model_search = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        do_exhaustive_model_search = value;
     }
     
     public void setMinResidualPartitionOrder(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	min_residual_partition_order = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        min_residual_partition_order = value;
     }
     
     public void setMaxResidualPartitionOrder(int value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	max_residual_partition_order = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        max_residual_partition_order = value;
     }
     
     public void setTotalSamplesEstimate(long value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	total_samples_estimate = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        total_samples_estimate = value;
     }
-
-/*
-public void set_metadata(StreamMetadata **metadata, int num_blocks) {
-	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-	metadata = metadata;
-	num_metadata_blocks = num_blocks;
-}
-*/
-
-/*
-boolean set_write_callback(StreamEncoderWriteCallback value)
-{
-	ASSERT(0 != encoder);
-	ASSERT(0 != value);
-	if (state != STREAM_ENCODER_UNINITIALIZED)
-		return false;
-	encoder->private_->write_callback = value;
-	return true;
-}
-*/
-
-/*
-boolean set_metadata_callback(StreamEncoderMetadataCallback value)
-{
-	ASSERT(0 != encoder);
-	ASSERT(0 != value);
-	if (state != STREAM_ENCODER_UNINITIALIZED)
-		return false;
-	encoder->private_->metadata_callback = value;
-	return true;
-}
-*/
-
-/*
-boolean set_client_data(void *value)
-{
-	ASSERT(0 != encoder);
-	if (state != STREAM_ENCODER_UNINITIALIZED)
-		return false;
-	encoder->private_->client_data = value;
-	return true;
-}
-*/
-
-/*
- * These three functions are not static, but not publically exposed in
- * include/FLAC/ either.  They are used by the test suite.
- */
+    
+    /*
+     public void set_metadata(StreamMetadata **metadata, int num_blocks) {
+     if (state != STREAM_ENCODER_UNINITIALIZED) return;
+     metadata = metadata;
+     num_metadata_blocks = num_blocks;
+     }
+     */
+    
+    /*
+     boolean set_write_callback(StreamEncoderWriteCallback value)
+     {
+     ASSERT(0 != encoder);
+     ASSERT(0 != value);
+     if (state != STREAM_ENCODER_UNINITIALIZED)
+     return false;
+     encoder->private_->write_callback = value;
+     return true;
+     }
+     */
+    
+    /*
+     boolean set_metadata_callback(StreamEncoderMetadataCallback value)
+     {
+     ASSERT(0 != encoder);
+     ASSERT(0 != value);
+     if (state != STREAM_ENCODER_UNINITIALIZED)
+     return false;
+     encoder->private_->metadata_callback = value;
+     return true;
+     }
+     */
+    
+    /*
+     boolean set_client_data(void *value)
+     {
+     ASSERT(0 != encoder);
+     if (state != STREAM_ENCODER_UNINITIALIZED)
+     return false;
+     encoder->private_->client_data = value;
+     return true;
+     }
+     */
+    
+    /*
+     * These three functions are not static, but not publically exposed in
+     * include/FLAC/ either.  They are used by the test suite.
+     */
     public void disableConstantSubframes(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	disable_constant_subframes = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        disable_constant_subframes = value;
     }
     
     public void disableFixedSubframes(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	disable_fixed_subframes = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        disable_fixed_subframes = value;
     }
     
     public void disableVerbatimSubframes(boolean value) {
-    	if (state != STREAM_ENCODER_UNINITIALIZED) return;
-    	disable_verbatim_subframes = value;
+        if (state != STREAM_ENCODER_UNINITIALIZED) return;
+        disable_verbatim_subframes = value;
     }
     
     public int getState() {
-    	return state;
+        return state;
     }
-
-/*
-public int getVerifyDecoderState() {
-	if (verify)
-		return stream_decoder_get_state(verify.decoder);
-	else
-		return STREAM_DECODER_UNINITIALIZED;
-}
-*/
-
-/*
-char *get_resolved_state_string(StreamEncoder *encoder)
-{
-	if (state != STREAM_ENCODER_VERIFY_DECODER_ERROR)
-		return StreamEncoderStateString[state];
-	else
-		return StreamDecoderStateString[stream_decoder_get_state(verify.decoder)];
-}
-*/
-
-/*
-void get_verify_decoder_error_stats(StreamEncoder *encoder, uint64 *absolute_sample, unsigned *frame_number, unsigned *channel, unsigned *sample, int *expected, int *got)
-{
-	ASSERT(0 != encoder);
-	if (0 != absolute_sample)
-		*absolute_sample = verify.error_stats.absolute_sample;
-	if (0 != frame_number)
-		*frame_number = verify.error_stats.frame_number;
-	if (0 != channel)
-		*channel = verify.error_stats.channel;
-	if (0 != sample)
-		*sample = verify.error_stats.sample;
-	if (0 != expected)
-		*expected = verify.error_stats.expected;
-	if (0 != got)
-		*got = verify.error_stats.got;
-}
-*/
+    
+    /*
+     public int getVerifyDecoderState() {
+     if (verify)
+     return stream_decoder_get_state(verify.decoder);
+     else
+     return STREAM_DECODER_UNINITIALIZED;
+     }
+     */
+    
+    /*
+     char *get_resolved_state_string(StreamEncoder *encoder)
+     {
+     if (state != STREAM_ENCODER_VERIFY_DECODER_ERROR)
+     return StreamEncoderStateString[state];
+     else
+     return StreamDecoderStateString[stream_decoder_get_state(verify.decoder)];
+     }
+     */
+    
+    /*
+     void get_verify_decoder_error_stats(StreamEncoder *encoder, uint64 *absolute_sample, unsigned *frame_number, unsigned *channel, unsigned *sample, int *expected, int *got)
+     {
+     ASSERT(0 != encoder);
+     if (0 != absolute_sample)
+     *absolute_sample = verify.error_stats.absolute_sample;
+     if (0 != frame_number)
+     *frame_number = verify.error_stats.frame_number;
+     if (0 != channel)
+     *channel = verify.error_stats.channel;
+     if (0 != sample)
+     *sample = verify.error_stats.sample;
+     if (0 != expected)
+     *expected = verify.error_stats.expected;
+     if (0 != got)
+     *got = verify.error_stats.got;
+     }
+     */
     
     public boolean getVerify() {
-    	return verify;
+        return verify;
     }
     
     public boolean getStreamableSubset() {
-    	return streamable_subset;
+        return streamable_subset;
     }
     
     public boolean getDoMidSideStereo() {
-    	return do_mid_side_stereo;
+        return do_mid_side_stereo;
     }
     
     public boolean getLooseMidSideStereo() {
-    	return loose_mid_side_stereo;
+        return loose_mid_side_stereo;
     }
     
     public int getChannels() {
-    	return channels;
+        return channels;
     }
     
     public int getBitsPerSample() {
-    	return bits_per_sample;
+        return bits_per_sample;
     }
     
     public int getSampleRate() {
-    	return sample_rate;
+        return sample_rate;
     }
     
     public int getBlocksize() {
-    	return blocksize;
+        return blocksize;
     }
     
     public int getMaxLPCOrder() {
-    	return max_lpc_order;
+        return max_lpc_order;
     }
     
     public int getQLPCoeffPrecision() {
-    	return qlp_coeff_precision;
+        return qlp_coeff_precision;
     }
     
     public boolean getDoQLPCoeffPrecSearch() {
-    	return do_qlp_coeff_prec_search;
+        return do_qlp_coeff_prec_search;
     }
     
     public boolean getDoEscapeCoding() {
-    	return do_escape_coding;
+        return do_escape_coding;
     }
     
     public boolean getDoExhaustiveModelSearch() {
-    	return do_exhaustive_model_search;
+        return do_exhaustive_model_search;
     }
     
     public int getMinResidualPartitionOrder() {
-    	return min_residual_partition_order;
+        return min_residual_partition_order;
     }
     
     public int getMaxResidualPartitionOrder() {
-    	return max_residual_partition_order;
+        return max_residual_partition_order;
     }
     
     public int getRiceParameterSearchDist() {
-    	return rice_parameter_search_dist;
+        return rice_parameter_search_dist;
     }
     
     public long getTotalSamplesEstimate() {
-    	return total_samples_estimate;
+        return total_samples_estimate;
     }
-
-/*
-public boolean process(int * buffer[], unsigned samples)
-{
-	unsigned i, j, channel;
-	int x, mid, side;
-	int channels = channels, blocksize = blocksize;
-
-	ASSERT(0 != encoder);
-	ASSERT(state == STREAM_ENCODER_OK);
-
-	j = 0;
-	if (do_mid_side_stereo && channels == 2) {
-		do {
-			if (verify)
-				append_to_verify_fifo_(&verify.input_fifo, buffer, j, channels, min(blocksize-current_sample_number, samples-j));
-
-			for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
-				x = mid = side = buffer[0][j];
-				integer_signal[0][i] = x;
-				real_signal[0][i] = (double)x;
-				x = buffer[1][j];
-				integer_signal[1][i] = x;
-				real_signal[1][i] = (double)x;
-				mid += x;
-				side -= x;
-				mid >>= 1; // NOTE: not the same as 'mid = (buffer[0][j] + buffer[1][j]) / 2' ! 
-				integer_signal_mid_side[1][i] = side;
-				integer_signal_mid_side[0][i] = mid;
-				real_signal_mid_side[1][i] = (double)side;
-				real_signal_mid_side[0][i] = (double)mid;
-				current_sample_number++;
-			}
-			if (i == blocksize) {
-				if (!process_frame_(false)) // false => not last frame 
-					return false;
-			}
-		} while(j < samples);
-	}
-	else {
-		do {
-			if (verify)
-				append_to_verify_fifo_(&verify.input_fifo, buffer, j, channels, min(blocksize-current_sample_number, samples-j));
-
-			for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
-				for(channel = 0; channel < channels; channel++) {
-					x = buffer[channel][j];
-					integer_signal[channel][i] = x;
-					real_signal[channel][i] = (double)x;
-				}
-				current_sample_number++;
-			}
-			if (i == blocksize) {
-				if (!process_frame_(false)) // false => not last frame
-					return false;
-			}
-		} while(j < samples);
-	}
-
-	return true;
-}
-*/
-
-/*
-public boolean process_interleaved(int[] buffer, int samples) {
-	int i, j, k, channel;
-	int x, mid, side;
-	int channels = channels, blocksize = blocksize;
-
-	j = k = 0;
-	if (do_mid_side_stereo && channels == 2) {
-		do {
-			if (verify)
-				appendToVerifyFifoInterleaved(verifyData.input_fifo, buffer, j, channels, Math.min(blocksize-current_sample_number, samples-j));
-
-			for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
-				x = mid = side = buffer[k++];
-				integer_signal[0][i] = x;
-				real_signal[0][i] = (double)x;
-				x = buffer[k++];
-				integer_signal[1][i] = x;
-				real_signal[1][i] = (double)x;
-				mid += x;
-				side -= x;
-				mid >>= 1; // NOTE: not the same as 'mid = (left + right) / 2' !
-				integer_signal_mid_side[1][i] = side;
-				integer_signal_mid_side[0][i] = mid;
-				real_signal_mid_side[1][i] = (double)side;
-				real_signal_mid_side[0][i] = (double)mid;
-				current_sample_number++;
-			}
-			if (i == blocksize) {
-				if (!processFrame(false)) // false => not last frame
-					return false;
-			}
-		} while(j < samples);
-	}
-	else {
-		do {
-			if (verify)
-				appendToVerifyFifoInterleaved(verifyData.input_fifo, buffer, j, channels, Math.min(blocksize-current_sample_number, samples-j));
-
-			for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
-				for(channel = 0; channel < channels; channel++) {
-					x = buffer[k++];
-					integer_signal[channel][i] = x;
-					real_signal[channel][i] = (double)x;
-				}
-				current_sample_number++;
-			}
-			if (i == blocksize) {
-				if (!processFrame(false)) // false => not last frame
-					return false;
-			}
-		} while(j < samples);
-	}
-
-	return true;
-}
-*/
-
-/***********************************************************************
- *
- * Private class methods
- *
- ***********************************************************************/
+    
+    /*
+     public boolean process(int * buffer[], unsigned samples)
+     {
+     unsigned i, j, channel;
+     int x, mid, side;
+     int channels = channels, blocksize = blocksize;
+     
+     ASSERT(0 != encoder);
+     ASSERT(state == STREAM_ENCODER_OK);
+     
+     j = 0;
+     if (do_mid_side_stereo && channels == 2) {
+     do {
+     if (verify)
+     append_to_verify_fifo_(&verify.input_fifo, buffer, j, channels, min(blocksize-current_sample_number, samples-j));
+     
+     for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
+     x = mid = side = buffer[0][j];
+     integer_signal[0][i] = x;
+     real_signal[0][i] = (double)x;
+     x = buffer[1][j];
+     integer_signal[1][i] = x;
+     real_signal[1][i] = (double)x;
+     mid += x;
+     side -= x;
+     mid >>= 1; // NOTE: not the same as 'mid = (buffer[0][j] + buffer[1][j]) / 2' ! 
+     integer_signal_mid_side[1][i] = side;
+     integer_signal_mid_side[0][i] = mid;
+     real_signal_mid_side[1][i] = (double)side;
+     real_signal_mid_side[0][i] = (double)mid;
+     current_sample_number++;
+     }
+     if (i == blocksize) {
+     if (!process_frame_(false)) // false => not last frame 
+     return false;
+     }
+     } while(j < samples);
+     }
+     else {
+     do {
+     if (verify)
+     append_to_verify_fifo_(&verify.input_fifo, buffer, j, channels, min(blocksize-current_sample_number, samples-j));
+     
+     for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
+     for(channel = 0; channel < channels; channel++) {
+     x = buffer[channel][j];
+     integer_signal[channel][i] = x;
+     real_signal[channel][i] = (double)x;
+     }
+     current_sample_number++;
+     }
+     if (i == blocksize) {
+     if (!process_frame_(false)) // false => not last frame
+     return false;
+     }
+     } while(j < samples);
+     }
+     
+     return true;
+     }
+     */
+    
+    /*
+     public boolean process_interleaved(int[] buffer, int samples) {
+     int i, j, k, channel;
+     int x, mid, side;
+     int channels = channels, blocksize = blocksize;
+     
+     j = k = 0;
+     if (do_mid_side_stereo && channels == 2) {
+     do {
+     if (verify)
+     appendToVerifyFifoInterleaved(verifyData.input_fifo, buffer, j, channels, Math.min(blocksize-current_sample_number, samples-j));
+     
+     for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
+     x = mid = side = buffer[k++];
+     integer_signal[0][i] = x;
+     real_signal[0][i] = (double)x;
+     x = buffer[k++];
+     integer_signal[1][i] = x;
+     real_signal[1][i] = (double)x;
+     mid += x;
+     side -= x;
+     mid >>= 1; // NOTE: not the same as 'mid = (left + right) / 2' !
+     integer_signal_mid_side[1][i] = side;
+     integer_signal_mid_side[0][i] = mid;
+     real_signal_mid_side[1][i] = (double)side;
+     real_signal_mid_side[0][i] = (double)mid;
+     current_sample_number++;
+     }
+     if (i == blocksize) {
+     if (!processFrame(false)) // false => not last frame
+     return false;
+     }
+     } while(j < samples);
+     }
+     else {
+     do {
+     if (verify)
+     appendToVerifyFifoInterleaved(verifyData.input_fifo, buffer, j, channels, Math.min(blocksize-current_sample_number, samples-j));
+     
+     for(i = current_sample_number; i < blocksize && j < samples; i++, j++) {
+     for(channel = 0; channel < channels; channel++) {
+     x = buffer[k++];
+     integer_signal[channel][i] = x;
+     real_signal[channel][i] = (double)x;
+     }
+     current_sample_number++;
+     }
+     if (i == blocksize) {
+     if (!processFrame(false)) // false => not last frame
+     return false;
+     }
+     } while(j < samples);
+     }
+     
+     return true;
+     }
+     */
+    
+    /***********************************************************************
+     *
+     * Private class methods
+     *
+     ***********************************************************************/
     
     public void setDefaults() {
-    	
-    	verify = false;
-    	streamable_subset = true;
-    	do_mid_side_stereo = false;
-    	loose_mid_side_stereo = false;
-    	channels = 2;
-    	bits_per_sample = 16;
-    	sample_rate = 44100;
-    	blocksize = 1152;
-    	max_lpc_order = 0;
-    	qlp_coeff_precision = 0;
-    	do_qlp_coeff_prec_search = false;
-    	do_exhaustive_model_search = false;
-    	do_escape_coding = false;
-    	min_residual_partition_order = 0;
-    	max_residual_partition_order = 0;
-    	rice_parameter_search_dist = 0;
-    	total_samples_estimate = 0;
-    	//metadata = null;
-    	num_metadata_blocks = 0;
-    	
-    	disable_constant_subframes = false;
-    	disable_fixed_subframes = false;
-    	disable_verbatim_subframes = false;
-    	//write_callback = 0;
-    	//metadata_callback = 0;
-    	//client_data = 0;
+        
+        verify = false;
+        streamable_subset = true;
+        do_mid_side_stereo = false;
+        loose_mid_side_stereo = false;
+        channels = 2;
+        bits_per_sample = 16;
+        sample_rate = 44100;
+        blocksize = 1152;
+        max_lpc_order = 0;
+        qlp_coeff_precision = 0;
+        do_qlp_coeff_prec_search = false;
+        do_exhaustive_model_search = false;
+        do_escape_coding = false;
+        min_residual_partition_order = 0;
+        max_residual_partition_order = 0;
+        rice_parameter_search_dist = 0;
+        total_samples_estimate = 0;
+        //metadata = null;
+        num_metadata_blocks = 0;
+        
+        disable_constant_subframes = false;
+        disable_fixed_subframes = false;
+        disable_verbatim_subframes = false;
+        //write_callback = 0;
+        //metadata_callback = 0;
+        //client_data = 0;
     }
-
-/*
-void free_()
-{
-	unsigned i, channel;
-
-	ASSERT(0 != encoder);
-	for(i = 0; i < channels; i++) {
-		if (0 != integer_signal_unaligned[i]) {
-			free(integer_signal_unaligned[i]);
-			integer_signal_unaligned[i] = 0;
-		}
-		if (0 != real_signal_unaligned[i]) {
-			free(real_signal_unaligned[i]);
-			real_signal_unaligned[i] = 0;
-		}
-	}
-	for(i = 0; i < 2; i++) {
-		if (0 != integer_signal_mid_side_unaligned[i]) {
-			free(integer_signal_mid_side_unaligned[i]);
-			integer_signal_mid_side_unaligned[i] = 0;
-		}
-		if (0 != real_signal_mid_side_unaligned[i]) {
-			free(real_signal_mid_side_unaligned[i]);
-			real_signal_mid_side_unaligned[i] = 0;
-		}
-	}
-	for(channel = 0; channel < channels; channel++) {
-		for(i = 0; i < 2; i++) {
-			if (0 != residual_workspace_unaligned[channel][i]) {
-				free(residual_workspace_unaligned[channel][i]);
-				residual_workspace_unaligned[channel][i] = 0;
-			}
-		}
-	}
-	for(channel = 0; channel < 2; channel++) {
-		for(i = 0; i < 2; i++) {
-			if (0 != residual_workspace_mid_side_unaligned[channel][i]) {
-				free(residual_workspace_mid_side_unaligned[channel][i]);
-				residual_workspace_mid_side_unaligned[channel][i] = 0;
-			}
-		}
-	}
-	if (0 != abs_residual_unaligned) {
-		free(abs_residual_unaligned);
-		abs_residual_unaligned = 0;
-	}
-	if (0 != abs_residual_partition_sums_unaligned) {
-		free(abs_residual_partition_sums_unaligned);
-		abs_residual_partition_sums_unaligned = 0;
-	}
-	if (0 != raw_bits_per_partition_unaligned) {
-		free(raw_bits_per_partition_unaligned);
-		raw_bits_per_partition_unaligned = 0;
-	}
-	if (verify) {
-		for(i = 0; i < channels; i++) {
-			if (0 != verifyData.input_fifo.data[i]) {
-				free(verifyData.input_fifo.data[i]);
-				verifyData.input_fifo.data[i] = 0;
-			}
-		}
-	}
-	bitbuffer_free(frame);
-}
-*/
-
-/*
-private boolean resize_buffers_(int new_size) {
-	boolean ok;
-	int i, channel;
-
-	// To avoid excessive malloc'ing, we only grow the buffer; no shrinking.
-	if (new_size <= input_capacity) return true;
-
-	ok = true;
-
-	// WATCHOUT: lpc_compute_residual_from_qlp_coefficients_asm_ia32_mmx()
-	// requires that the input arrays (in our case the integer signals)
-	// have a buffer of up to 3 zeroes in front (at negative indices) for
-	// alignment purposes; we use 4 to keep the data well-aligned.
-
-	for(i = 0; ok && i < channels; i++) {
-		ok = ok && memory_alloc_aligned_int32_array(new_size+4, integer_signal_unaligned[i], integer_signal[i]);
-		ok = ok && memory_alloc_aligned_real_array(new_size, real_signal_unaligned[i], real_signal[i]);
-		memset(integer_signal[i], 0, sizeof(int)*4);
-		integer_signal[i] += 4;
-	}
-	for(i = 0; ok && i < 2; i++) {
-		ok = ok && memory_alloc_aligned_int32_array(new_size+4, &integer_signal_mid_side_unaligned[i], &integer_signal_mid_side[i]);
-		ok = ok && memory_alloc_aligned_real_array(new_size, &real_signal_mid_side_unaligned[i], &real_signal_mid_side[i]);
-		memset(integer_signal_mid_side[i], 0, sizeof(int)*4);
-		integer_signal_mid_side[i] += 4;
-	}
-	for(channel = 0; ok && channel < channels; channel++) {
-		for(i = 0; ok && i < 2; i++) {
-			ok = ok && memory_alloc_aligned_int32_array(new_size, &residual_workspace_unaligned[channel][i], &residual_workspace[channel][i]);
-		}
-	}
-	for(channel = 0; ok && channel < 2; channel++) {
-		for(i = 0; ok && i < 2; i++) {
-			ok = ok && memory_alloc_aligned_int32_array(new_size, &residual_workspace_mid_side_unaligned[channel][i], &residual_workspace_mid_side[channel][i]);
-		}
-	}
-	ok = ok && memory_alloc_aligned_uint32_array(new_size, &abs_residual_unaligned, &abs_residual);
-	if (precompute_partition_sums || do_escape_coding) // we require precompute_partition_sums if do_escape_coding because of their intertwined nature
-		ok = ok && memory_alloc_aligned_uint64_array(new_size * 2, &abs_residual_partition_sums_unaligned, &abs_residual_partition_sums);
-	if (do_escape_coding)
-		ok = ok && memory_alloc_aligned_unsigned_array(new_size * 2, &raw_bits_per_partition_unaligned, &raw_bits_per_partition);
-
-	if (ok)
-		input_capacity = new_size;
-	else
-		state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
-
-	return ok;
-}
-*/
-
-/*
-private boolean writeBitBuffer(int samples) {
-	byte[] buffer;
-	unsigned bytes;
-
-	bitbuffer_get_buffer(frame, &buffer, &bytes);
-
-	if (verify) {
-		verifyData.output.data = buffer;
-		verifyData.output.bytes = bytes;
-		if (verifyData.state_hint == ENCODER_IN_MAGIC) {
-			verifyData.needs_magic_hack = true;
-		}
-		else {
-			if (!stream_decoder_process_single(verifyData.decoder)) {
-				bitbuffer_release_buffer(frame);
-				if (state != STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA)
-					state = STREAM_ENCODER_VERIFY_DECODER_ERROR;
-				return false;
-			}
-		}
-	}
-
-	if (write_callback(buffer, bytes, samples, current_frame_number, client_data) != STREAM_ENCODER_WRITE_STATUS_OK) {
-		bitbuffer_release_buffer(frame);
-		state = STREAM_ENCODER_FATAL_ERROR_WHILE_WRITING;
-		return false;
-	}
-
-	bitbuffer_release_buffer(frame);
-
-	if (samples > 0) {
-		metadata.data.stream_info.min_framesize = min(bytes, metadata.data.stream_info.min_framesize);
-		metadata.data.stream_info.max_framesize = max(bytes, metadata.data.stream_info.max_framesize);
-	}
-
-	return true;
-}
-*/
-
-/*
-private boolean processFrame(boolean is_last_frame) {
-
-	// Accumulate raw signal to the MD5 signature
-	if (!MD5Accumulate(&md5context, (int * *)integer_signal, channels, blocksize, (bits_per_sample+7) / 8)) {
-		state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
-		return false;
-	}
-
-	// Process the frame header and subframes into the frame bitbuffer
-	if (!process_subframes_(is_last_frame)) {
-		// the above function sets the state for us in case of an error
-		return false;
-	}
-
-	// Zero-pad the frame to a byte_boundary
-	if (!bitbuffer_zero_pad_to_byte_boundary(frame)) {
-		state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
-		return false;
-	}
-
-	// CRC-16 the whole thing
-	ASSERT(bitbuffer_is_byte_aligned(frame));
-	bitbuffer_write_raw_uint32(frame, bitbuffer_get_write_crc16(frame), FRAME_FOOTER_CRC_LEN);
-
-	// Write it
-	if (!write_bitbuffer_(blocksize)) {
-		// the above function sets the state for us in case of an error
-		return false;
-	}
-
-	// Get ready for the next frame
-	current_sample_number = 0;
-	current_frame_number++;
-	metadata.data.stream_info.total_samples += (uint64)blocksize;
-
-	return true;
-}
-*/
-
-/*
-private boolean processSubframes(boolean is_last_frame) {
-	Header frame_header;
-	int channel, min_partition_order = min_residual_partition_order, max_partition_order;
-	boolean do_independent, do_mid_side, precompute_partition_sums;
-
-	// Calculate the min,max Rice partition orders
-	if (is_last_frame) {
-		max_partition_order = 0;
-	}
-	else {
-		max_partition_order = Frame.get_max_rice_partition_order_from_blocksize(blocksize);
-		max_partition_order = Math.min(max_partition_order, max_residual_partition_order);
-	}
-	min_partition_order = Math.min(min_partition_order, max_partition_order);
-
-	precompute_partition_sums = precompute_partition_sums && ((max_partition_order > min_partition_order) || do_escape_coding);
-
-	// Setup the frame
-    frame.clear();
-	frame_header.blockSize = blocksize;
-	frame_header.sampleRate = sample_rate;
-	frame_header.channels = channels;
-	frame_header.channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT; // the default unless the encoder determines otherwise
-	frame_header.bitsPerSample = bits_per_sample;
-	frame_header.frameNumber = current_frame_number;
-
-	// Figure out what channel assignments to try
-	if (do_mid_side_stereo) {
-		if (loose_mid_side_stereo) {
-			if (loose_mid_side_stereo_frame_count == 0) {
-				do_independent = true;
-				do_mid_side = true;
-			}
-			else {
-				do_independent = (last_channel_assignment == Constants.CHANNEL_ASSIGNMENT_INDEPENDENT);
-				do_mid_side = !do_independent;
-			}
-		}
-		else {
-			do_independent = true;
-			do_mid_side = true;
-		}
-	}
-	else {
-		do_independent = true;
-		do_mid_side = false;
-	}
-
-	// Check for wasted bits; set effective bps for each subframe
-	if (do_independent) {
-		for(channel = 0; channel < channels; channel++) {
-			int w = get_wasted_bits_(integer_signal[channel], blocksize);
-			subframe_workspace[channel][0].wasted_bits = subframe_workspace[channel][1].wasted_bits = w;
-			subframe_bps[channel] = bits_per_sample - w;
-		}
-	}
-	if (do_mid_side) {
-		ASSERT(channels == 2);
-		for(channel = 0; channel < 2; channel++) {
-			unsigned w = get_wasted_bits_(integer_signal_mid_side[channel], blocksize);
-			subframe_workspace_mid_side[channel][0].wasted_bits = subframe_workspace_mid_side[channel][1].wasted_bits = w;
-			subframe_bps_mid_side[channel] = bits_per_sample - w + (channel==0? 0:1);
-		}
-	}
-
-	// First do a normal encoding pass of each independent channel
-	if (do_independent) {
-		for(channel = 0; channel < channels; channel++) {
-			if (!
-				process_subframe_(
-					encoder,
-					min_partition_order,
-					max_partition_order,
-					precompute_partition_sums,
-					frame_header,
-					subframe_bps[channel],
-					integer_signal[channel],
-					real_signal[channel],
-					subframe_workspace_ptr[channel],
-					partitioned_rice_contents_workspace_ptr[channel],
-					residual_workspace[channel],
-					best_subframe+channel,
-					best_subframe_bits+channel
-				)
-			)
-				return false;
-		}
-	}
-
-	// Now do mid and side channels if requested
-	if (do_mid_side) {
-
-		for(channel = 0; channel < 2; channel++) {
-			if (!
-				process_subframe_(
-					encoder,
-					min_partition_order,
-					max_partition_order,
-					precompute_partition_sums,
-					frame_header,
-					subframe_bps_mid_side[channel],
-					integer_signal_mid_side[channel],
-					real_signal_mid_side[channel],
-					subframe_workspace_ptr_mid_side[channel],
-					partitioned_rice_contents_workspace_ptr_mid_side[channel],
-					residual_workspace_mid_side[channel],
-					best_subframe_mid_side+channel,
-					best_subframe_bits_mid_side+channel
-				)
-			)
-				return false;
-		}
-	}
-
-	// Compose the frame bitbuffer
-	if (do_mid_side) {
-		unsigned left_bps = 0, right_bps = 0; // initialized only to prevent superfluous compiler warning
-		ChannelBase left_subframe, right_subframe; // initialized only to prevent superfluous compiler warning
-		ChannelAssignment channel_assignment;
-
-		if (loose_mid_side_stereo && loose_mid_side_stereo_frame_count > 0) {
-			channel_assignment = (last_channel_assignment == CHANNEL_ASSIGNMENT_INDEPENDENT? CHANNEL_ASSIGNMENT_INDEPENDENT : CHANNEL_ASSIGNMENT_MID_SIDE);
-		}
-		else {
-			int[] bits = new int[4]; // WATCHOUT - indexed by ChannelAssignment
-			int min_bits;
-			int ca;
-
-			// We have to figure out which channel assignent results in the smallest frame
-			bits[CHANNEL_ASSIGNMENT_INDEPENDENT] = best_subframe_bits         [0] + best_subframe_bits         [1];
-			bits[CHANNEL_ASSIGNMENT_LEFT_SIDE  ] = best_subframe_bits         [0] + best_subframe_bits_mid_side[1];
-			bits[CHANNEL_ASSIGNMENT_RIGHT_SIDE ] = best_subframe_bits         [1] + best_subframe_bits_mid_side[1];
-			bits[CHANNEL_ASSIGNMENT_MID_SIDE   ] = best_subframe_bits_mid_side[0] + best_subframe_bits_mid_side[1];
-
-			for(channel_assignment = (ChannelAssignment)0, min_bits = bits[0], ca = (ChannelAssignment)1; (int)ca <= 3; ca = (ChannelAssignment)((int)ca + 1)) {
-				if (bits[ca] < min_bits) {
-					min_bits = bits[ca];
-					channel_assignment = ca;
-				}
-			}
-		}
-
-		frame_header.channel_assignment = channel_assignment;
-
-		if (!frame_add_header(frame_header, streamable_subset, is_last_frame, frame)) {
-			state = STREAM_ENCODER_FRAMING_ERROR;
-			return false;
-		}
-
-		switch(channel_assignment) {
-			case CHANNEL_ASSIGNMENT_INDEPENDENT:
-				left_subframe  = subframe_workspace         [0][best_subframe         [0]];
-				right_subframe = subframe_workspace         [1][best_subframe         [1]];
-				break;
-			case CHANNEL_ASSIGNMENT_LEFT_SIDE:
-				left_subframe  = subframe_workspace         [0][best_subframe         [0]];
-				right_subframe = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
-				break;
-			case CHANNEL_ASSIGNMENT_RIGHT_SIDE:
-				left_subframe  = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
-				right_subframe = subframe_workspace         [1][best_subframe         [1]];
-				break;
-			case CHANNEL_ASSIGNMENT_MID_SIDE:
-				left_subframe  = subframe_workspace_mid_side[0][best_subframe_mid_side[0]];
-				right_subframe = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
-				break;
-			default:
-				ASSERT(0);
-		}
-
-		switch(channel_assignment) {
-			case CHANNEL_ASSIGNMENT_INDEPENDENT:
-				left_bps  = subframe_bps         [0];
-				right_bps = subframe_bps         [1];
-				break;
-			case CHANNEL_ASSIGNMENT_LEFT_SIDE:
-				left_bps  = subframe_bps         [0];
-				right_bps = subframe_bps_mid_side[1];
-				break;
-			case CHANNEL_ASSIGNMENT_RIGHT_SIDE:
-				left_bps  = subframe_bps_mid_side[1];
-				right_bps = subframe_bps         [1];
-				break;
-			case CHANNEL_ASSIGNMENT_MID_SIDE:
-				left_bps  = subframe_bps_mid_side[0];
-				right_bps = subframe_bps_mid_side[1];
-				break;
-			default:
-				ASSERT(0);
-		}
-
-		// note that encoder_add_subframe_ sets the state for us in case of an error
-		if (!add_subframe_(frame_header, left_bps , left_subframe , frame))
-			return false;
-		if (!add_subframe_(frame_header, right_bps, right_subframe, frame))
-			return false;
-	}
-	else {
-		if (!frame_add_header(frame_header, streamable_subset, is_last_frame, frame)) {
-			state = STREAM_ENCODER_FRAMING_ERROR;
-			return false;
-		}
-
-		for(channel = 0; channel < channels; channel++) {
-			if (!add_subframe_(frame_header, subframe_bps[channel], subframe_workspace[channel][best_subframe[channel]], frame)) {
-				// the above function sets the state for us in case of an error
-				return false;
-			}
-		}
-	}
-
-	if (loose_mid_side_stereo) {
-		loose_mid_side_stereo_frame_count++;
-		if (loose_mid_side_stereo_frame_count >= loose_mid_side_stereo_frames)
-			loose_mid_side_stereo_frame_count = 0;
-	}
-
-	last_channel_assignment = frame_header.channel_assignment;
-
-	return true;
-}
-*/
-
-/*
-private boolean processSubframe(int min_partition_order,
-	int max_partition_order,
-	boolean precompute_partition_sums,
-	Header frame_header,
-	int subframe_bps,
-	int[] integer_signal,
-	double[] real_signal,
-	Subframe[] subframe],
-	EntropyPartitionedRiceContents[] partitioned_rice_contents,
-	int[] residual,
-	int *best_subframe,
-	int *best_bits
-)
-{
-	double[] fixed_residual_bits_per_sample = new double[MAX_FIXED_ORDER+1];
-	double lpc_residual_bits_per_sample;
-	double[] autoc = new double[MAX_LPC_ORDER+1]; // WATCHOUT: the size is important even though max_lpc_order might be less; some asm routines need all the space
-	double[] lpc_error = new double[MAX_LPC_ORDER];
-	int min_lpc_order, max_lpc_order, lpc_order;
-	int min_fixed_order, max_fixed_order, guess_fixed_order, fixed_order;
-	int min_qlp_coeff_precision, max_qlp_coeff_precision, qlp_coeff_precision;
-	int rice_parameter;
-	int _candidate_bits, _best_bits;
-	int _best_subframe;
-
-	// verbatim subframe is the baseline against which we measure other compressed subframes
-	_best_subframe = 0;
-	if (disable_verbatim_subframes && frame_header.blocksize >= MAX_FIXED_ORDER)
-		_best_bits = UINT_MAX;
-	else
-		_best_bits = evaluateVerbatimSubframe(integer_signal, frame_header.blocksize, subframe_bps, subframe[_best_subframe]);
-
-	if (frame_header.blocksize >= MAX_FIXED_ORDER) {
-		unsigned signal_is_constant = false;
-		guess_fixed_order = local_fixed_compute_best_predictor(integer_signal+MAX_FIXED_ORDER, frame_header.blocksize-MAX_FIXED_ORDER, fixed_residual_bits_per_sample);
-		// check for constant subframe
-		if (!disable_constant_subframes && fixed_residual_bits_per_sample[1] == 0.0) {
-			// the above means integer_signal+MAX_FIXED_ORDER is constant, now we just have to check the warmup samples
-			unsigned i;
-			signal_is_constant = true;
-			for(i = 1; i <= MAX_FIXED_ORDER; i++) {
-				if (integer_signal[0] != integer_signal[i]) {
-					signal_is_constant = false;
-					break;
-				}
-			}
-		}
-		if (signal_is_constant) {
-			_candidate_bits = evaluate_constant_subframe_(integer_signal[0], subframe_bps, subframe[!_best_subframe]);
-			if (_candidate_bits < _best_bits) {
-				_best_subframe = !_best_subframe;
-				_best_bits = _candidate_bits;
-			}
-		}
-		else {
-			if (!disable_fixed_subframes || (max_lpc_order == 0 && _best_bits == UINT_MAX)) {
-				// encode fixed
-				if (do_exhaustive_model_search) {
-					min_fixed_order = 0;
-					max_fixed_order = MAX_FIXED_ORDER;
-				}
-				else {
-					min_fixed_order = max_fixed_order = guess_fixed_order;
-				}
-				for(fixed_order = min_fixed_order; fixed_order <= max_fixed_order; fixed_order++) {
-					if (fixed_residual_bits_per_sample[fixed_order] >= (double)subframe_bps)
-						continue; // don't even try
-					rice_parameter = (fixed_residual_bits_per_sample[fixed_order] > 0.0)? (unsigned)(fixed_residual_bits_per_sample[fixed_order]+0.5) : 0; // 0.5 is for rounding
-					rice_parameter++; // to account for the signed->unsigned conversion during rice coding
-					if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-						fprintf(stderr, "clipping rice_parameter (%u -> %u) @0\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-						rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-					}
-					_candidate_bits =
-						evaluate_fixed_subframe_(
-							encoder,
-							integer_signal,
-							residual[!_best_subframe],
-							abs_residual,
-							abs_residual_partition_sums,
-							raw_bits_per_partition,
-							frame_header.blocksize,
-							subframe_bps,
-							fixed_order,
-							rice_parameter,
-							min_partition_order,
-							max_partition_order,
-							precompute_partition_sums,
-							do_escape_coding,
-							rice_parameter_search_dist,
-							subframe[!_best_subframe],
-							partitioned_rice_contents[!_best_subframe]
-						);
-					if (_candidate_bits < _best_bits) {
-						_best_subframe = !_best_subframe;
-						_best_bits = _candidate_bits;
-					}
-				}
-			}
-
-			// encode lpc
-			if (max_lpc_order > 0) {
-				if (max_lpc_order >= frame_header.blocksize)
-					max_lpc_order = frame_header.blocksize-1;
-				else
-					max_lpc_order = max_lpc_order;
-				if (max_lpc_order > 0) {
-					local_lpc_compute_autocorrelation(real_signal, frame_header.blocksize, max_lpc_order+1, autoc);
-					// if autoc[0] == 0.0, the signal is constant and we usually won't get here, but it can happen
-					if (autoc[0] != 0.0) {
-						lpc_compute_lp_coefficients(autoc, max_lpc_order, lp_coeff, lpc_error);
-						if (do_exhaustive_model_search) {
-							min_lpc_order = 1;
-						}
-						else {
-							unsigned guess_lpc_order = lpc_compute_best_order(lpc_error, max_lpc_order, frame_header.blocksize, subframe_bps);
-							min_lpc_order = max_lpc_order = guess_lpc_order;
-						}
-						for(lpc_order = min_lpc_order; lpc_order <= max_lpc_order; lpc_order++) {
-							lpc_residual_bits_per_sample = lpc_compute_expected_bits_per_residual_sample(lpc_error[lpc_order-1], frame_header.blocksize-lpc_order);
-							if (lpc_residual_bits_per_sample >= (double)subframe_bps)
-								continue; // don't even try
-							rice_parameter = (lpc_residual_bits_per_sample > 0.0)? (unsigned)(lpc_residual_bits_per_sample+0.5) : 0; // 0.5 is for rounding
-							rice_parameter++; // to account for the signed->unsigned conversion during rice coding
-							if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-								fprintf(stderr, "clipping rice_parameter (%u -> %u) @1\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-								rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-							}
-							if (do_qlp_coeff_prec_search) {
-								min_qlp_coeff_precision = MIN_QLP_COEFF_PRECISION;
-								// ensure a 32-bit datapath throughout for 16bps or less
-								if (subframe_bps <= 16)
-									max_qlp_coeff_precision = min(32 - subframe_bps - lpc_order, MAX_QLP_COEFF_PRECISION);
-								else
-									max_qlp_coeff_precision = MAX_QLP_COEFF_PRECISION;
-							}
-							else {
-								min_qlp_coeff_precision = max_qlp_coeff_precision = qlp_coeff_precision;
-							}
-							for(qlp_coeff_precision = min_qlp_coeff_precision; qlp_coeff_precision <= max_qlp_coeff_precision; qlp_coeff_precision++) {
-								_candidate_bits =
-									evaluate_lpc_subframe_(
-										encoder,
-										integer_signal,
-										residual[!_best_subframe],
-										abs_residual,
-										abs_residual_partition_sums,
-										raw_bits_per_partition,
-										lp_coeff[lpc_order-1],
-										frame_header.blocksize,
-										subframe_bps,
-										lpc_order,
-										qlp_coeff_precision,
-										rice_parameter,
-										min_partition_order,
-										max_partition_order,
-										precompute_partition_sums,
-										do_escape_coding,
-										rice_parameter_search_dist,
-										subframe[!_best_subframe],
-										partitioned_rice_contents[!_best_subframe]
-									);
-								if (_candidate_bits > 0) { // if == 0, there was a problem quantizing the lpcoeffs
-									if (_candidate_bits < _best_bits) {
-										_best_subframe = !_best_subframe;
-										_best_bits = _candidate_bits;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	// under rare circumstances this can happen when all but lpc subframe types are disabled:
-	if (_best_bits == UINT_MAX) {
-		ASSERT(_best_subframe == 0);
-		_best_bits = evaluateVerbatimSubframe(integer_signal, frame_header.blocksize, subframe_bps, subframe[_best_subframe]);
-	}
-
-	*best_subframe = _best_subframe;
-	*best_bits = _best_bits;
-
-	return true;
-}
-*/
-
-/*
-private boolean addSubframe(Header frame_header, int subframe_bps, ChannelBase subframe, BitBuffer frame) {
-	switch(subframe->type) {
-		case SUBFRAME_TYPE_CONSTANT:
-			if (!subframe_add_constant(&(subframe->data.constant), subframe_bps, subframe->wasted_bits, frame)) {
-				state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
-				return false;
-			}
-			break;
-		case SUBFRAME_TYPE_FIXED:
-			if (!subframe_add_fixed(&(subframe->data.fixed), frame_header.blocksize - subframe->data.fixed.order, subframe_bps, subframe->wasted_bits, frame)) {
-				state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
-				return false;
-			}
-			break;
-		case SUBFRAME_TYPE_LPC:
-			if (!subframe_add_lpc(&(subframe->data.lpc), frame_header.blocksize - subframe->data.lpc.order, subframe_bps, subframe->wasted_bits, frame)) {
-				state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
-				return false;
-			}
-			break;
-		case SUBFRAME_TYPE_VERBATIM:
-			if (!subframe_add_verbatim(&(subframe->data.verbatim), frame_header.blocksize, subframe_bps, subframe->wasted_bits, frame)) {
-				state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
-				return false;
-			}
-			break;
-		default:
-			ASSERT(0);
-	}
-
-	return true;
-}
-*/
-
-/*
-private int evaluateConstantSubframe(int signal, int subframe_bps, ChannelBase subframe) {
-	subframe->type = SUBFRAME_TYPE_CONSTANT;
-	subframe->data.constant.value = signal;
-
-	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + subframe_bps;
-}
-*/
-
-/*
-private int evaluateFixedSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int blocksize, int subframe_bps, int order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
-	unsigned i, residual_bits;
-	unsigned residual_samples = blocksize - order;
-
-	fixed_compute_residual(signal+order, residual_samples, order, residual);
-
-	subframe->type = SUBFRAME_TYPE_FIXED;
-
-	subframe->data.fixed.entropy_coding_method.type = ENTROPY_CODING_METHOD_PARTITIONED_RICE;
-	subframe->data.fixed.entropy_coding_method.data.partitioned_rice.contents = partitioned_rice_contents;
-	subframe->data.fixed.residual = residual;
-
-	residual_bits =
-		find_best_partition_order_(
-			encoder->private_,
-			residual,
-			abs_residual,
-			abs_residual_partition_sums,
-			raw_bits_per_partition,
-			residual_samples,
-			order,
-			rice_parameter,
-			min_partition_order,
-			max_partition_order,
-			precompute_partition_sums,
-			do_escape_coding,
-			rice_parameter_search_dist,
-			&subframe->data.fixed.entropy_coding_method.data.partitioned_rice
-		);
-
-	subframe->data.fixed.order = order;
-	for(i = 0; i < order; i++)
-		subframe->data.fixed.warmup[i] = signal[i];
-
-	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (order * subframe_bps) + residual_bits;
-}
-*/
-
-/*
-private int evaluateLPCSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, double[] lp_coeff, int blocksize, int subframe_bps, int order, int qlp_coeff_precision, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
-	int[] qlp_coeff = new int[MAX_LPC_ORDER];
-	int i, residual_bits;
-	int quantization, ret;
-	int residual_samples = blocksize - order;
-
-	// try to keep qlp coeff precision such that only 32-bit math is required for decode of <=16bps streams
-	if (subframe_bps <= 16) {
-		ASSERT(order > 0);
-		ASSERT(order <= MAX_LPC_ORDER);
-		qlp_coeff_precision = min(qlp_coeff_precision, 32 - subframe_bps - bitmath_ilog2(order));
-	}
-
-	ret = lpc_quantize_coefficients(lp_coeff, order, qlp_coeff_precision, qlp_coeff, quantization);
-	if (ret != 0)
-		return 0; // this is a hack to indicate to the caller that we can't do lp at this order on this subframe
-
-	if (subframe_bps + qlp_coeff_precision + bitmath_ilog2(order) <= 32)
-		if (subframe_bps <= 16 && qlp_coeff_precision <= 16)
-			local_lpc_compute_residual_from_qlp_coefficients_16bit(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
-		else
-			local_lpc_compute_residual_from_qlp_coefficients(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
-	else
-		local_lpc_compute_residual_from_qlp_coefficients_64bit(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
-
-	subframe->type = SUBFRAME_TYPE_LPC;
-
-	subframe->data.lpc.entropy_coding_method.type = ENTROPY_CODING_METHOD_PARTITIONED_RICE;
-	subframe->data.lpc.entropy_coding_method.data.partitioned_rice.contents = partitioned_rice_contents;
-	subframe->data.lpc.residual = residual;
-
-	residual_bits =
-		find_best_partition_order_(
-			encoder->private_,
-			residual,
-			abs_residual,
-			abs_residual_partition_sums,
-			raw_bits_per_partition,
-			residual_samples,
-			order,
-			rice_parameter,
-			min_partition_order,
-			max_partition_order,
-			precompute_partition_sums,
-			do_escape_coding,
-			rice_parameter_search_dist,
-			&subframe->data.fixed.entropy_coding_method.data.partitioned_rice
-		);
-
-	subframe->data.lpc.order = order;
-	subframe->data.lpc.qlp_coeff_precision = qlp_coeff_precision;
-	subframe->data.lpc.quantization_level = quantization;
-	memcpy(subframe->data.lpc.qlp_coeff, qlp_coeff, sizeof(int)*MAX_LPC_ORDER);
-	for(i = 0; i < order; i++)
-		subframe->data.lpc.warmup[i] = signal[i];
-
-	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN + SUBFRAME_LPC_QLP_SHIFT_LEN + (order * (qlp_coeff_precision + subframe_bps)) + residual_bits;
-}
-*/
-
+    
+    /*
+     void free_()
+     {
+     unsigned i, channel;
+     
+     ASSERT(0 != encoder);
+     for(i = 0; i < channels; i++) {
+     if (0 != integer_signal_unaligned[i]) {
+     free(integer_signal_unaligned[i]);
+     integer_signal_unaligned[i] = 0;
+     }
+     if (0 != real_signal_unaligned[i]) {
+     free(real_signal_unaligned[i]);
+     real_signal_unaligned[i] = 0;
+     }
+     }
+     for(i = 0; i < 2; i++) {
+     if (0 != integer_signal_mid_side_unaligned[i]) {
+     free(integer_signal_mid_side_unaligned[i]);
+     integer_signal_mid_side_unaligned[i] = 0;
+     }
+     if (0 != real_signal_mid_side_unaligned[i]) {
+     free(real_signal_mid_side_unaligned[i]);
+     real_signal_mid_side_unaligned[i] = 0;
+     }
+     }
+     for(channel = 0; channel < channels; channel++) {
+     for(i = 0; i < 2; i++) {
+     if (0 != residual_workspace_unaligned[channel][i]) {
+     free(residual_workspace_unaligned[channel][i]);
+     residual_workspace_unaligned[channel][i] = 0;
+     }
+     }
+     }
+     for(channel = 0; channel < 2; channel++) {
+     for(i = 0; i < 2; i++) {
+     if (0 != residual_workspace_mid_side_unaligned[channel][i]) {
+     free(residual_workspace_mid_side_unaligned[channel][i]);
+     residual_workspace_mid_side_unaligned[channel][i] = 0;
+     }
+     }
+     }
+     if (0 != abs_residual_unaligned) {
+     free(abs_residual_unaligned);
+     abs_residual_unaligned = 0;
+     }
+     if (0 != abs_residual_partition_sums_unaligned) {
+     free(abs_residual_partition_sums_unaligned);
+     abs_residual_partition_sums_unaligned = 0;
+     }
+     if (0 != raw_bits_per_partition_unaligned) {
+     free(raw_bits_per_partition_unaligned);
+     raw_bits_per_partition_unaligned = 0;
+     }
+     if (verify) {
+     for(i = 0; i < channels; i++) {
+     if (0 != verifyData.input_fifo.data[i]) {
+     free(verifyData.input_fifo.data[i]);
+     verifyData.input_fifo.data[i] = 0;
+     }
+     }
+     }
+     bitbuffer_free(frame);
+     }
+     */
+    
+    /*
+     private boolean resize_buffers_(int new_size) {
+     boolean ok;
+     int i, channel;
+     
+     // To avoid excessive malloc'ing, we only grow the buffer; no shrinking.
+      if (new_size <= input_capacity) return true;
+      
+      ok = true;
+      
+      // WATCHOUT: lpc_compute_residual_from_qlp_coefficients_asm_ia32_mmx()
+       // requires that the input arrays (in our case the integer signals)
+        // have a buffer of up to 3 zeroes in front (at negative indices) for
+         // alignment purposes; we use 4 to keep the data well-aligned.
+          
+          for(i = 0; ok && i < channels; i++) {
+          ok = ok && memory_alloc_aligned_int32_array(new_size+4, integer_signal_unaligned[i], integer_signal[i]);
+          ok = ok && memory_alloc_aligned_real_array(new_size, real_signal_unaligned[i], real_signal[i]);
+          memset(integer_signal[i], 0, sizeof(int)*4);
+          integer_signal[i] += 4;
+          }
+          for(i = 0; ok && i < 2; i++) {
+          ok = ok && memory_alloc_aligned_int32_array(new_size+4, &integer_signal_mid_side_unaligned[i], &integer_signal_mid_side[i]);
+          ok = ok && memory_alloc_aligned_real_array(new_size, &real_signal_mid_side_unaligned[i], &real_signal_mid_side[i]);
+          memset(integer_signal_mid_side[i], 0, sizeof(int)*4);
+          integer_signal_mid_side[i] += 4;
+          }
+          for(channel = 0; ok && channel < channels; channel++) {
+          for(i = 0; ok && i < 2; i++) {
+          ok = ok && memory_alloc_aligned_int32_array(new_size, &residual_workspace_unaligned[channel][i], &residual_workspace[channel][i]);
+          }
+          }
+          for(channel = 0; ok && channel < 2; channel++) {
+          for(i = 0; ok && i < 2; i++) {
+          ok = ok && memory_alloc_aligned_int32_array(new_size, &residual_workspace_mid_side_unaligned[channel][i], &residual_workspace_mid_side[channel][i]);
+          }
+          }
+          ok = ok && memory_alloc_aligned_uint32_array(new_size, &abs_residual_unaligned, &abs_residual);
+          if (precompute_partition_sums || do_escape_coding) // we require precompute_partition_sums if do_escape_coding because of their intertwined nature
+          ok = ok && memory_alloc_aligned_uint64_array(new_size * 2, &abs_residual_partition_sums_unaligned, &abs_residual_partition_sums);
+          if (do_escape_coding)
+          ok = ok && memory_alloc_aligned_unsigned_array(new_size * 2, &raw_bits_per_partition_unaligned, &raw_bits_per_partition);
+          
+          if (ok)
+          input_capacity = new_size;
+          else
+          state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
+          
+          return ok;
+          }
+          */
+    
+    /*
+     private boolean writeBitBuffer(int samples) {
+     byte[] buffer;
+     unsigned bytes;
+     
+     bitbuffer_get_buffer(frame, &buffer, &bytes);
+     
+     if (verify) {
+     verifyData.output.data = buffer;
+     verifyData.output.bytes = bytes;
+     if (verifyData.state_hint == ENCODER_IN_MAGIC) {
+     verifyData.needs_magic_hack = true;
+     }
+     else {
+     if (!stream_decoder_process_single(verifyData.decoder)) {
+     bitbuffer_release_buffer(frame);
+     if (state != STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA)
+     state = STREAM_ENCODER_VERIFY_DECODER_ERROR;
+     return false;
+     }
+     }
+     }
+     
+     if (write_callback(buffer, bytes, samples, current_frame_number, client_data) != STREAM_ENCODER_WRITE_STATUS_OK) {
+     bitbuffer_release_buffer(frame);
+     state = STREAM_ENCODER_FATAL_ERROR_WHILE_WRITING;
+     return false;
+     }
+     
+     bitbuffer_release_buffer(frame);
+     
+     if (samples > 0) {
+     metadata.data.stream_info.min_framesize = min(bytes, metadata.data.stream_info.min_framesize);
+     metadata.data.stream_info.max_framesize = max(bytes, metadata.data.stream_info.max_framesize);
+     }
+     
+     return true;
+     }
+     */
+    
+    /*
+     private boolean processFrame(boolean is_last_frame) {
+     
+     // Accumulate raw signal to the MD5 signature
+      if (!MD5Accumulate(&md5context, (int * *)integer_signal, channels, blocksize, (bits_per_sample+7) / 8)) {
+      state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
+      return false;
+      }
+      
+      // Process the frame header and subframes into the frame bitbuffer
+       if (!process_subframes_(is_last_frame)) {
+       // the above function sets the state for us in case of an error
+        return false;
+        }
+        
+        // Zero-pad the frame to a byte_boundary
+         if (!bitbuffer_zero_pad_to_byte_boundary(frame)) {
+         state = STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
+         return false;
+         }
+         
+         // CRC-16 the whole thing
+          ASSERT(bitbuffer_is_byte_aligned(frame));
+          bitbuffer_write_raw_uint32(frame, bitbuffer_get_write_crc16(frame), FRAME_FOOTER_CRC_LEN);
+          
+          // Write it
+           if (!write_bitbuffer_(blocksize)) {
+           // the above function sets the state for us in case of an error
+            return false;
+            }
+            
+            // Get ready for the next frame
+             current_sample_number = 0;
+             current_frame_number++;
+             metadata.data.stream_info.total_samples += (uint64)blocksize;
+             
+             return true;
+             }
+             */
+    
+    /*
+     private boolean processSubframes(boolean is_last_frame) {
+     Header frame_header;
+     int channel, min_partition_order = min_residual_partition_order, max_partition_order;
+     boolean do_independent, do_mid_side, precompute_partition_sums;
+     
+     // Calculate the min,max Rice partition orders
+      if (is_last_frame) {
+      max_partition_order = 0;
+      }
+      else {
+      max_partition_order = Frame.get_max_rice_partition_order_from_blocksize(blocksize);
+      max_partition_order = Math.min(max_partition_order, max_residual_partition_order);
+      }
+      min_partition_order = Math.min(min_partition_order, max_partition_order);
+      
+      precompute_partition_sums = precompute_partition_sums && ((max_partition_order > min_partition_order) || do_escape_coding);
+      
+      // Setup the frame
+       frame.clear();
+       frame_header.blockSize = blocksize;
+       frame_header.sampleRate = sample_rate;
+       frame_header.channels = channels;
+       frame_header.channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT; // the default unless the encoder determines otherwise
+       frame_header.bitsPerSample = bits_per_sample;
+       frame_header.frameNumber = current_frame_number;
+       
+       // Figure out what channel assignments to try
+        if (do_mid_side_stereo) {
+        if (loose_mid_side_stereo) {
+        if (loose_mid_side_stereo_frame_count == 0) {
+        do_independent = true;
+        do_mid_side = true;
+        }
+        else {
+        do_independent = (last_channel_assignment == Constants.CHANNEL_ASSIGNMENT_INDEPENDENT);
+        do_mid_side = !do_independent;
+        }
+        }
+        else {
+        do_independent = true;
+        do_mid_side = true;
+        }
+        }
+        else {
+        do_independent = true;
+        do_mid_side = false;
+        }
+        
+        // Check for wasted bits; set effective bps for each subframe
+         if (do_independent) {
+         for(channel = 0; channel < channels; channel++) {
+         int w = get_wasted_bits_(integer_signal[channel], blocksize);
+         subframe_workspace[channel][0].wasted_bits = subframe_workspace[channel][1].wasted_bits = w;
+         subframe_bps[channel] = bits_per_sample - w;
+         }
+         }
+         if (do_mid_side) {
+         ASSERT(channels == 2);
+         for(channel = 0; channel < 2; channel++) {
+         unsigned w = get_wasted_bits_(integer_signal_mid_side[channel], blocksize);
+         subframe_workspace_mid_side[channel][0].wasted_bits = subframe_workspace_mid_side[channel][1].wasted_bits = w;
+         subframe_bps_mid_side[channel] = bits_per_sample - w + (channel==0? 0:1);
+         }
+         }
+         
+         // First do a normal encoding pass of each independent channel
+          if (do_independent) {
+          for(channel = 0; channel < channels; channel++) {
+          if (!
+          process_subframe_(
+          encoder,
+          min_partition_order,
+          max_partition_order,
+          precompute_partition_sums,
+          frame_header,
+          subframe_bps[channel],
+          integer_signal[channel],
+          real_signal[channel],
+          subframe_workspace_ptr[channel],
+          partitioned_rice_contents_workspace_ptr[channel],
+          residual_workspace[channel],
+          best_subframe+channel,
+          best_subframe_bits+channel
+          )
+          )
+          return false;
+          }
+          }
+          
+          // Now do mid and side channels if requested
+           if (do_mid_side) {
+           
+           for(channel = 0; channel < 2; channel++) {
+           if (!
+           process_subframe_(
+           encoder,
+           min_partition_order,
+           max_partition_order,
+           precompute_partition_sums,
+           frame_header,
+           subframe_bps_mid_side[channel],
+           integer_signal_mid_side[channel],
+           real_signal_mid_side[channel],
+           subframe_workspace_ptr_mid_side[channel],
+           partitioned_rice_contents_workspace_ptr_mid_side[channel],
+           residual_workspace_mid_side[channel],
+           best_subframe_mid_side+channel,
+           best_subframe_bits_mid_side+channel
+           )
+           )
+           return false;
+           }
+           }
+           
+           // Compose the frame bitbuffer
+            if (do_mid_side) {
+            unsigned left_bps = 0, right_bps = 0; // initialized only to prevent superfluous compiler warning
+            ChannelBase left_subframe, right_subframe; // initialized only to prevent superfluous compiler warning
+            ChannelAssignment channel_assignment;
+            
+            if (loose_mid_side_stereo && loose_mid_side_stereo_frame_count > 0) {
+            channel_assignment = (last_channel_assignment == CHANNEL_ASSIGNMENT_INDEPENDENT? CHANNEL_ASSIGNMENT_INDEPENDENT : CHANNEL_ASSIGNMENT_MID_SIDE);
+            }
+            else {
+            int[] bits = new int[4]; // WATCHOUT - indexed by ChannelAssignment
+            int min_bits;
+            int ca;
+            
+            // We have to figure out which channel assignent results in the smallest frame
+             bits[CHANNEL_ASSIGNMENT_INDEPENDENT] = best_subframe_bits         [0] + best_subframe_bits         [1];
+             bits[CHANNEL_ASSIGNMENT_LEFT_SIDE  ] = best_subframe_bits         [0] + best_subframe_bits_mid_side[1];
+             bits[CHANNEL_ASSIGNMENT_RIGHT_SIDE ] = best_subframe_bits         [1] + best_subframe_bits_mid_side[1];
+             bits[CHANNEL_ASSIGNMENT_MID_SIDE   ] = best_subframe_bits_mid_side[0] + best_subframe_bits_mid_side[1];
+             
+             for(channel_assignment = (ChannelAssignment)0, min_bits = bits[0], ca = (ChannelAssignment)1; (int)ca <= 3; ca = (ChannelAssignment)((int)ca + 1)) {
+             if (bits[ca] < min_bits) {
+             min_bits = bits[ca];
+             channel_assignment = ca;
+             }
+             }
+             }
+             
+             frame_header.channel_assignment = channel_assignment;
+             
+             if (!frame_add_header(frame_header, streamable_subset, is_last_frame, frame)) {
+             state = STREAM_ENCODER_FRAMING_ERROR;
+             return false;
+             }
+             
+             switch(channel_assignment) {
+             case CHANNEL_ASSIGNMENT_INDEPENDENT:
+             left_subframe  = subframe_workspace         [0][best_subframe         [0]];
+             right_subframe = subframe_workspace         [1][best_subframe         [1]];
+             break;
+             case CHANNEL_ASSIGNMENT_LEFT_SIDE:
+             left_subframe  = subframe_workspace         [0][best_subframe         [0]];
+             right_subframe = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
+             break;
+             case CHANNEL_ASSIGNMENT_RIGHT_SIDE:
+             left_subframe  = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
+             right_subframe = subframe_workspace         [1][best_subframe         [1]];
+             break;
+             case CHANNEL_ASSIGNMENT_MID_SIDE:
+             left_subframe  = subframe_workspace_mid_side[0][best_subframe_mid_side[0]];
+             right_subframe = subframe_workspace_mid_side[1][best_subframe_mid_side[1]];
+             break;
+             default:
+             ASSERT(0);
+             }
+             
+             switch(channel_assignment) {
+             case CHANNEL_ASSIGNMENT_INDEPENDENT:
+             left_bps  = subframe_bps         [0];
+             right_bps = subframe_bps         [1];
+             break;
+             case CHANNEL_ASSIGNMENT_LEFT_SIDE:
+             left_bps  = subframe_bps         [0];
+             right_bps = subframe_bps_mid_side[1];
+             break;
+             case CHANNEL_ASSIGNMENT_RIGHT_SIDE:
+             left_bps  = subframe_bps_mid_side[1];
+             right_bps = subframe_bps         [1];
+             break;
+             case CHANNEL_ASSIGNMENT_MID_SIDE:
+             left_bps  = subframe_bps_mid_side[0];
+             right_bps = subframe_bps_mid_side[1];
+             break;
+             default:
+             ASSERT(0);
+             }
+             
+             // note that encoder_add_subframe_ sets the state for us in case of an error
+              if (!add_subframe_(frame_header, left_bps , left_subframe , frame))
+              return false;
+              if (!add_subframe_(frame_header, right_bps, right_subframe, frame))
+              return false;
+              }
+              else {
+              if (!frame_add_header(frame_header, streamable_subset, is_last_frame, frame)) {
+              state = STREAM_ENCODER_FRAMING_ERROR;
+              return false;
+              }
+              
+              for(channel = 0; channel < channels; channel++) {
+              if (!add_subframe_(frame_header, subframe_bps[channel], subframe_workspace[channel][best_subframe[channel]], frame)) {
+              // the above function sets the state for us in case of an error
+               return false;
+               }
+               }
+               }
+               
+               if (loose_mid_side_stereo) {
+               loose_mid_side_stereo_frame_count++;
+               if (loose_mid_side_stereo_frame_count >= loose_mid_side_stereo_frames)
+               loose_mid_side_stereo_frame_count = 0;
+               }
+               
+               last_channel_assignment = frame_header.channel_assignment;
+               
+               return true;
+               }
+               */
+    
+    /*
+     private boolean processSubframe(int min_partition_order,
+     int max_partition_order,
+     boolean precompute_partition_sums,
+     Header frame_header,
+     int subframe_bps,
+     int[] integer_signal,
+     double[] real_signal,
+     Subframe[] subframe],
+     EntropyPartitionedRiceContents[] partitioned_rice_contents,
+     int[] residual,
+     int *best_subframe,
+     int *best_bits
+     )
+     {
+     double[] fixed_residual_bits_per_sample = new double[MAX_FIXED_ORDER+1];
+     double lpc_residual_bits_per_sample;
+     double[] autoc = new double[MAX_LPC_ORDER+1]; // WATCHOUT: the size is important even though max_lpc_order might be less; some asm routines need all the space
+     double[] lpc_error = new double[MAX_LPC_ORDER];
+     int min_lpc_order, max_lpc_order, lpc_order;
+     int min_fixed_order, max_fixed_order, guess_fixed_order, fixed_order;
+     int min_qlp_coeff_precision, max_qlp_coeff_precision, qlp_coeff_precision;
+     int rice_parameter;
+     int _candidate_bits, _best_bits;
+     int _best_subframe;
+     
+     // verbatim subframe is the baseline against which we measure other compressed subframes
+      _best_subframe = 0;
+      if (disable_verbatim_subframes && frame_header.blocksize >= MAX_FIXED_ORDER)
+      _best_bits = UINT_MAX;
+      else
+      _best_bits = evaluateVerbatimSubframe(integer_signal, frame_header.blocksize, subframe_bps, subframe[_best_subframe]);
+      
+      if (frame_header.blocksize >= MAX_FIXED_ORDER) {
+      unsigned signal_is_constant = false;
+      guess_fixed_order = local_fixed_compute_best_predictor(integer_signal+MAX_FIXED_ORDER, frame_header.blocksize-MAX_FIXED_ORDER, fixed_residual_bits_per_sample);
+      // check for constant subframe
+       if (!disable_constant_subframes && fixed_residual_bits_per_sample[1] == 0.0) {
+       // the above means integer_signal+MAX_FIXED_ORDER is constant, now we just have to check the warmup samples
+        unsigned i;
+        signal_is_constant = true;
+        for(i = 1; i <= MAX_FIXED_ORDER; i++) {
+        if (integer_signal[0] != integer_signal[i]) {
+        signal_is_constant = false;
+        break;
+        }
+        }
+        }
+        if (signal_is_constant) {
+        _candidate_bits = evaluate_constant_subframe_(integer_signal[0], subframe_bps, subframe[!_best_subframe]);
+        if (_candidate_bits < _best_bits) {
+        _best_subframe = !_best_subframe;
+        _best_bits = _candidate_bits;
+        }
+        }
+        else {
+        if (!disable_fixed_subframes || (max_lpc_order == 0 && _best_bits == UINT_MAX)) {
+        // encode fixed
+         if (do_exhaustive_model_search) {
+         min_fixed_order = 0;
+         max_fixed_order = MAX_FIXED_ORDER;
+         }
+         else {
+         min_fixed_order = max_fixed_order = guess_fixed_order;
+         }
+         for(fixed_order = min_fixed_order; fixed_order <= max_fixed_order; fixed_order++) {
+         if (fixed_residual_bits_per_sample[fixed_order] >= (double)subframe_bps)
+         continue; // don't even try
+         rice_parameter = (fixed_residual_bits_per_sample[fixed_order] > 0.0)? (unsigned)(fixed_residual_bits_per_sample[fixed_order]+0.5) : 0; // 0.5 is for rounding
+         rice_parameter++; // to account for the signed->unsigned conversion during rice coding
+         if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+         fprintf(stderr, "clipping rice_parameter (%u -> %u) @0\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+         rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+         }
+         _candidate_bits =
+         evaluate_fixed_subframe_(
+         encoder,
+         integer_signal,
+         residual[!_best_subframe],
+         abs_residual,
+         abs_residual_partition_sums,
+         raw_bits_per_partition,
+         frame_header.blocksize,
+         subframe_bps,
+         fixed_order,
+         rice_parameter,
+         min_partition_order,
+         max_partition_order,
+         precompute_partition_sums,
+         do_escape_coding,
+         rice_parameter_search_dist,
+         subframe[!_best_subframe],
+         partitioned_rice_contents[!_best_subframe]
+         );
+         if (_candidate_bits < _best_bits) {
+         _best_subframe = !_best_subframe;
+         _best_bits = _candidate_bits;
+         }
+         }
+         }
+         
+         // encode lpc
+          if (max_lpc_order > 0) {
+          if (max_lpc_order >= frame_header.blocksize)
+          max_lpc_order = frame_header.blocksize-1;
+          else
+          max_lpc_order = max_lpc_order;
+          if (max_lpc_order > 0) {
+          local_lpc_compute_autocorrelation(real_signal, frame_header.blocksize, max_lpc_order+1, autoc);
+          // if autoc[0] == 0.0, the signal is constant and we usually won't get here, but it can happen
+           if (autoc[0] != 0.0) {
+           lpc_compute_lp_coefficients(autoc, max_lpc_order, lp_coeff, lpc_error);
+           if (do_exhaustive_model_search) {
+           min_lpc_order = 1;
+           }
+           else {
+           unsigned guess_lpc_order = lpc_compute_best_order(lpc_error, max_lpc_order, frame_header.blocksize, subframe_bps);
+           min_lpc_order = max_lpc_order = guess_lpc_order;
+           }
+           for(lpc_order = min_lpc_order; lpc_order <= max_lpc_order; lpc_order++) {
+           lpc_residual_bits_per_sample = lpc_compute_expected_bits_per_residual_sample(lpc_error[lpc_order-1], frame_header.blocksize-lpc_order);
+           if (lpc_residual_bits_per_sample >= (double)subframe_bps)
+           continue; // don't even try
+           rice_parameter = (lpc_residual_bits_per_sample > 0.0)? (unsigned)(lpc_residual_bits_per_sample+0.5) : 0; // 0.5 is for rounding
+           rice_parameter++; // to account for the signed->unsigned conversion during rice coding
+           if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+           fprintf(stderr, "clipping rice_parameter (%u -> %u) @1\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+           rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+           }
+           if (do_qlp_coeff_prec_search) {
+           min_qlp_coeff_precision = MIN_QLP_COEFF_PRECISION;
+           // ensure a 32-bit datapath throughout for 16bps or less
+            if (subframe_bps <= 16)
+            max_qlp_coeff_precision = min(32 - subframe_bps - lpc_order, MAX_QLP_COEFF_PRECISION);
+            else
+            max_qlp_coeff_precision = MAX_QLP_COEFF_PRECISION;
+            }
+            else {
+            min_qlp_coeff_precision = max_qlp_coeff_precision = qlp_coeff_precision;
+            }
+            for(qlp_coeff_precision = min_qlp_coeff_precision; qlp_coeff_precision <= max_qlp_coeff_precision; qlp_coeff_precision++) {
+            _candidate_bits =
+            evaluate_lpc_subframe_(
+            encoder,
+            integer_signal,
+            residual[!_best_subframe],
+            abs_residual,
+            abs_residual_partition_sums,
+            raw_bits_per_partition,
+            lp_coeff[lpc_order-1],
+            frame_header.blocksize,
+            subframe_bps,
+            lpc_order,
+            qlp_coeff_precision,
+            rice_parameter,
+            min_partition_order,
+            max_partition_order,
+            precompute_partition_sums,
+            do_escape_coding,
+            rice_parameter_search_dist,
+            subframe[!_best_subframe],
+            partitioned_rice_contents[!_best_subframe]
+            );
+            if (_candidate_bits > 0) { // if == 0, there was a problem quantizing the lpcoeffs
+            if (_candidate_bits < _best_bits) {
+            _best_subframe = !_best_subframe;
+            _best_bits = _candidate_bits;
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            
+            // under rare circumstances this can happen when all but lpc subframe types are disabled:
+             if (_best_bits == UINT_MAX) {
+             ASSERT(_best_subframe == 0);
+             _best_bits = evaluateVerbatimSubframe(integer_signal, frame_header.blocksize, subframe_bps, subframe[_best_subframe]);
+             }
+             
+             *best_subframe = _best_subframe;
+             *best_bits = _best_bits;
+             
+             return true;
+             }
+             */
+    
+    /*
+     private boolean addSubframe(Header frame_header, int subframe_bps, ChannelBase subframe, BitBuffer frame) {
+     switch(subframe->type) {
+     case SUBFRAME_TYPE_CONSTANT:
+     if (!subframe_add_constant(&(subframe->data.constant), subframe_bps, subframe->wasted_bits, frame)) {
+     state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
+     return false;
+     }
+     break;
+     case SUBFRAME_TYPE_FIXED:
+     if (!subframe_add_fixed(&(subframe->data.fixed), frame_header.blocksize - subframe->data.fixed.order, subframe_bps, subframe->wasted_bits, frame)) {
+     state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
+     return false;
+     }
+     break;
+     case SUBFRAME_TYPE_LPC:
+     if (!subframe_add_lpc(&(subframe->data.lpc), frame_header.blocksize - subframe->data.lpc.order, subframe_bps, subframe->wasted_bits, frame)) {
+     state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
+     return false;
+     }
+     break;
+     case SUBFRAME_TYPE_VERBATIM:
+     if (!subframe_add_verbatim(&(subframe->data.verbatim), frame_header.blocksize, subframe_bps, subframe->wasted_bits, frame)) {
+     state = STREAM_ENCODER_FATAL_ERROR_WHILE_ENCODING;
+     return false;
+     }
+     break;
+     default:
+     ASSERT(0);
+     }
+     
+     return true;
+     }
+     */
+    
+    /*
+     private int evaluateConstantSubframe(int signal, int subframe_bps, ChannelBase subframe) {
+     subframe->type = SUBFRAME_TYPE_CONSTANT;
+     subframe->data.constant.value = signal;
+     
+     return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + subframe_bps;
+     }
+     */
+    
+    /*
+     private int evaluateFixedSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int blocksize, int subframe_bps, int order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
+     unsigned i, residual_bits;
+     unsigned residual_samples = blocksize - order;
+     
+     fixed_compute_residual(signal+order, residual_samples, order, residual);
+     
+     subframe->type = SUBFRAME_TYPE_FIXED;
+     
+     subframe->data.fixed.entropy_coding_method.type = ENTROPY_CODING_METHOD_PARTITIONED_RICE;
+     subframe->data.fixed.entropy_coding_method.data.partitioned_rice.contents = partitioned_rice_contents;
+     subframe->data.fixed.residual = residual;
+     
+     residual_bits =
+     find_best_partition_order_(
+     encoder->private_,
+     residual,
+     abs_residual,
+     abs_residual_partition_sums,
+     raw_bits_per_partition,
+     residual_samples,
+     order,
+     rice_parameter,
+     min_partition_order,
+     max_partition_order,
+     precompute_partition_sums,
+     do_escape_coding,
+     rice_parameter_search_dist,
+     &subframe->data.fixed.entropy_coding_method.data.partitioned_rice
+     );
+     
+     subframe->data.fixed.order = order;
+     for(i = 0; i < order; i++)
+     subframe->data.fixed.warmup[i] = signal[i];
+     
+     return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (order * subframe_bps) + residual_bits;
+     }
+     */
+    
+    /*
+     private int evaluateLPCSubframe(int[] signal, int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, double[] lp_coeff, int blocksize, int subframe_bps, int order, int qlp_coeff_precision, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, ChannelBase subframe, EntropyPartitionedRiceContents partitioned_rice_contents) {
+     int[] qlp_coeff = new int[MAX_LPC_ORDER];
+     int i, residual_bits;
+     int quantization, ret;
+     int residual_samples = blocksize - order;
+     
+     // try to keep qlp coeff precision such that only 32-bit math is required for decode of <=16bps streams
+      if (subframe_bps <= 16) {
+      ASSERT(order > 0);
+      ASSERT(order <= MAX_LPC_ORDER);
+      qlp_coeff_precision = min(qlp_coeff_precision, 32 - subframe_bps - bitmath_ilog2(order));
+      }
+      
+      ret = lpc_quantize_coefficients(lp_coeff, order, qlp_coeff_precision, qlp_coeff, quantization);
+      if (ret != 0)
+      return 0; // this is a hack to indicate to the caller that we can't do lp at this order on this subframe
+      
+      if (subframe_bps + qlp_coeff_precision + bitmath_ilog2(order) <= 32)
+      if (subframe_bps <= 16 && qlp_coeff_precision <= 16)
+      local_lpc_compute_residual_from_qlp_coefficients_16bit(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
+      else
+      local_lpc_compute_residual_from_qlp_coefficients(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
+      else
+      local_lpc_compute_residual_from_qlp_coefficients_64bit(signal+order, residual_samples, qlp_coeff, order, quantization, residual);
+      
+      subframe->type = SUBFRAME_TYPE_LPC;
+      
+      subframe->data.lpc.entropy_coding_method.type = ENTROPY_CODING_METHOD_PARTITIONED_RICE;
+      subframe->data.lpc.entropy_coding_method.data.partitioned_rice.contents = partitioned_rice_contents;
+      subframe->data.lpc.residual = residual;
+      
+      residual_bits =
+      find_best_partition_order_(
+      encoder->private_,
+      residual,
+      abs_residual,
+      abs_residual_partition_sums,
+      raw_bits_per_partition,
+      residual_samples,
+      order,
+      rice_parameter,
+      min_partition_order,
+      max_partition_order,
+      precompute_partition_sums,
+      do_escape_coding,
+      rice_parameter_search_dist,
+      &subframe->data.fixed.entropy_coding_method.data.partitioned_rice
+      );
+      
+      subframe->data.lpc.order = order;
+      subframe->data.lpc.qlp_coeff_precision = qlp_coeff_precision;
+      subframe->data.lpc.quantization_level = quantization;
+      memcpy(subframe->data.lpc.qlp_coeff, qlp_coeff, sizeof(int)*MAX_LPC_ORDER);
+      for(i = 0; i < order; i++)
+      subframe->data.lpc.warmup[i] = signal[i];
+      
+      return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN + SUBFRAME_LPC_QLP_SHIFT_LEN + (order * (qlp_coeff_precision + subframe_bps)) + residual_bits;
+      }
+      */
+    
 /*
 private int evaluateVerbatimSubframe(int[] signal, int blocksize, int subframe_bps, ChannelVerbatim subframe) {
 

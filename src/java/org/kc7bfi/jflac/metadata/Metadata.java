@@ -25,4 +25,34 @@ package org.kc7bfi.jflac.metadata;
  * @author kc7bfi
  */
 public abstract class Metadata {
+    
+    /** StreamInfo Metatdata type. */
+    public static final int METADATA_TYPE_STREAMINFO = 0;
+    
+    /** Padding Metatdata type. */
+    public static final int METADATA_TYPE_PADDING = 1;
+    
+    /** Application Metatdata type. */
+    public static final int METADATA_TYPE_APPLICATION = 2;
+    
+    /** SeekTable Metatdata type. */
+    public static final int METADATA_TYPE_SEEKTABLE = 3;
+    
+    /** VorbisComment Metatdata type. */
+    public static final int METADATA_TYPE_VORBIS_COMMENT = 4;
+    
+    /** CueSheet Metatdata type. */
+    public static final int METADATA_TYPE_CUESHEET = 5;
+    
+    /** Undefined Metatdata type. */
+    public static final int METADATA_TYPE_UNDEFINED = 6;
+    
+    /** Metadata IsLast field length. */
+    public static final int STREAM_METADATA_IS_LAST_LEN = 1; // bits
+    
+    /** Metadata type field length. */
+    public static final int STREAM_METADATA_TYPE_LEN = 7; // bits
+    
+    /** Metadata length field length. */
+    public static final int STREAM_METADATA_LENGTH_LEN = 24; // bits
 }

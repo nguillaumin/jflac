@@ -19,6 +19,7 @@ package org.kc7bfi.jflac.util;
  * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 
@@ -42,9 +43,9 @@ public class OutputBitStream {
             0xFFFFFFFFFFFFFFFFL};
     
     private byte[] buffer = new byte[0];
-    private int capacity = 0; // in blurbs
-    private int inBlurbs = 0;
-    private int inBits = 0;
+    private int outCapacity = 0; // in blurbs
+    private int outBlurbs = 0;
+    private int outBits = 0;
     private int totalBits = 0; // must always == BITS_PER_BLURB*blurbs+bits
     private int consumedBlurbs = 0;
     private int consumedBits = 0;
@@ -60,12 +61,12 @@ public class OutputBitStream {
      * fixups here.
      */
     private boolean resize(int newCapacity) {
-        if (capacity == newCapacity) return true;
+        if (outCapacity >= newCapacity) return true;
         byte[] newBuffer = new byte[newCapacity];
-        System.arraycopy(buffer, 0, newBuffer, 0, Math.min(inBlurbs + ((inBits != 0) ? 1 : 0), newCapacity));
-        if (newCapacity < inBlurbs + ((inBits != 0) ? 1 : 0)) {
-            inBlurbs = newCapacity;
-            inBits = 0;
+        System.arraycopy(buffer, 0, newBuffer, 0, Math.min(outBlurbs + ((outBits != 0) ? 1 : 0), newCapacity));
+        if (newCapacity < outBlurbs + ((outBits != 0) ? 1 : 0)) {
+            outBlurbs = newCapacity;
+            outBits = 0;
             totalBits = newCapacity << 3;
         }
         if (newCapacity < consumedBlurbs + ((consumedBits != 0) ? 1 : 0)) {
@@ -74,20 +75,22 @@ public class OutputBitStream {
             totalConsumedBits = newCapacity << 3;
         }
         buffer = newBuffer;
-        capacity = newCapacity;
+        outCapacity = newCapacity;
         return true;
     }
     
     private boolean grow(int minBlurbsToAdd) {
-        int new_capacity = Math.max(capacity * 2, capacity + minBlurbsToAdd);
-        return resize(new_capacity);
+        int newCapacity = Math.max(outCapacity * 2, outCapacity + minBlurbsToAdd);
+        System.out.print(" growCap="+newCapacity);
+        return resize(newCapacity);
     }
     
     private boolean ensureSize(int bitsToAdd) {
-        if ((capacity << 3) < totalBits + bitsToAdd)
+        if ((outCapacity << 3) < totalBits + bitsToAdd) {
+            System.out.print(" grow="+((bitsToAdd >> 3) + 2));
             return grow((bitsToAdd >> 3) + 2);
-        else
-            return true;
+        }
+        return true;
     }
     
     /*
@@ -150,23 +153,23 @@ public class OutputBitStream {
     public boolean concatenateAligned(OutputBitStream src) {
         int bitsToAdd = src.totalBits - src.totalConsumedBits;
         if (bitsToAdd == 0) return true;
-        if (inBits != src.consumedBits) return false;
+        if (outBits != src.consumedBits) return false;
         if (!ensureSize(bitsToAdd)) return false;
-        if (inBits == 0) {
-            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, inBlurbs, 
-                    (src.inBlurbs - src.consumedBlurbs + ((src.inBits != 0) ? 1 : 0)));
-        } else if (inBits + bitsToAdd > BITS_PER_BLURB) {
-            buffer[inBlurbs] <<= (BITS_PER_BLURB - inBits);
-            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - inBits)) - 1));
-            System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, inBlurbs + 11,
-                    (src.inBlurbs - src.consumedBlurbs - 1 + ((src.inBits != 0) ? 1 : 0)));
+        if (outBits == 0) {
+            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, outBlurbs, 
+                    (src.outBlurbs - src.consumedBlurbs + ((src.outBits != 0) ? 1 : 0)));
+        } else if (outBits + bitsToAdd > BITS_PER_BLURB) {
+            buffer[outBlurbs] <<= (BITS_PER_BLURB - outBits);
+            buffer[outBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - outBits)) - 1));
+            System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, outBlurbs + 11,
+                    (src.outBlurbs - src.consumedBlurbs - 1 + ((src.outBits != 0) ? 1 : 0)));
         } else {
-            buffer[inBlurbs] <<= bitsToAdd;
-            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
+            buffer[outBlurbs] <<= bitsToAdd;
+            buffer[outBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
         }
-        inBits = src.inBits;
+        outBits = src.outBits;
         totalBits += bitsToAdd;
-        inBlurbs = totalBits / BITS_PER_BLURB;
+        outBlurbs = totalBits / BITS_PER_BLURB;
         return true;
     }
     
@@ -191,7 +194,7 @@ public class OutputBitStream {
      * @return The write CRC-16 value
      */
     public short getWriteCRC16() {
-        return CRC16.calc(buffer, inBlurbs);
+        return CRC16.calc(buffer, outBlurbs);
     }
     
     /**
@@ -199,7 +202,7 @@ public class OutputBitStream {
      * @return  The write CRC-8 val;ue
      */
     public byte getWriteCRC8() {
-        return CRC8.calc(buffer, inBlurbs);
+        return CRC8.calc(buffer, outBlurbs);
     }
     
     /**
@@ -207,7 +210,7 @@ public class OutputBitStream {
      * @return  True of bit stream is byte aligned
      */
     public boolean isByteAligned() {
-        return ((inBits & 7) == 0);
+        return ((outBits & 7) == 0);
     }
     
     /**
@@ -234,153 +237,147 @@ public class OutputBitStream {
         return (totalBits - totalConsumedBits) >> 3;
     }
     
-    public boolean writeZeroes(int bits) {
-        if (bits == 0) return true;
-        if (!ensureSize(bits)) return false;
+    public void writeZeroes(int bits) throws IOException {
+        if (bits == 0) return;
+        if (!ensureSize(bits)) throw new IOException("Memory Allocation Error");
         totalBits += bits;
         while (bits > 0) {
-            int n = Math.min(BITS_PER_BLURB - bits, bits);
-            buffer[inBlurbs] <<= n;
+            int n = Math.min(BITS_PER_BLURB - outBits, bits);
+            buffer[outBlurbs] <<= n;
             bits -= n;
-            bits += n;
-            if (bits == BITS_PER_BLURB) {
-                inBlurbs++;
-                bits = 0;
+            outBits += n;
+            if (outBits == BITS_PER_BLURB) {
+                outBlurbs++;
+                outBits = 0;
             }
         }
-        return true;
+    }
+
+    public void writeRawUInt(boolean val, int bits) throws IOException {
+        writeRawUInt((val) ? 1 : 0, bits);
     }
     
-    public boolean writeRawUInt(int val, int bits) {
-        if (bits == 0) return true;
+    public void writeRawUInt(int val, int bits) throws IOException {
+        if (bits == 0) return;
         
         // inline the size check so we don't incure a function call unnecessarily
-        if ((capacity << 3) < totalBits + bits) {
-            if (!ensureSize(bits))
-                return false;
+        System.out.print("capacity="+outCapacity+" totalBits="+totalBits+" bits="+bits);
+        if ((outCapacity << 3) < totalBits + bits) {
+            if (!ensureSize(bits)) throw new IOException("Memory allocation error");
         }
+        System.out.println(" newCap="+outCapacity);
         
         // zero-out unused bits; WATCHOUT: other code relies on this, so this needs to stay
-        if (bits < 32) val &= (~(0xffffffff << bits)); /* zero-out unused bits */
+        if (bits < 32) val &= (~(0xffffffff << bits)); // zero-out unused bits
         totalBits += bits;
         while (bits > 0) {
-            int n = BITS_PER_BLURB - bits;
-            if (n == BITS_PER_BLURB) { // i.e. bb->bits == 0
+            int n = BITS_PER_BLURB - outBits;
+            if (n == BITS_PER_BLURB) { // i.e. outBits == 0
                 if (bits < BITS_PER_BLURB) {
-                    buffer[inBlurbs] = (byte) val;
-                    this.inBits = bits;
+                    buffer[outBlurbs] = (byte) val;
+                    outBits = bits;
                     break;
                 } else if (bits == BITS_PER_BLURB) {
-                    buffer[inBlurbs++] = (byte) val;
+                    buffer[outBlurbs++] = (byte) val;
                     break;
                 } else {
                     int k = bits - BITS_PER_BLURB;
-                    buffer[inBlurbs++] = (byte) (val >> k);
+                    buffer[outBlurbs++] = (byte) (val >> k);
                     
                     // we know k < 32 so no need to protect against the gcc bug mentioned above
                     val &= (~(0xffffffff << k));
                     bits -= BITS_PER_BLURB;
                 }
             } else if (bits <= n) {
-                buffer[inBlurbs] <<= bits;
-                buffer[inBlurbs] |= val;
+                buffer[outBlurbs] <<= bits;
+                buffer[outBlurbs] |= val;
                 if (bits == n) {
-                    inBlurbs++;
-                    bits = 0;
+                    outBlurbs++;
+                    outBits = 0;
                 } else
-                    bits += bits;
+                    outBits += bits;
                 break;
             } else {
                 int k = bits - n;
-                buffer[inBlurbs] <<= n;
-                buffer[inBlurbs] |= (val >> k);
+                buffer[outBlurbs] <<= n;
+                buffer[outBlurbs] |= (val >> k);
                 
                 // we know n > 0 so k < 32 so no need to protect against the gcc bug mentioned above
                 val &= (~(0xffffffff << k));
                 bits -= n;
-                inBlurbs++;
-                bits = 0;
+                outBlurbs++;
+                outBits = 0;
             }
         }
-        return true;
     }
     
-    public boolean writeRawInt(int val, int bits) {
-        return writeRawUInt((int) val, bits);
+    public void writeRawInt(int val, int bits) throws IOException {
+        writeRawUInt((int) val, bits);
     }
     
-    public boolean writeRawULong(long val, int bits) {
-        if (bits == 0) return true;
-        if (!ensureSize(bits)) return false;
+    public void writeRawULong(long val, int bits) throws IOException {
+        if (bits == 0) return;
+        if (!ensureSize(bits)) throw new IOException("Memory Allocate Error");
         val &= MASK32[bits];
         totalBits += bits;
         while (bits > 0) {
-            if (bits == 0) {
+            if (outBits == 0) {
                 if (bits < BITS_PER_BLURB) {
-                    buffer[inBlurbs] = (byte) val;
-                    this.inBits = bits;
+                    buffer[outBlurbs] = (byte) val;
+                    outBits = bits;
                     break;
                 } else if (bits == BITS_PER_BLURB) {
-                    buffer[inBlurbs++] = (byte) val;
+                    buffer[outBlurbs++] = (byte) val;
                     break;
                 } else {
                     int k = bits - BITS_PER_BLURB;
-                    buffer[inBlurbs++] = (byte) (val >> k);
+                    buffer[outBlurbs++] = (byte) (val >> k);
                     
                     // we know k < 64 so no need to protect against the gcc bug mentioned above
                     val &= (~(0xffffffffffffffffL << k));
                     bits -= BITS_PER_BLURB;
                 }
             } else {
-                int n = Math.min(BITS_PER_BLURB - bits, bits);
+                int n = Math.min(BITS_PER_BLURB - outBits, bits);
                 int k = bits - n;
-                buffer[inBlurbs] <<= n;
-                buffer[inBlurbs] |= (val >> k);
+                buffer[outBlurbs] <<= n;
+                buffer[outBlurbs] |= (val >> k);
                 
                 // we know n > 0 so k < 64 so no need to protect against the gcc bug mentioned above
                 val &= (~(0xffffffffffffffffL << k));
                 bits -= n;
-                bits += n;
-                if (bits == BITS_PER_BLURB) {
-                    inBlurbs++;
-                    bits = 0;
+                outBits += n;
+                if (outBits == BITS_PER_BLURB) {
+                    outBlurbs++;
+                    outBits = 0;
                 }
             }
         }
-        return true;
     }
     
-    public boolean writeRawUIntLittleEndian(int val) {
+    public void writeRawUIntLittleEndian(int val) throws IOException {
         // NOTE: we rely on the fact that write_raw_uint32() masks out the unused bits
-        if (!writeRawUInt(val, 8))
-            return false;
-        if (!writeRawUInt(val >> 8, 8))
-            return false;
-        if (!writeRawUInt(val >> 16, 8))
-            return false;
-        if (!writeRawUInt(val >> 24, 8))
-            return false;
-        return true;
+        writeRawUInt(val, 8);
+        writeRawUInt(val >> 8, 8);
+        writeRawUInt(val >> 16, 8);
+        writeRawUInt(val >> 24, 8);
     }
     
-    public boolean writeByteBlock(byte[] vals, int nvals) {
+    public void writeByteBlock(byte[] vals, int nvals) throws IOException {
         // this could be faster but currently we don't need it to be
         for (int i = 0; i < nvals; i++) {
-            if (!writeRawUInt((int) (vals[i]), 8))
-                return false;
+            writeRawUInt((int) (vals[i]), 8);
         }
-        return true;
     }
     
-    public boolean writeUnaryUnsigned(int val) {
+    public void writeUnaryUnsigned(int val) throws IOException {
         if (val < 32)
-            return writeRawUInt(1, ++val);
+            writeRawUInt(1, ++val);
         else if (val < 64)
-            return writeRawULong(1, ++val);
+            writeRawULong(1, ++val);
         else {
-            if (!writeZeroes(val))
-                return false;
-            return writeRawUInt(1, 1);
+            writeZeroes(val);
+            writeRawUInt(1, 1);
         }
     }
     
@@ -433,7 +430,7 @@ public class OutputBitStream {
      * return true; } # endif // ifdef SYMMETRIC_RICE
      */
     
-    public boolean writeRiceSigned(int val, int parameter) {
+    public void writeRiceSigned(int val, int parameter) throws IOException {
         int total_bits, interesting_bits, msbs, uval;
         int pattern;
         
@@ -450,99 +447,88 @@ public class OutputBitStream {
         pattern = 1 << parameter; /* the unary end bit */
         pattern |= (uval & ((1 << parameter) - 1)); /* the binary LSBs */
         if (total_bits <= 32) {
-            if (!writeRawUInt(pattern, total_bits))
-                return false;
+            writeRawUInt(pattern, total_bits);
         } else {
             /* write the unary MSBs */
-            if (!writeZeroes(msbs))
-                return false;
+            writeZeroes(msbs);
             /* write the unary end bit and binary LSBs */
-            if (!writeRawUInt(pattern, interesting_bits))
-                return false;
+            writeRawUInt(pattern, interesting_bits);
         }
-        return true;
     }
     
-    public boolean writeUTF8UInt(int val) {
-        boolean ok = true;
+    public void writeUTF8UInt(int val) throws IOException {
         if (val < 0x80) {
-            return writeRawUInt(val, 8);
+            writeRawUInt(val, 8);
         } else if (val < 0x800) {
-            ok &= writeRawUInt(0xC0 | (val >> 6), 8);
-            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
+            writeRawUInt(0xC0 | (val >> 6), 8);
+            writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x10000) {
-            ok &= writeRawUInt(0xE0 | (val >> 12), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
+            writeRawUInt(0xE0 | (val >> 12), 8);
+            writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x200000) {
-            ok &= writeRawUInt(0xF0 | (val >> 18), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
+            writeRawUInt(0xF0 | (val >> 18), 8);
+            writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x4000000) {
-            ok &= writeRawUInt(0xF8 | (val >> 24), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
+            writeRawUInt(0xF8 | (val >> 24), 8);
+            writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (val & 0x3F), 8);
         } else {
-            ok &= writeRawUInt(0xFC | (val >> 30), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 24) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
+            writeRawUInt(0xFC | (val >> 30), 8);
+            writeRawUInt(0x80 | ((val >> 24) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (val & 0x3F), 8);
         }
-        return ok;
     }
     
-    public boolean writeUTF8ULong(long val) {
-        boolean ok = true;
+    public void writeUTF8ULong(long val) throws IOException {
         if (val < 0x80) {
-            return writeRawUInt((int) val, 8);
+            writeRawUInt((int) val, 8);
         } else if (val < 0x800) {
-            ok &= writeRawUInt(0xC0 | (int) (val >> 6), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xC0 | (int) (val >> 6), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x10000) {
-            ok &= writeRawUInt(0xE0 | (int) (val >> 12), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xE0 | (int) (val >> 12), 8);
+            writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x200000) {
-            ok &= writeRawUInt(0xF0 | (int) (val >> 18), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xF0 | (int) (val >> 18), 8);
+            writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x4000000) {
-            ok &= writeRawUInt(0xF8 | (int) (val >> 24), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xF8 | (int) (val >> 24), 8);
+            writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x80000000) {
-            ok &= writeRawUInt(0xFC | (int) (val >> 30), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xFC | (int) (val >> 30), 8);
+            writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else {
-            ok &= writeRawUInt(0xFE, 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 30) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
+            writeRawUInt(0xFE, 8);
+            writeRawUInt(0x80 | (int) ((val >> 30) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         }
-        return ok;
     }
     
-    public boolean zeroPadToByteBoundary() {
-        /* 0-pad to byte boundary */
-        if ((inBits & 7) != 0)
-            return writeZeroes(8 - (inBits & 7));
-        else
-            return true;
+    public void zeroPadToByteBoundary() throws IOException {
+        // 0-pad to byte boundary
+        if ((outBits & 7) != 0) writeZeroes(8 - (outBits & 7));
     }
     
     /*

@@ -23,6 +23,7 @@ package org.kc7bfi.jflac.metadata;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.util.OutputBitStream;
 
 /**
  * StreamInfo Metadata block.
@@ -91,6 +92,36 @@ public class StreamInfo extends Metadata {
         // skip the rest of the block
         length -= (usedBits / 8);
         is.readByteBlockAlignedNoCRC(null, length);
+    }
+    
+    public void write(OutputBitStream os, boolean isLast) throws IOException {
+
+        os.writeRawUInt(isLast, STREAM_METADATA_IS_LAST_LEN);
+        os.writeRawUInt(METADATA_TYPE_STREAMINFO, STREAM_METADATA_TYPE_LEN);
+        os.writeRawUInt(calcLength(), STREAM_METADATA_LENGTH_LEN);
+
+        os.writeRawUInt(minBlockSize, STREAMINFO_MIN_BLOCK_SIZE_LEN);
+        os.writeRawUInt(maxBlockSize, STREAMINFO_MAX_BLOCK_SIZE_LEN);
+        os.writeRawUInt(minFrameSize, STREAMINFO_MIN_FRAME_SIZE_LEN);
+        os.writeRawUInt(maxFrameSize, STREAMINFO_MAX_FRAME_SIZE_LEN);
+        os.writeRawUInt(sampleRate, STREAMINFO_SAMPLE_RATE_LEN);
+        os.writeRawUInt(channels - 1, STREAMINFO_CHANNELS_LEN);
+        os.writeRawULong(bitsPerSample - 1, STREAMINFO_BITS_PER_SAMPLE_LEN);
+        os.writeRawULong(totalSamples, STREAMINFO_TOTAL_SAMPLES_LEN);
+        os.writeByteBlock(md5sum, md5sum.length);
+    }
+    
+    private int calcLength() {
+        int bits = STREAMINFO_MIN_BLOCK_SIZE_LEN + 
+                   STREAMINFO_MAX_BLOCK_SIZE_LEN +
+                   STREAMINFO_MIN_FRAME_SIZE_LEN +
+                   STREAMINFO_MAX_FRAME_SIZE_LEN +
+                   STREAMINFO_SAMPLE_RATE_LEN +
+                   STREAMINFO_CHANNELS_LEN +
+                   STREAMINFO_BITS_PER_SAMPLE_LEN +
+                   STREAMINFO_TOTAL_SAMPLES_LEN +
+                   md5sum.length;
+        return ((bits + 7) / 8);
     }
     
     /**
