@@ -98,6 +98,7 @@ public class SeekTable extends Metadata {
      * @return  The selected seek point
      */
     public SeekPoint getSeekPoint(int idx) {
+        if (idx < 0 || idx >= points.length) return null;
         return points[idx];
     }
     
