@@ -4,7 +4,7 @@
 	<name>Java FLAC Codec</name>
 	<id>jflac</id>
 	<groupId>jflac</groupId>
-	<currentVersion>0.6</currentVersion>
+	<currentVersion>1.0</currentVersion>
 	<organization>
 		<name>Open Roads Consulting, Inc.</name>
 		<url>http://openroadsconsulting.com/</url>
@@ -17,7 +17,12 @@
 	<description>
 <![CDATA[
 <p>Java FLAC Codec</p>
-<p>jFLAC is a port of the Free Lossless Audio Codec (FLAC) library to Java. This library allows java developers to experiment and write programs that use the FLAC algorithms.</p>
+<p>jFLAC is a port of the Free Lossless Audio Codec (FLAC) library to Java. 
+This library allows java developers to experiment and write programs that use the 
+FLAC algorithms.</p>
+
+<p>The jFLAC library now also provides a Java Sound SPI class. To use the Java Sound SPI
+simply include the jFLAC jar file into your class path.</p>
 
 <p>The <a href="http://sourceforge.net/projects/jflac">jFLAC project</a> is hosted by <a href="http://sourceforge.net">SourceForge</a>.</p>
 
@@ -88,12 +93,6 @@ on SourceForge</p>
 				<directory>testdata</directory>
 				<includes>
 					<include>*.flac</include>
-				</includes>
-			  </resource>
-			  <resource>
-				<directory>META-INF</directory>
-				<includes>
-					<include>**/javax.*</include>
 				</includes>
 			  </resource>
 		  </resources>

@@ -40,27 +40,27 @@ import javax.sound.sampled.spi.FormatConversionProvider;
  * returned by one of the getAudioInputStream methods.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FlacFormatConvertionProvider extends FormatConversionProvider {
 
     /** */
-    private static final AudioFormat.Encoding[] NO_ENCODING = {};
+    //private static final AudioFormat.Encoding[] NO_ENCODING = {};
 
     /** */
-    private static final AudioFormat.Encoding[] PCM_ENCODING = { AudioFormat.Encoding.PCM_SIGNED };
+    //private static final AudioFormat.Encoding[] PCM_ENCODING = { AudioFormat.Encoding.PCM_SIGNED };
 
     /** */
-    private static final AudioFormat.Encoding[] FLAC_ENCODING = { FlacEncoding.FLAC };
+    //private static final AudioFormat.Encoding[] FLAC_ENCODING = { FlacEncoding.FLAC };
 
     /** */
-    private static final AudioFormat.Encoding[] BOTH_ENCODINGS = {
-            FlacEncoding.FLAC, 
-            AudioFormat.Encoding.PCM_SIGNED 
-    };
+    //private static final AudioFormat.Encoding[] BOTH_ENCODINGS = {
+    //        FlacEncoding.FLAC, 
+    //        AudioFormat.Encoding.PCM_SIGNED 
+    //};
 
     /** */
-    private static final AudioFormat[] NO_FORMAT = {};
+    //private static final AudioFormat[] NO_FORMAT = {};
 
     /**
      * Obtains the set of source format encodings from which format conversion

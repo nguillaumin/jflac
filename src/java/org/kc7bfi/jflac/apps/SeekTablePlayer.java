@@ -68,7 +68,7 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
         FLACDecoder decoder = new FLACDecoder(is);
         decoder.addPCMProcessor(this);
         decoder.addFrameListener(this);
-        decoder.processMetadata();
+        decoder.readMetadata();
         
         // see if SeekTbale exists
         if (seekTable == null) {

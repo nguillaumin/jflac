@@ -50,6 +50,10 @@ public class Header {
      * use the number_type value to determine which to use. 
      */
     public int frameNumber = -1;
+    
+    /**
+     * The sample number for the first sample in the frame.
+     */
     public long sampleNumber = -1;
     
     /** 

@@ -69,19 +69,19 @@ public class BitInputStream {
         this.inStream = is;
     }
     
-    private void resize(int newCapacity) {
-        if (buffer.length >= newCapacity) return;
-        System.out.println("RESIZE FROM " + buffer.length + " TO " + newCapacity);
-        byte[] newBuffer = new byte[newCapacity];
-        System.arraycopy(buffer, 0, newBuffer, 0, putByte);
-        buffer = newBuffer;
-        return;
-    }
+    //private void resize(int newCapacity) {
+    //    if (buffer.length >= newCapacity) return;
+    //    System.out.println("RESIZE FROM " + buffer.length + " TO " + newCapacity);
+    //    byte[] newBuffer = new byte[newCapacity];
+    //    System.arraycopy(buffer, 0, newBuffer, 0, putByte);
+    //    buffer = newBuffer;
+    //    //return;
+    //}
     
-    private void grow(int minBlurbsToAdd) {
-        int newCapacity = (buffer.length + minBlurbsToAdd + BUFFER_CHUNK_SIZE - 1) / BUFFER_CHUNK_SIZE;
-        resize(newCapacity);
-    }
+    //private void grow(int minBlurbsToAdd) {
+    //    int newCapacity = (buffer.length + minBlurbsToAdd + BUFFER_CHUNK_SIZE - 1) / BUFFER_CHUNK_SIZE;
+    //    resize(newCapacity);
+    //}
     
     //private void ensureSize(int bitsToAdd) {
     //    int blurbsToAdd = (bitsToAdd + 7) >> 3;

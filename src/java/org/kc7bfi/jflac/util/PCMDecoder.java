@@ -31,7 +31,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * @author kc7bfi
  */
 public class PCMDecoder {
-    private static final int MAX_BLOCK_SIZE = 65535;
+    //private static final int MAX_BLOCK_SIZE = 65535;
     
     private long totalSamples;
     private int channels;

@@ -131,7 +131,7 @@ public class FlacPacker extends JFrame {
             try {
                 FileInputStream is = new FileInputStream(file);
                 FLACDecoder decoder = new FLACDecoder(is);
-                decoder.processMetadata();
+                decoder.readMetadata();
                 StreamInfo info = decoder.getStreamInfo();
                 if (masterStreamInfo == null) {
                     masterStreamInfo = info;
@@ -144,7 +144,7 @@ public class FlacPacker extends JFrame {
                 masterStreamInfo.addTotalSamples(info.getTotalSamples());
                 
                 SeekPoint seekPoint = new SeekPoint(lastSampleNumber, lastStreamOffset, 0);
-                decoder.processMetadata();
+                //decoder.processMetadata();
                 long frameStartOffs = decoder.getTotalBytesRead();
                 PackerFile aFile = new PackerFile(file, seekPoint, frameStartOffs);
                 albumFiles.add(aFile);

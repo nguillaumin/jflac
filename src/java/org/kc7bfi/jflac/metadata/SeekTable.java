@@ -38,6 +38,7 @@ public class SeekTable extends Metadata {
      * The constructor.
      * @param is                The InputBitStream
      * @param length            Length of the record
+     * @param isLast            True if this is the last Metadata block in the chain
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public SeekTable(BitInputStream is, int length, boolean isLast) throws IOException {
@@ -57,6 +58,7 @@ public class SeekTable extends Metadata {
     /**
      * Constructor.
      * @param points    Seek Points
+     * @param isLast            True if this is the last Metadata block in the chain
      */
     public SeekTable(SeekPoint[] points, boolean isLast) {
         super(isLast);

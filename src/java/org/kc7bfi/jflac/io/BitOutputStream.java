@@ -141,6 +141,10 @@ public class BitOutputStream {
     public BitOutputStream(OutputStream os) {
         this.os = os;
     }
+    
+    /**
+     * The constructor.
+     */
     public BitOutputStream() {
     }
     
@@ -242,6 +246,11 @@ public class BitOutputStream {
         return (totalBits - totalConsumedBits) >> 3;
     }
     
+    /**
+     * Write zero bits.
+     * @param bits  The number of zero bits to write
+     * @throws IOException  On write error
+     */
     public void writeZeroes(int bits) throws IOException {
         if (bits == 0) return;
         if (!ensureSize(bits)) throw new IOException("Memory Allocation Error");
@@ -258,6 +267,12 @@ public class BitOutputStream {
         }
     }
 
+    /**
+     * Write a true/false integer.
+     * @param val   The true/false value
+     * @param bits  The bit size to write
+     * @throws IOException  On write error
+     */
     public void writeRawUInt(boolean val, int bits) throws IOException {
         writeRawUInt((val) ? 1 : 0, bits);
     }
