@@ -40,7 +40,8 @@ public class SeekTable extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public SeekTable(BitInputStream is, int length) throws IOException {
+    public SeekTable(BitInputStream is, int length, boolean isLast) throws IOException {
+        super(isLast);
         int numPoints = length / SEEKPOINT_LENGTH_BYTES;
 
         points = new SeekPoint[numPoints];
@@ -57,7 +58,8 @@ public class SeekTable extends Metadata {
      * Constructor.
      * @param points    Seek Points
      */
-    public SeekTable(SeekPoint[] points) {
+    public SeekTable(SeekPoint[] points, boolean isLast) {
+        super(isLast);
         this.points = points;
     }
     

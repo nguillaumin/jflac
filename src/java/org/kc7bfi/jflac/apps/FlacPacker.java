@@ -162,7 +162,7 @@ public class FlacPacker extends JFrame {
         
         // make Seek Table
         SeekPoint[] points = new SeekPoint[albumFiles.size()];
-        SeekTable seekTable = new SeekTable(points);
+        SeekTable seekTable = new SeekTable(points, true);
         int metadataHeader = (Metadata.STREAM_METADATA_IS_LAST_LEN + Metadata.STREAM_METADATA_TYPE_LEN + Metadata.STREAM_METADATA_LENGTH_LEN) / 8;
         int metadataOffset = Constants.STREAM_SYNC_STRING.length + masterStreamInfo.calcLength() + seekTable.calcLength() + metadataHeader * 2;
         for (int i = 0; i < albumFiles.size(); i++) {
@@ -172,7 +172,7 @@ public class FlacPacker extends JFrame {
             points[i] = aFile.seekPoint;
         }
         
-        return new SeekTable(points);
+        return seekTable;
     }
     
     private void packFlac() throws IOException {

@@ -42,7 +42,9 @@ public class VorbisComment extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public VorbisComment(BitInputStream is, int length) throws IOException {
+    public VorbisComment(BitInputStream is, int length, boolean isLast) throws IOException {
+        super(isLast);
+        
         // read vendor string
         int len = is.readRawIntLittleEndian();
         vendorString = new byte[len];

@@ -55,4 +55,22 @@ public abstract class Metadata {
     
     /** Metadata length field length. */
     public static final int STREAM_METADATA_LENGTH_LEN = 24; // bits
+    
+    protected boolean isLast;
+    
+    /**
+     * Constructir.
+     * @param isLast    True if last Metadata block
+     */
+    public Metadata(boolean isLast) {
+        this.isLast = isLast;
+    }
+    
+    /**
+     * Test if this is the last metadata block.
+     * @return True if last metadata block in chain
+     */
+    public boolean isLast() {
+        return isLast;
+    }
 }

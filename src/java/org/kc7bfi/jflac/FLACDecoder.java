@@ -512,20 +512,20 @@ public class FLACDecoder {
         int length = bitStream.readRawUInt(Metadata.STREAM_METADATA_LENGTH_LEN);
         
         if (type == Metadata.METADATA_TYPE_STREAMINFO) {
-            metadata = streamInfo = new StreamInfo(bitStream, length);
+            metadata = streamInfo = new StreamInfo(bitStream, length, isLast);
             pcmProcessors.processStreamInfo((StreamInfo)metadata);
         } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
-            metadata = seekTable = new SeekTable(bitStream, length);
+            metadata = seekTable = new SeekTable(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_APPLICATION) {
-            metadata = new Application(bitStream, length);
+            metadata = new Application(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_PADDING) {
-            metadata = new Padding(bitStream, length);
+            metadata = new Padding(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_VORBIS_COMMENT) {
-            metadata = new VorbisComment(bitStream, length);
+            metadata = new VorbisComment(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_CUESHEET) {
-            metadata = new CueSheet(bitStream, length);
+            metadata = new CueSheet(bitStream, length, isLast);
         } else {
-            metadata = new Unknown(bitStream, length);
+            metadata = new Unknown(bitStream, length, isLast);
         }
         frameListeners.processMetadata(metadata);
         if (isLast) state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;

@@ -37,7 +37,8 @@ public class Padding extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Padding(BitInputStream is, int length) throws IOException {
+    public Padding(BitInputStream is, int length, boolean isLast) throws IOException {
+        super(isLast);
         this.length = length;
         is.readByteBlockAlignedNoCRC(null, length);
     }
