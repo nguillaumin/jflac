@@ -40,6 +40,7 @@ import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.metadata.Unknown;
 import org.kc7bfi.jflac.metadata.VorbisComment;
+import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC16;
 import org.kc7bfi.jflac.util.InputBitStream;
 
@@ -78,6 +79,7 @@ public class StreamDecoder {
     private int blockSize; /* in samples (per channel) */
     
     private HashSet frameListeners = new HashSet();
+    private HashSet pcmProcessors = new HashSet();
     
     // Decoder states
     private static final int STREAM_DECODER_SEARCH_FOR_METADATA = 0;
@@ -146,6 +148,70 @@ public class StreamDecoder {
     			listener.processFrame(frame);
     		}
     	}
+    }
+    
+    public void addPCMProcessor(PCMProcessor processor) {
+    	synchronized (pcmProcessors) {
+    		pcmProcessors.add(processor);
+    	}
+    }
+    
+    public void removePCMProcessor(PCMProcessor processor) {
+    	synchronized (pcmProcessors) {
+    		pcmProcessors.remove(processor);
+    	}
+    }
+    
+    private void callStreamInfoProcessors(StreamInfo info) {
+    	synchronized (pcmProcessors) {
+    		Iterator it = pcmProcessors.iterator();
+    		while (it.hasNext()) {
+    			PCMProcessor processor = (PCMProcessor)it.next();
+    			processor.processStreamInfo(info);
+    		}
+    	}
+    }
+    
+    private void callPCMProcessors(ByteSpace pcm) {
+    	synchronized (pcmProcessors) {
+    		Iterator it = pcmProcessors.iterator();
+    		while (it.hasNext()) {
+    			PCMProcessor processor = (PCMProcessor)it.next();
+    			processor.processPCM(pcm);
+    		}
+    	}
+    }
+    
+    private void callPCMProcessors(Frame frame) {
+    	ByteSpace space = null;
+		if (streamInfo.bitsPerSample == 8) {
+			space = new ByteSpace(frame.header.blockSize * channels);
+				for (int i = 0; i < frame.header.blockSize; i++) {
+					for (int channel = 0; channel < channels; channel++) {
+						space.append((byte) (channelData[channel].output[i] + 0x80));
+					}
+				}
+		} else if (streamInfo.bitsPerSample == 16) {
+			space = new ByteSpace(frame.header.blockSize * channels * 2);
+			for (int i = 0; i < frame.header.blockSize; i++) {
+					for (int channel = 0; channel < channels; channel++) {
+						short val = (short) (channelData[channel].output[i]);
+						space.append((byte) (val & 0xff));
+						space.append((byte) ((val >> 8) & 0xff));
+					}
+			}
+		} else if (streamInfo.bitsPerSample == 24) {
+			space = new ByteSpace(frame.header.blockSize * channels * 3);
+			for (int i = 0; i < frame.header.blockSize; i++) {
+					for (int channel = 0; channel < channels; channel++) {
+						int val = (channelData[channel].output[i]);
+						space.append((byte) (val & 0xff));
+						space.append((byte) ((val >> 8) & 0xff));
+						space.append((byte) ((val >> 16) & 0xff));
+					}
+			}
+		}
+		callPCMProcessors(space);
     }
     
     /**
@@ -219,13 +285,17 @@ public class StreamDecoder {
                     break;
                 case STREAM_DECODER_READ_METADATA :
                     Metadata metadata = readMetadata();
-                    if (metadata != null) callMetadataListeners(metadata);
+                    if (metadata == null) break;
+                    callMetadataListeners(metadata);
+                    if (metadata instanceof StreamInfo) callStreamInfoProcessors((StreamInfo)metadata);
                     break;
                 case STREAM_DECODER_SEARCH_FOR_FRAME_SYNC :
                     frameSync();
                     break;
                 case STREAM_DECODER_READ_FRAME :
-                    if (readFrame()) callFrameListeners(frame);
+                    if (!readFrame()) break;
+                    callFrameListeners(frame);
+                    callPCMProcessors(frame);
                     break;
                 case STREAM_DECODER_END_OF_STREAM :
                 case STREAM_DECODER_ABORTED :

@@ -39,17 +39,6 @@ public class Analyser implements FrameListener {
         decoder.decode();
    }
 
-    public static void main(String[] args) {
-        try {
-            Analyser analyser = new Analyser();
-            analyser.analyse(args[0]);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 	/* (non-Javadoc)
 	 * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.MetadataBase)
 	 */
@@ -64,4 +53,15 @@ public class Analyser implements FrameListener {
         frameNum++;
         System.out.println(frameNum + " " +frame.toString());
 	}
+
+    public static void main(String[] args) {
+        try {
+            Analyser analyser = new Analyser();
+            analyser.analyse(args[0]);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

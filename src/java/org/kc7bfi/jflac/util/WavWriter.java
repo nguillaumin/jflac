@@ -64,6 +64,11 @@ public class WavWriter {
         this.sampleRate = streamInfo.sampleRate;
     }
     
+    public WavWriter(DataOutput os) {
+        this.os = os;
+        this.osLE = new LittleEndianDataOutput(os);
+    }
+    
     /**
      * The constructor
      * @param os            The output sream
@@ -76,6 +81,11 @@ public class WavWriter {
         this.channels = streamInfo.channels;
         this.bps = streamInfo.bitsPerSample;
         this.sampleRate = streamInfo.sampleRate;
+    }
+    
+    public WavWriter(OutputStream os) {
+        this.os = new DataOutputStream(os);
+        this.osLE = new LittleEndianDataOutput(this.os);
     }
     
     /**
@@ -106,6 +116,14 @@ public class WavWriter {
         if (needsFixup) dataOffset = ((RandomAccessFile) os).getFilePointer();
         
         osLE.writeInt((int) dataSize); // data size
+    }
+    
+    public void writeHeader(StreamInfo streamInfo) throws IOException {
+        this.totalSamples = streamInfo.totalSamples;
+        this.channels = streamInfo.channels;
+        this.bps = streamInfo.bitsPerSample;
+        this.sampleRate = streamInfo.sampleRate;
+        writeHeader();
     }
 
     /**
@@ -175,5 +193,9 @@ public class WavWriter {
                 os.write(s8buffer, 0, sample);
             }
         }
+    }
+    
+    public void writePCM(ByteSpace space) throws IOException {
+    	os.write(space.space, 0, space.pos);
     }
 }

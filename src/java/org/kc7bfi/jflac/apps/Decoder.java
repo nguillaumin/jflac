@@ -19,37 +19,53 @@ package org.kc7bfi.jflac.apps;
  * Boston, MA  02111-1307, USA.
  */
 
-import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.StreamDecoder;
-import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.WavWriter;
 
-public class Decoder {
+public class Decoder implements PCMProcessor {
+	private WavWriter wav;
     
     public void decode(String inFileName, String outFileName) throws IOException {
         System.out.println("Decode ["+inFileName+"]["+outFileName+"]");
         FileInputStream is = new FileInputStream(inFileName);
         FileOutputStream os = new FileOutputStream(outFileName);
+        wav = new WavWriter(os);
         StreamDecoder decoder = new StreamDecoder(is);
-        decoder.processMetadata();
-        WavWriter wav = new WavWriter(os, decoder.getStreamInfo());
-        wav.writeHeader();
-        boolean eof = false;
-        for (int f = 0; !eof; f++) {
-            try {
-                Frame frame = decoder.getNextFrame();
-                if (frame == null) break;
-                wav.writeFrame(frame, decoder.getChannelData());
-            } catch (EOFException e) {
-                eof = true;
-            }
-        }
+        decoder.addPCMProcessor(this);
+        decoder.decode();
     }
+
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
+	 */
+	public void processStreamInfo(StreamInfo info) {
+        try {
+        	System.out.println("Write WAV header " + info);
+			wav.writeHeader(info);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
+	 */
+	public void processPCM(ByteSpace pcm) {
+		try {
+			System.out.println("Write PCM");
+			wav.writePCM(pcm);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
     public static void main(String[] args) {
         try {

@@ -35,5 +35,9 @@ public class ByteSpace {
         space = new byte[maxSpace];
         pos = 0;
     }
+    
+    public void append(byte b) {
+    	space[pos++] = b;
+    }
 
 }
