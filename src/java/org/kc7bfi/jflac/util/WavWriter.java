@@ -142,15 +142,15 @@ public class WavWriter {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].output[wideSample] + 0x8000);
-                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].output[wideSample]);
-                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                         }
                 }
                 os.write(s8buffer, 0, sample);
@@ -159,17 +159,17 @@ public class WavWriter {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].output[wideSample] + 0x800000);
-                            s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
-                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             short val = (short) (channelData[channel].output[wideSample]);
-                            s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
-                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
+                            s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
                         }
                 }
                 os.write(s8buffer, 0, sample);

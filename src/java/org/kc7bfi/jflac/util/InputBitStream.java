@@ -951,7 +951,7 @@ public class InputBitStream {
                             if (lsbs_left == available_bits) {
                                 // compose the value
                                 uval |= (msbs << parameter);
-                                if ((uval & 1) == 1)
+                                if ((uval & 1) != 0)
                                     vals[pos + val_i++] = -((int) (uval >> 1)) - 1;
                                 else
                                     vals[pos + val_i++] = (int) (uval >> 1);

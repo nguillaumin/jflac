@@ -114,7 +114,17 @@ public class ChannelLPC extends ChannelBase {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "FLACSubframe_LPC: WastedBits=" + wastedBits;
+        StringBuffer sb = new StringBuffer("ChannelLPC: Order=" + order +  " WastedBits=" + wastedBits);
+        sb.append(" qlpCoeffPrecision=" + qlpCoeffPrecision + " quantizationLevel=" + quantizationLevel);
+        sb.append("\n\t\tqlpCoeff: ");
+        for (int i = 0; i < order; i++) sb.append(qlpCoeff[i] + " ");
+        sb.append("\n\t\tWarmup: ");
+        for (int i = 0; i < order; i++) sb.append(warmup[i] + " ");
+        sb.append("\n\t\tParameter: ");
+        for (int i = 0; i < (1 <<((EntropyPartitionedRice) entropyCodingMethod).order); i++) sb.append(((EntropyPartitionedRice) entropyCodingMethod).contents.parameters[i] + " ");
+        //sb.append("\n\t\tResidual: ");
+        //for (int i = 0; i < header.blockSize; i++) sb.append(residual[i] + " ");
+        return sb.toString();
     }
 
 }

@@ -208,13 +208,19 @@ public class LPCPredictor {
      * @param startAt   The starting position in the data array
      */
     public static void restoreSignal(int[] residual, int dataLen, int[] qlpCoeff, int order, int lpQuantization, int[] data, int startAt) {
+        //System.out.println("Q="+lpQuantization);
         for (int i = 0; i < dataLen; i++) {
             int sum = 0;
             for (int j = 0; j < order; j++) {
                 sum += qlpCoeff[j] * data[startAt + i - j - 1];
             }
-            data[startAt + i] = residual[startAt + i] + (sum >> lpQuantization);
+            //System.out.print((sum >> lpQuantization)+" ");
+            data[startAt + i] = residual[i] + (sum >> lpQuantization);
         }
+        //System.out.println();
+        //for (int i = 0; i < dataLen+startAt; i++) System.out.print(data[i]+" "); System.out.println();
+        //for (int j = 0; j < order; j++) System.out.print(qlpCoeff[j]+" ");System.out.println();
+        //System.exit(1);
     }
     
     /**

@@ -39,7 +39,7 @@ public class Frame {
         StringBuffer sb = new StringBuffer();
         sb.append("Frame Header: " + header + "\n");
         for (int i = 0; i < header.channels; i++) {
-            sb.append("\tFrame Data" + subframes[i].toString() + "\n");
+            sb.append("\tFrame Data " + subframes[i].toString() + "\n");
         }
         sb.append("\tFrame Footer: " + crc);
         
