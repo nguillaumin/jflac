@@ -45,16 +45,6 @@ import org.kc7bfi.jflac.util.CRC16;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamDecoder {
-    private static final int METADATA_TYPE_STREAMINFO = 0;
-    private static final int METADATA_TYPE_PADDING = 1;
-    private static final int METADATA_TYPE_APPLICATION = 2;
-    private static final int METADATA_TYPE_SEEKTABLE = 3;
-    private static final int METADATA_TYPE_VORBIS_COMMENT = 4;
-    private static final int METADATA_TYPE_CUESHEET = 5;
-    private static final int METADATA_TYPE_UNDEFINED = 6;
-    private static final int STREAM_METADATA_IS_LAST_LEN = 1; /* bits */
-    private static final int STREAM_METADATA_TYPE_LEN = 7; /* bits */
-    private static final int STREAM_METADATA_LENGTH_LEN = 24; /* bits */
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     
     private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
@@ -431,21 +421,21 @@ public class StreamDecoder {
     public Metadata readMetadata() throws IOException {
         Metadata metadata = null;
         
-        boolean isLast = (is.readRawUInt(STREAM_METADATA_IS_LAST_LEN) != 0);
-        int type = is.readRawUInt(STREAM_METADATA_TYPE_LEN);
-        int length = is.readRawUInt(STREAM_METADATA_LENGTH_LEN);
+        boolean isLast = (is.readRawUInt(Metadata.STREAM_METADATA_IS_LAST_LEN) != 0);
+        int type = is.readRawUInt(Metadata.STREAM_METADATA_TYPE_LEN);
+        int length = is.readRawUInt(Metadata.STREAM_METADATA_LENGTH_LEN);
         
-        if (type == METADATA_TYPE_STREAMINFO) {
+        if (type == Metadata.METADATA_TYPE_STREAMINFO) {
             metadata = streamInfo = new StreamInfo(is, length);
-        } else if (type == METADATA_TYPE_SEEKTABLE) {
+        } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
             metadata = seekTable = new SeekTable(is, length);
-        } else if (type == METADATA_TYPE_APPLICATION) {
+        } else if (type == Metadata.METADATA_TYPE_APPLICATION) {
             metadata = new Application(is, length);
-        } else if (type == METADATA_TYPE_PADDING) {
+        } else if (type == Metadata.METADATA_TYPE_PADDING) {
             metadata = new Padding(is, length);
-        } else if (type == METADATA_TYPE_VORBIS_COMMENT) {
+        } else if (type == Metadata.METADATA_TYPE_VORBIS_COMMENT) {
             metadata = new VorbisComment(is, length);
-        } else if (type == METADATA_TYPE_CUESHEET) {
+        } else if (type == Metadata.METADATA_TYPE_CUESHEET) {
             metadata = new CueSheet(is, length);
         } else {
             metadata = new Unknown(is, length);
