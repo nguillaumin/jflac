@@ -23,7 +23,6 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
-import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.LPCPredictor;
 import org.kc7bfi.jflac.util.BitMath;
 import org.kc7bfi.jflac.util.InputBitStream;
@@ -82,12 +81,12 @@ public class ChannelLPC extends Channel {
         }
 
         // read entropy coding method info
-        int codingType = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_TYPE_LEN);
+        int codingType = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         //System.out.println("codingType="+codingType);
         switch (codingType) {
-            case Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
                 entropyCodingMethod = new EntropyPartitionedRice();
-                ((EntropyPartitionedRice) entropyCodingMethod).order = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
+                ((EntropyPartitionedRice) entropyCodingMethod).order = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 ((EntropyPartitionedRice) entropyCodingMethod).contents = channelData.getPartitionedRiceContents();
                 break;
             default :

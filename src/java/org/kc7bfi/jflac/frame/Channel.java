@@ -21,6 +21,13 @@ package org.kc7bfi.jflac.frame;
  */
 
 public abstract class Channel {
+
+    /** Partisioned Rice Encoding Methid */
+    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE = 0;
+    
+    public static final int ENTROPY_CODING_METHOD_TYPE_LEN = 2; /* bits */
+    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4; /* bits */
+
     /** The FLAC Frame Header */
     protected Header header;
     

@@ -23,7 +23,6 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
-import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FixedPredictor;
 import org.kc7bfi.jflac.util.InputBitStream;
 
@@ -57,11 +56,11 @@ public class ChannelFixed extends Channel {
         }
 
         // read entropy coding method info
-        int type = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_TYPE_LEN);
+        int type = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         EntropyPartitionedRice pr;
         switch (type) {
-            case Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE :
-                int u32 = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+                int u32 = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 pr = new EntropyPartitionedRice();
                 entropyCodingMethod = pr;
                 pr.order = u32;
