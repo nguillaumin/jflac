@@ -4,5 +4,12 @@
     <title>News</title>
   </properties>
 	<body>
+		<section name="2nd May 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.1</a> released!</p>
+			<p>I am pleased to announce the first release of the jFLAC library.</p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
 	</body>
 </document>
