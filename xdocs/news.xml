@@ -4,7 +4,17 @@
     <title>News</title>
   </properties>
 	<body>
-		<section name="3rd Julu 2004">
+		<section name="5th September 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 1.1</a> released!</p>
+			<p>I am pleased to announce an updated release of the jFLAC library.</p>
+			<p>This release fixes a bug in the java Sound SPI. This bug caused a problem when
+			the jFLAC SPI was used in a player with oother SPIs. It would prevent non-flac
+			files from being played if the jFLAC SPI was included in the class path.</p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
+		<section name="3rd July 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 1.0</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
 			<p>The most significant change in this release is the inclusion of a Java Sound SPI
