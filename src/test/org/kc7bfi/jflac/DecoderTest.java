@@ -1,7 +1,7 @@
 package org.kc7bfi.jflac;
 
+
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -9,32 +9,27 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:jason@zenplex.com">Jason van Zyl</a>
  */
-public class NaughtyTest
-    extends AbstractTestCase
-{
+public class DecoderTest extends AbstractTestCase {
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public NaughtyTest( String testName )
-    {
+    public DecoderTest( String testName ) {
         super( testName );
     }
-
+    
     /**
      * @return the suite of tests being tested
      */
-    public static Test suite()
-    {
-        return new TestSuite( NaughtyTest.class );
+    public static Test suite() {
+        return new TestSuite( DecoderTest.class );
     }
-
+    
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
-    {
-        // Crash and burn!
+    public void testApp() {
+        assertEquals( "maven kicks ass", "maven kicks ass" );
     }
 }

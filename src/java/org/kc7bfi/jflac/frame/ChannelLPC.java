@@ -81,6 +81,7 @@ public class ChannelLPC extends ChannelBase {
         int codingType = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_TYPE_LEN);
         switch (codingType) {
             case Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+                entropyCodingMethod = new EntropyPartitionedRice();
                 ((EntropyPartitionedRice) entropyCodingMethod).order = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 ((EntropyPartitionedRice) entropyCodingMethod).contents = channelData.partitionedRiceContents;
                 break;
