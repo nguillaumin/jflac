@@ -8,11 +8,11 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.flac.Constants;
-import org.flac.io.InputBitStream;
-import org.flac.metadata.StreamInfo;
-import org.flac.util.ByteSpace;
-import org.flac.util.CRC8;
+import org.kc7bfi.jflac.Constants;
+import org.kc7bfi.jflac.io.InputBitStream;
+import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.CRC8;
 
 /**
  * @author kc7bfi

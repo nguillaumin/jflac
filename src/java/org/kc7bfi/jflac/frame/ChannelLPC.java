@@ -8,11 +8,11 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.flac.ChannelData;
-import org.flac.Constants;
-import org.flac.LPCPredictor;
-import org.flac.io.InputBitStream;
-import org.flac.util.BitMath;
+import org.kc7bfi.jflac.ChannelData;
+import org.kc7bfi.jflac.Constants;
+import org.kc7bfi.jflac.LPCPredictor;
+import org.kc7bfi.jflac.io.InputBitStream;
+import org.kc7bfi.jflac.util.BitMath;
 
 /**
  * @author kc7bfi

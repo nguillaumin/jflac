@@ -1,88 +1,92 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0"?>
 <project>
+	<pomVersion>3</pomVersion>
+	<name>Java FLAC Codec</name>
+	<id>jflac</id>
+	<groupId>jflac</groupId>
+	<currentVersion>0.1</currentVersion>
+	<organization>
+		<name>Open Roads Consulting, Inc.</name>
+		<url>http://openroadsconsulting.com/</url>
+		<logo>img/logo-corner.gif</logo>
+	</organization>
+	<inceptionYear>2004</inceptionYear>
+	<package>org.kc7bfi.jflac</package>
+	<logo>img/logo-corner.gif</logo>
 
-  <!-- the version of maven's project object model -->
-  <pomVersion>3</pomVersion>
-  
-  <!-- a unique name for this project -->
-  <id>jFLAC</id>
-  
-  <!-- a short but descriptive name for the project -->
-  <name>Java Free Lossless Audio Codec</name>
-  
-  <!-- The version of the project under development, e.g.
-       1.1, 1.2, 2.0-SNAPSHOT -->
-  <currentVersion>1.0</currentVersion>
-  
-  <!-- details about the organization that 'owns' the project -->
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org/</url>
-    <logo>http://maven.apache.org/images/jakarta-logo-blue.gif</logo>
-  </organization>
-  
-  <!-- the year the project started -->
-  <inceptionYear>2002</inceptionYear>
-  <package>org.kc7bfi.jflac</package>
-  <logo>http://maven.apache.org/images/maven.jpg</logo>
-  <description>
-    A collection of example projects showing how to use maven in different
-    situations   
-  </description>
-  <!-- a short description of what the project does -->
-  <shortDescription>
-    How to use maven in different situations
-  </shortDescription>
+	<description>
+<![CDATA[
+<p>Java FLAC Codec</p>
+<p>jFLAC is a port of the Free Lossless Audio Codec (FLAC) library to Java. This library allows java developers to experiment and write programs that use the FLAC algorithms.</p>
 
-  <!-- the project home page -->
-  <url>http://maven.apache.org/reference/plugins/examples/</url>
-  <issueTrackingUrl>http://nagoya.apache.org/scarab/servlet/scarab/</issueTrackingUrl>
-  <siteAddress>jakarta.apache.org</siteAddress>
-  <siteDirectory>/www/maven.apache.org/reference/plugins/examples/</siteDirectory>
-  <distributionDirectory>/www/maven.apache.org/builds/</distributionDirectory>
+<p>The <a href="http://sourceforge.net/projects/jflac">jFLAC project</a> is hosted by <a href="http://sourceforge.net">SourceForge</a>.</p>
 
-  <!-- the version control repository and http url for online access
-       the connection element has the form:
-       scm:<system>:<system specific connection string> -->
-  <repository>
-    <connection>scm:cvs:pserver:anoncvs@cvs.apache.org:/home/cvspublic:maven/src/plugins-build/examples</connection>
-    <url>http://cvs.apache.org/viewcvs/maven/src/plugins-build/examples/</url>
-  </repository>
+<p>You may want to explore the Java <a href="xref/index.html">source code</a>
+and the <a href="apidocs/index.html">javadoc</a>.</p>
 
-  <!-- any mailing lists for the project -->
-  <mailingLists/>
-  
-  <!-- who the developers are for the project -->
-  <developers/>
+<hr/>
+<A href="http://sourceforge.net"> <IMG src="http://sourceforge.net/sflogo.php?group_id=106536" border="0" alt="SourceForge.net Logo" /></A>
+]]>
+	</description>
 
-  <!-- jar files the project is dependent on -->
-  <dependencies/>
-  
-  <!-- build information for the project -->
-  <build>
-    <nagEmailAddress>turbine-maven-dev@jakarta.apache.org</nagEmailAddress>
-    <sourceDirectory>src/java</sourceDirectory>
-    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+	<shortDescription>Java FLAC Codec</shortDescription>
 
-    <unitTest>
-      <includes>
-        <include>**/*Test.java</include>
-      </includes>
-      <excludes>
-        <exclude>**/NaughtyTest.java</exclude>
-      </excludes>
-    </unitTest>
+	<url>http://jflac.sourceforge.net/</url>
 
-    <resources>
-      <resource>
-        <directory>src/conf</directory>
-        <includes>
-          <include>*.properties</include>
-        </includes>
-      </resource>
-    </resources>
-  </build>
+	<siteAddress>shell.sourceforge.net</siteAddress>
+	<siteDirectory>/home/groups/j/jf/jflac/htdocs</siteDirectory>
 
+	<distributionSite>projects.sourceforge.net</distributionSite>
+    <distributionDirectory>/home/groups/j/jf/jflac/htdocs/repository</distributionDirectory>
+
+	<repository>
+		<connection>
+			scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/jflac/:jflac
+		</connection>
+	</repository>
+
+	<mailingLists>
+		<mailingList>
+			<name>jflac-general</name>
+			<subscribe>http://lists.sourceforge.net/lists/listinfo/jflac-general</subscribe>
+			<unsubscribe>http://lists.sourceforge.net/lists/listinfo/jflac-general</unsubscribe>
+			<archive>http://sourceforge.net/mailarchive/forum.php?forum=jflac-general</archive>
+		</mailingList>
+	</mailingLists>
+
+	<developers>
+		<developer>
+			<name>David R Robison</name>
+			<id>kc7bfi</id>
+			<email>drrobison@openroadsconsulting.com</email>
+			<organization>Open Roads Consulting, Inc.</organization>
+			<roles>
+				<role>Project Manager</role>
+				<role>Developer</role>
+			</roles>
+			<url>http://openroadsconsulting.com</url>
+			<timezone>-5</timezone>
+		</developer>
+	</developers>
+
+	<dependencies>
+	</dependencies>
+
+	<build>
+		<nagEmailAddress>drrobison1@cox.net</nagEmailAddress>
+		<sourceDirectory>src/java</sourceDirectory>
+	</build>
+
+  <reports>
+	 <report>maven-jdepend-plugin</report>
+	 <report>maven-checkstyle-plugin</report>
+	 <report>maven-pmd-plugin</report>
+	 <report>maven-changelog-plugin</report>
+	 <report>maven-file-activity-plugin</report>
+	 <report>maven-developer-activity-plugin</report>
+	 <report>maven-javadoc-plugin</report>
+	 <report>maven-jxr-plugin</report>
+	 <report>maven-tasklist-plugin</report>
+  </reports>
 
 </project>
-

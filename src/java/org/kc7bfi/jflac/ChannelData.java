@@ -6,7 +6,7 @@
  */
 package org.kc7bfi.jflac;
 
-import org.flac.frame.*;
+import org.kc7bfi.jflac.frame.*;
 
 /**
  * @author kc7bfi

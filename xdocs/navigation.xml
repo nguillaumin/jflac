@@ -1,0 +1,12 @@
+<project name="jsdsi">
+	<body>
+		<menu name="jFLAC">
+			<item name="About" href="index.html"/>
+			<item name="News" href="news.html"/>
+			<item name="Download" href="download.html"/>
+			<item name="Install" href="install.html"/>
+			<item name="Build" href="build.html"/>
+			<item name="FAQs" href="faq.html"/>
+		</menu>
+	</body>
+</project>

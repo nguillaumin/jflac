@@ -8,7 +8,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.flac.io.InputBitStream;
+import org.kc7bfi.jflac.io.InputBitStream;
 
 /**
  * @author kc7bfi

@@ -12,8 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import org.flac.frame.Frame;
-import org.flac.io.WavWriter;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.io.WavWriter;
 
 /**
  * @author kc7bfi

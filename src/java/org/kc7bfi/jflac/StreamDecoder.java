@@ -3,22 +3,22 @@ package org.kc7bfi.jflac;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.flac.frame.BadHeaderException;
-import org.flac.frame.ChannelConstant;
-import org.flac.frame.ChannelFixed;
-import org.flac.frame.ChannelLPC;
-import org.flac.frame.ChannelVerbatim;
-import org.flac.frame.Frame;
-import org.flac.frame.Header;
-import org.flac.io.InputBitStream;
-import org.flac.metadata.Application;
-import org.flac.metadata.CueSheet;
-import org.flac.metadata.MetadataBase;
-import org.flac.metadata.SeekTable;
-import org.flac.metadata.StreamInfo;
-import org.flac.metadata.Unknown;
-import org.flac.metadata.VorbisComment;
-import org.flac.util.CRC16;
+import org.kc7bfi.jflac.frame.BadHeaderException;
+import org.kc7bfi.jflac.frame.ChannelConstant;
+import org.kc7bfi.jflac.frame.ChannelFixed;
+import org.kc7bfi.jflac.frame.ChannelLPC;
+import org.kc7bfi.jflac.frame.ChannelVerbatim;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.frame.Header;
+import org.kc7bfi.jflac.io.InputBitStream;
+import org.kc7bfi.jflac.metadata.Application;
+import org.kc7bfi.jflac.metadata.CueSheet;
+import org.kc7bfi.jflac.metadata.MetadataBase;
+import org.kc7bfi.jflac.metadata.SeekTable;
+import org.kc7bfi.jflac.metadata.StreamInfo;
+import org.kc7bfi.jflac.metadata.Unknown;
+import org.kc7bfi.jflac.metadata.VorbisComment;
+import org.kc7bfi.jflac.util.CRC16;
 
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000,2001,2002,2003  Josh Coalson

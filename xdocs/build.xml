@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<document>
+  <properties>
+    <title>Build</title>
+  </properties>
+	<body>
+		<section name="Building jFLAC">
+			<p><strong>Contents:</strong></p>
+			<ul>
+				<li><a href="#build">How to Build jFLAC from Source.</a></li>
+				<li><a href="#maven">Maven: A step-by-step guide to installing.</a></li>
+				<li><a href="#eclipse">Eclipse: How to generate a jFLAC project.</a></li>
+				<li><a href="#eclipse-cvs">Eclipse CVS Repository Explorer: How to generate a jFLAC project.</a></li>
+			</ul>
+		</section>
+		<section name="How to Build jFLAC from Source">
+			<a name="build"/>
+			<p><strong>Pre-requisites</strong></p>
+			<ul>
+				<li>You have a working Java Development Kit version 1.4 or better.</li>
+				<li>Your have <a href="http://maven.apache.org/start/download.html">downloaded</a> and <a href="http://maven.apache.org/start/install.html">installed</a>, or <a href="http://maven.apache.org/start/bootstrap.html">built</a> Maven. (You may like to follow our <a href="#maven">step-by-step</a> guide to installing Maven)<p/></li>
+			</ul>
+			<p><strong>Steps</strong></p>
+			<ol>
+				<li><a href="download.html">Download</a> or retrieve the jFLAC source code from <a href="https://sourceforge.net/cvs/?group_id=74580">CVS</a>.<p/></li>
+				<li>Using a shell, run your desired Maven target from the jsdsi directory, e.g.<source>maven jar:install</source><p/></li>
+				<li>Make a cuppa tea :-)<p/></li>
+			</ol>
+		</section>
+		<section name="Maven: A step-by-step guide to installing">
+			<a name="maven"/>
+			<p><strong>Pre-requisites</strong></p>
+			<ul>
+				<li>You have a working Java Development Kit version 1.4 or better.<p/></li>
+			</ul>
+			<p><strong>Steps</strong></p>
+			<ol>
+				<li>Download maven-1.0-rc1.zip (Windows) or maven-1.0-rc1.tar.gz ('nix) [<a href="http://maven.apache.org/start/download.html">http://maven.apache.org/start/download.html</a>)].<p/></li>
+				<li>Extract the downloaded zip to your chosen target directory. Resulting in something like:
+				<source>/usr/java/maven-1.0-rc1</source>or<source>c:\java\maven-1.0-rc1</source><p/></li>
+				<li>Create a MAVEN_HOME Environment Variable and set it to the target directory created in the previous step.<p/>
+				'nix: add an entry to a shell startup script, e.g. ~/.bash_profile<p/>
+				Windows: set this as a 'User Variable' in your 'Environment Variables' via the Control Panel.<p/></li>
+				<li>Add MAVEN_HOME\bin to your 'Path' Environment Variables similar to above.<p/>
+				'nix: if 'Path' Variable already exists, add ":$MAVEN_HOME/bin" to the end of it.<p/>
+				Windows: 'Path' Variable must be in 'User Variables'. If a Path Variable already exists, add ";%MAVEN_HOME%\bin" to the end of it.<p/></li>
+				<li>Open a shell (known as Command Prompt in Windows) and run 'set' or 'env' to check that the Environment Variables are set correctly.<p/>
+				Windows: an easy way to open a Command Prompt is 'Start\Run...', enter 'command' and press 'ok').<p/></li>
+				<li>From the shell run 'install_repo.bat YOURHOMEPATH/.maven/repository'.<p/>
+				Windows:<source>install_repo.bat %HOMEPATH%\.maven\repository</source> (On some boxes the environment variable is %HOME%, you can check this by running the 'set' command and looking for which entry points to 'C:\Documents and Settings\YOURUSERNAME'<p/>
+				'nix:<source>install_repo.bat ~/.maven/repository</source><p/></li>
+				<li>From the shell run 'maven -g' to check that Maven is running - all the maven goals should be listed.<p/></li>
+			</ol>
+		</section>
+		<section name="Eclipse CVS Repository Explorer: How to generate the jFLAC project">
+			<a name="eclipse-cvs"/>
+			<p><strong>Pre-requisites</strong></p>
+			<ul>
+				<li>You have <a href="http://maven.apache.org/">Maven</a> installed and working.<p/></li>
+				<li>You have downloaded and installed <a href="http://www.eclipse.org">Eclipse</a>.<p/></li>
+			</ul>
+			<p><strong>Steps</strong></p>
+			<ol>
+				<li>Run Eclipse<p/></li>
+				<li>Set up a jFLAC CVS repository in the Eclipse CVS Repository Explorer (make sure to use 'extssh' or 'ext' if you are a jFLAC Developer). [<a href="https://sourceforge.net/cvs/?group_id=74580">Sourceforge's jFLAC CVS guide</a>]<p/></li>
+				<li>In the CVS Repository Explorer select the HEAD branch of 'cvsroot/jsdsi'<p/></li>
+				<li>Under the above, select the 'jsdsi' directory and right-click<p/></li>
+				<li>Select 'Check Out As...'<p/></li>
+				<li>Make sure 'Check out as a project configured using the New Project Wizard' is selected and press 'Finish'.<p/></li>
+				<li>Select 'Java' in the left pane, 'Java Project' in the right pane, and press 'Next'<p/></li>
+				<li>Enter project name 'jsdsi' in the text box and press 'Finish'. (Optionally enter an alternate project location in the 'Project Contents' information area).<p/></li>
+				<li>If you are asked to switch Perspective, select 'yes'<p/></li>
+				<li>Follow the <a href="#eclipse-steps">steps</a> in 'Eclipse: How to generate the jFLAC project'<p/></li>
+			</ol>
+		</section>
+		<section name="Eclipse: How to generate the jFLAC project">
+			<a name="eclipse"/>
+			<p><strong>Pre-requisites</strong></p>
+			<ul>
+				<li>You can <a href="#build">build jFLAC from Source</a>.</li>
+				<li>You have downloaded and installed <a href="http://www.eclipse.org">Eclipse</a>.<p/></li>
+			</ul>
+			<p><a name="eclipse-steps"><strong>Steps</strong></a></p>
+			<ol>
+				<li>Edit (create if need be) your personal Maven 'build.properties' (located in your home directory), adding a 'maven.eclipse.workspace' entry with the path to your Eclipse Workspace directory, e.g.<source>maven.eclipse.workspace=~/programs/eclipse-3.0-M7/workspace</source><p/>
+				Windows: Your home directory is normally found under 'C:\Documents and Settings\YOURUSERNAME'.<p/>
+				'nix: Your home directory is normally '/home/YOURUSERNAME', or for shorthand '~'.<p/></li>
+				<li>Create an Eclipse Classpath Variable - in a shell 'cd' to your jsdsi project directory and run <source>maven eclipse:add-maven-repo</source>(About the Maven <a href="http://maven.apache.org/reference/plugins/eclipse/">Eclipse Plugin</a>)<p/></li>
+				<li>Create the Eclipse '.project' and '.classpath' files - again in a shell within your jsdsi project directory and run: <source>maven eclipse</source>(About the Maven <a href="http://maven.apache.org/reference/plugins/eclipse/">Eclipse Plugin</a>)<p/></li>
+				<li>If you have the jsdsi project open in Eclipse, right click the project name in the Package Explorer and select "Refresh."</li>
+			</ol>
+		</section>
+	</body>
+</document>

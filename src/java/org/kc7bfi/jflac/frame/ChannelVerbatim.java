@@ -8,8 +8,8 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.flac.ChannelData;
-import org.flac.io.InputBitStream;
+import org.kc7bfi.jflac.ChannelData;
+import org.kc7bfi.jflac.io.InputBitStream;
 
 /**
  * @author kc7bfi

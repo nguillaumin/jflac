@@ -12,10 +12,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
-import org.flac.ChannelData;
-import org.flac.Constants;
-import org.flac.frame.Frame;
-import org.flac.metadata.StreamInfo;
+import org.kc7bfi.jflac.ChannelData;
+import org.kc7bfi.jflac.Constants;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.metadata.StreamInfo;
 /**
  * @author kc7bfi
  * 
@@ -71,8 +71,8 @@ public class WavWriter {
 
         osLE.writeInt((int)dataSize + 36); // filesize-8
         os.write("WAVEfmt ".getBytes());
-        os.write("\020\000\000\000".getBytes()); // chunk size = 16
-        os.write("\001\000".getBytes()); // compression code == 1
+        os.write(new byte[] {0x10, 0x00, 0x00, 0x00}); // chunk size = 16
+        os.write(new byte[] {0x01, 0x00}); // compression code == 1
         osLE.writeShort(channels);
         osLE.writeInt(sampleRate);
         osLE.writeInt(sampleRate * channels * ((bps + 7) / 8)); // or is it (sample_rate*channels*bps) / 8

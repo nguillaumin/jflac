@@ -3,7 +3,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.flac.util.*;
+import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.CRC16;
+import org.kc7bfi.jflac.util.CRC8;
 /*
  * libFLAC - Free Lossless Audio Codec library Copyright (C) 2000,2001,2002,2003
  * Josh Coalson
