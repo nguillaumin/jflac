@@ -46,8 +46,8 @@ public class InputBitStream {
     
     private byte[] buffer = new byte[0];
     private int capacity = 0; // in blurbs
-    private int blurbs = 0;
-    private int bits = 0;
+    private int inBlurbs = 0;
+    private int inBits = 0;
     private int totalBits = 0; // must always == BITS_PER_BLURB*blurbs+bits
     private int consumedBlurbs = 0;
     private int consumedBits = 0;
@@ -65,10 +65,10 @@ public class InputBitStream {
     private boolean resize(int newCapacity) {
         if (capacity == newCapacity) return true;
         byte[] newBuffer = new byte[newCapacity];
-        System.arraycopy(buffer, 0, newBuffer, 0, Math.min(blurbs + ((bits != 0) ? 1 : 0), newCapacity));
-        if (newCapacity < blurbs + ((bits != 0) ? 1 : 0)) {
-            blurbs = newCapacity;
-            bits = 0;
+        System.arraycopy(buffer, 0, newBuffer, 0, Math.min(inBlurbs + ((inBits != 0) ? 1 : 0), newCapacity));
+        if (newCapacity < inBlurbs + ((inBits != 0) ? 1 : 0)) {
+            inBlurbs = newCapacity;
+            inBits = 0;
             totalBits = newCapacity << 3;
         }
         if (newCapacity < consumedBlurbs + ((consumedBits != 0) ? 1 : 0)) {
@@ -98,12 +98,12 @@ public class InputBitStream {
         if (totalConsumedBits >= BITS_PER_BLURB) {
             int l = 0;
             int r = consumedBlurbs;
-            int r_end = blurbs + ((bits != 0) ? 1 : 0);
+            int r_end = inBlurbs + ((inBits != 0) ? 1 : 0);
             for (; r < r_end; l++, r++)
                 buffer[l] = buffer[r];
             for (; l < r_end; l++)
                 buffer[l] = 0;
-            blurbs -= consumedBlurbs;
+            inBlurbs -= consumedBlurbs;
             totalBits -= consumedBlurbs << 3;
             consumedBlurbs = 0;
             totalConsumedBits = consumedBits;
@@ -114,15 +114,15 @@ public class InputBitStream {
         
         // set the target for reading, taking into account blurb alignment
         // blurb == byte, so no gyrations necessary:
-        int bytes = capacity - blurbs;
+        int bytes = capacity - inBlurbs;
         
         // finally, read in some data
-        bytes = is.read(buffer, blurbs, bytes);
-        if (bytes <=0) throw new EOFException();
+        bytes = is.read(buffer, inBlurbs, bytes);
+        if (bytes <= 0) throw new EOFException();
         
         // now we have to handle partial blurb cases:
         // blurb == byte, so no gyrations necessary:
-        blurbs += bytes;
+        inBlurbs += bytes;
         totalBits += bytes << 3;
         return bytes;
     }
@@ -143,250 +143,249 @@ public class InputBitStream {
     public boolean concatenateAligned(InputBitStream src) {
         int bitsToAdd = src.totalBits - src.totalConsumedBits;
         if (bitsToAdd == 0) return true;
-        if (bits != src.consumedBits) return false;
+        if (inBits != src.consumedBits) return false;
         if (!ensureSize(bitsToAdd)) return false;
-        if (bits == 0) {
-            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, blurbs, 
-                    (src.blurbs - src.consumedBlurbs + ((src.bits != 0) ? 1 : 0)));
-        } else if (bits + bitsToAdd > BITS_PER_BLURB) {
-            buffer[blurbs] <<= (BITS_PER_BLURB - bits);
-            buffer[blurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - bits)) - 1));
-            System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, blurbs + 11,
-                    (src.blurbs - src.consumedBlurbs - 1 + ((src.bits != 0) ? 1 : 0)));
+        if (inBits == 0) {
+            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, inBlurbs, 
+                    (src.inBlurbs - src.consumedBlurbs + ((src.inBits != 0) ? 1 : 0)));
+        } else if (inBits + bitsToAdd > BITS_PER_BLURB) {
+            buffer[inBlurbs] <<= (BITS_PER_BLURB - inBits);
+            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - inBits)) - 1));
+            System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, inBlurbs + 11,
+                    (src.inBlurbs - src.consumedBlurbs - 1 + ((src.inBits != 0) ? 1 : 0)));
         } else {
-            buffer[blurbs] <<= bitsToAdd;
-            buffer[blurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
+            buffer[inBlurbs] <<= bitsToAdd;
+            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
         }
-        bits = src.bits;
+        inBits = src.inBits;
         totalBits += bitsToAdd;
-        blurbs = totalBits / BITS_PER_BLURB;
+        inBlurbs = totalBits / BITS_PER_BLURB;
         return true;
     }
 
+    /**
+     * Reset the read CRC-16 value
+     * @param seed  The initial CRC-16 value
+     */
     public void resetReadCRC16(short seed) {
         readCRC16 = seed;
     }
 
+    /**
+     * return the read CRC-16 value
+     * @return  The read CRC-16 value
+     */
     public short getReadCRC16() {
         return readCRC16;
     }
 
+    /**
+     * return the write CRC-16 value
+     * @return The write CRC-16 value
+     */
     public short getWriteCRC16() {
-        return CRC16.calc(buffer, blurbs);
+        return CRC16.calc(buffer, inBlurbs);
     }
 
+    /**
+     * return the write CRC-8 value
+     * @return  The write CRC-8 val;ue
+     */
     public byte getWriteCRC8() {
-        return CRC8.calc(buffer, blurbs);
+        return CRC8.calc(buffer, inBlurbs);
     }
     
+    /**
+     * Test if the Bit Stream is byte aligned
+     * @return  True of bit stream is byte aligned
+     */
     public boolean isByteAligned() {
-        return ((bits & 7) == 0);
+        return ((inBits & 7) == 0);
     }
     
+    /**
+     * Test if the Bit Stream consumed bits is byte aligned
+     * @return  True of bit stream consumed bits is byte aligned
+     */
     public boolean isConsumedByteAligned() {
         return ((consumedBits & 7) == 0);
     }
     
+    /**
+     * return the number of bits to read to align the byte
+     * @return  The number of bits to align the byte
+     */
     public int bitsLeftForByteAlignment() {
         return 8 - (consumedBits & 7);
     }
     
+    /**
+     * return the number of bytes left to read
+     * @return  The number of bytes left to read
+     */
     public int getInputBytesUnconsumed() {
         return (totalBits - totalConsumedBits) >> 3;
     }
     
-    /*
-     * DRR FIX void get_buffer(const byte * * buffer, unsigned * bytes) {
-     * ASSERT((bb - > consumed_bits & 7) == 0 && (bb - > bits & 7) == 0); buffer =
-     * bb - > buffer + bb - > consumed_blurbs; bytes = bb - > blurbs - bb - >
-     * consumed_blurbs; }
-     */
-    /*
-     * DRR FIX void release_buffer(BitBuffer8 * bb) { (void) bb; }
-     */
     public boolean writeZeroes(int bits) {
-        if (bits == 0)
-            return true;
-        if (!ensureSize(bits))
-            return false;
+        if (bits == 0) return true;
+        if (!ensureSize(bits)) return false;
         totalBits += bits;
         while (bits > 0) {
             int n = Math.min(BITS_PER_BLURB - bits, bits);
-            buffer[blurbs] <<= n;
+            buffer[inBlurbs] <<= n;
             bits -= n;
             bits += n;
             if (bits == BITS_PER_BLURB) {
-                blurbs++;
+                inBlurbs++;
                 bits = 0;
             }
         }
         return true;
     }
-    public boolean write_raw_uint32(int val, int bits) {
-        if (bits == 0)
-            return true;
-        /*
-         * inline the size check so we don't incure a function call
-         * unnecessarily
-         */
+    
+    public boolean writeRawUInt(int val, int bits) {
+        if (bits == 0) return true;
+        
+        // inline the size check so we don't incure a function call unnecessarily
         if ((capacity << 3) < totalBits + bits) {
             if (!ensureSize(bits))
                 return false;
         }
-        /*
-         * zero-out unused bits; WATCHOUT: other code relies on this, so this
-         * needs to stay
-         */
-        if (bits < 32)
-            /*
-             * @@@ gcc seems to require this because the following line causes
-             * incorrect results when bits==32; investigate
-             */
-            val &= (~(0xffffffff << bits)); /* zero-out unused bits */
+        
+        // zero-out unused bits; WATCHOUT: other code relies on this, so this needs to stay
+        if (bits < 32) val &= (~(0xffffffff << bits)); /* zero-out unused bits */
         totalBits += bits;
         while (bits > 0) {
             int n = BITS_PER_BLURB - bits;
-            if (n == BITS_PER_BLURB) { /* i.e. bb->bits == 0 */
+            if (n == BITS_PER_BLURB) { // i.e. bb->bits == 0
                 if (bits < BITS_PER_BLURB) {
-                    buffer[blurbs] = (byte) val;
-                    this.bits = bits;
+                    buffer[inBlurbs] = (byte) val;
+                    this.inBits = bits;
                     break;
                 } else if (bits == BITS_PER_BLURB) {
-                    buffer[blurbs++] = (byte) val;
+                    buffer[inBlurbs++] = (byte) val;
                     break;
                 } else {
                     int k = bits - BITS_PER_BLURB;
-                    buffer[blurbs++] = (byte) (val >> k);
-                    /*
-                     * we know k < 32 so no need to protect against the gcc bug
-                     * mentioned above
-                     */
+                    buffer[inBlurbs++] = (byte) (val >> k);
+                    
+                    // we know k < 32 so no need to protect against the gcc bug mentioned above
                     val &= (~(0xffffffff << k));
                     bits -= BITS_PER_BLURB;
                 }
             } else if (bits <= n) {
-                buffer[blurbs] <<= bits;
-                buffer[blurbs] |= val;
+                buffer[inBlurbs] <<= bits;
+                buffer[inBlurbs] |= val;
                 if (bits == n) {
-                    blurbs++;
+                    inBlurbs++;
                     bits = 0;
                 } else
                     bits += bits;
                 break;
             } else {
                 int k = bits - n;
-                buffer[blurbs] <<= n;
-                buffer[blurbs] |= (val >> k);
-                /*
-                 * we know n > 0 so k < 32 so no need to protect against the gcc
-                 * bug mentioned above
-                 */
+                buffer[inBlurbs] <<= n;
+                buffer[inBlurbs] |= (val >> k);
+                
+                // we know n > 0 so k < 32 so no need to protect against the gcc bug mentioned above
                 val &= (~(0xffffffff << k));
                 bits -= n;
-                blurbs++;
+                inBlurbs++;
                 bits = 0;
             }
         }
         return true;
     }
-    public boolean write_raw_int32(int val, int bits) {
-        return write_raw_uint32((int) val, bits);
+    
+    public boolean writeRawInt(int val, int bits) {
+        return writeRawUInt((int) val, bits);
     }
-    public boolean write_raw_uint64(long val, int bits) {
-        if (bits == 0)
-            return true;
-        if (!ensureSize(bits))
-            return false;
+    
+    public boolean writeRawULong(long val, int bits) {
+        if (bits == 0) return true;
+        if (!ensureSize(bits)) return false;
         val &= MASK32[bits];
         totalBits += bits;
         while (bits > 0) {
             if (bits == 0) {
                 if (bits < BITS_PER_BLURB) {
-                    buffer[blurbs] = (byte) val;
-                    this.bits = bits;
+                    buffer[inBlurbs] = (byte) val;
+                    this.inBits = bits;
                     break;
                 } else if (bits == BITS_PER_BLURB) {
-                    buffer[blurbs++] = (byte) val;
+                    buffer[inBlurbs++] = (byte) val;
                     break;
                 } else {
                     int k = bits - BITS_PER_BLURB;
-                    buffer[blurbs++] = (byte) (val >> k);
-                    /*
-                     * we know k < 64 so no need to protect against the gcc bug
-                     * mentioned above
-                     */
+                    buffer[inBlurbs++] = (byte) (val >> k);
+                    
+                    // we know k < 64 so no need to protect against the gcc bug mentioned above
                     val &= (~(0xffffffffffffffffL << k));
                     bits -= BITS_PER_BLURB;
                 }
             } else {
                 int n = Math.min(BITS_PER_BLURB - bits, bits);
                 int k = bits - n;
-                buffer[blurbs] <<= n;
-                buffer[blurbs] |= (val >> k);
-                /*
-                 * we know n > 0 so k < 64 so no need to protect against the gcc
-                 * bug mentioned above
-                 */
+                buffer[inBlurbs] <<= n;
+                buffer[inBlurbs] |= (val >> k);
+                
+                // we know n > 0 so k < 64 so no need to protect against the gcc bug mentioned above
                 val &= (~(0xffffffffffffffffL << k));
                 bits -= n;
                 bits += n;
                 if (bits == BITS_PER_BLURB) {
-                    blurbs++;
+                    inBlurbs++;
                     bits = 0;
                 }
             }
         }
         return true;
     }
-    public boolean write_raw_uint32_little_endian(int val) {
-        /*
-         * this doesn't need to be that fast as currently it is only used for
-         * vorbis comments
-         */
-        /*
-         * NOTE: we rely on the fact that write_raw_uint32() masks out the
-         * unused bits
-         */
-        if (!write_raw_uint32(val, 8))
+    
+    public boolean writeRawUIntLittleEndian(int val) {
+        // NOTE: we rely on the fact that write_raw_uint32() masks out the unused bits
+        if (!writeRawUInt(val, 8))
             return false;
-        if (!write_raw_uint32(val >> 8, 8))
+        if (!writeRawUInt(val >> 8, 8))
             return false;
-        if (!write_raw_uint32(val >> 16, 8))
+        if (!writeRawUInt(val >> 16, 8))
             return false;
-        if (!write_raw_uint32(val >> 24, 8))
+        if (!writeRawUInt(val >> 24, 8))
             return false;
         return true;
     }
-    public boolean write_byte_block(byte[] vals, int nvals) {
-        /* this could be faster but currently we don't need it to be */
+    
+    public boolean writeByteBlock(byte[] vals, int nvals) {
+        // this could be faster but currently we don't need it to be
         for (int i = 0; i < nvals; i++) {
-            if (!write_raw_uint32((int) (vals[i]), 8))
+            if (!writeRawUInt((int) (vals[i]), 8))
                 return false;
         }
         return true;
     }
-    public boolean write_unary_unsigned(int val) {
+    
+    public boolean writeUnaryUnsigned(int val) {
         if (val < 32)
-            return write_raw_uint32(1, ++val);
+            return writeRawUInt(1, ++val);
         else if (val < 64)
-            return write_raw_uint64(1, ++val);
+            return writeRawULong(1, ++val);
         else {
             if (!writeZeroes(val))
                 return false;
-            return write_raw_uint32(1, 1);
+            return writeRawUInt(1, 1);
         }
     }
-    public int rice_bits(int val, int parameter) {
+    
+    public int riceBits(int val, int parameter) {
         int msbs, uval;
-        /* fold signed to unsigned */
-        if (val < 0)
-            /*
-             * equivalent to (unsigned)(((--val) < < 1) - 1); but without the
-             * overflow problem at MININT
-             */
+        // fold signed to unsigned
+        if (val < 0) {
+            // equivalent to (unsigned)(((--val) < < 1) - 1); but without the overflow problem at MININT
             uval = (int) (((-(++val)) << 1) + 1);
-        else
+        } else {
             uval = (int) (val << 1);
+        }
         msbs = uval >> parameter;
         return 1 + parameter + msbs;
     }
@@ -426,115 +425,119 @@ public class InputBitStream {
      * write the value if (!write_raw_int32(bb, val, val_bits)) return false; }
      * return true; } # endif // ifdef SYMMETRIC_RICE
      */
-    public boolean write_rice_signed(int val, int parameter) {
+    
+    public boolean writeRiceSigned(int val, int parameter) {
         int total_bits, interesting_bits, msbs, uval;
         int pattern;
-        /* fold signed to unsigned */
-        if (val < 0)
-            /*
-             * equivalent to (unsigned)(((--val) < < 1) - 1); but without the
-             * overflow problem at MININT
-             */
+        
+        // fold signed to unsigned
+        if (val < 0) {
+            // equivalent to (unsigned)(((--val) < < 1) - 1); but without the overflow problem at MININT
             uval = (int) (((-(++val)) << 1) + 1);
-        else
+        } else {
             uval = (int) (val << 1);
+        }
         msbs = uval >> parameter;
         interesting_bits = 1 + parameter;
         total_bits = interesting_bits + msbs;
         pattern = 1 << parameter; /* the unary end bit */
         pattern |= (uval & ((1 << parameter) - 1)); /* the binary LSBs */
         if (total_bits <= 32) {
-            if (!write_raw_uint32(pattern, total_bits))
+            if (!writeRawUInt(pattern, total_bits))
                 return false;
         } else {
             /* write the unary MSBs */
             if (!writeZeroes(msbs))
                 return false;
             /* write the unary end bit and binary LSBs */
-            if (!write_raw_uint32(pattern, interesting_bits))
+            if (!writeRawUInt(pattern, interesting_bits))
                 return false;
         }
         return true;
     }
-    public boolean write_utf8_uint32(int val) {
+    
+    public boolean writeUTF8UInt(int val) {
         boolean ok = true;
         if (val < 0x80) {
-            return write_raw_uint32(val, 8);
+            return writeRawUInt(val, 8);
         } else if (val < 0x800) {
-            ok &= write_raw_uint32(0xC0 | (val >> 6), 8);
-            ok &= write_raw_uint32(0x80 | (val & 0x3F), 8);
+            ok &= writeRawUInt(0xC0 | (val >> 6), 8);
+            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x10000) {
-            ok &= write_raw_uint32(0xE0 | (val >> 12), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (val & 0x3F), 8);
+            ok &= writeRawUInt(0xE0 | (val >> 12), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x200000) {
-            ok &= write_raw_uint32(0xF0 | (val >> 18), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (val & 0x3F), 8);
+            ok &= writeRawUInt(0xF0 | (val >> 18), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
         } else if (val < 0x4000000) {
-            ok &= write_raw_uint32(0xF8 | (val >> 24), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 18) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (val & 0x3F), 8);
+            ok &= writeRawUInt(0xF8 | (val >> 24), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
         } else {
-            ok &= write_raw_uint32(0xFC | (val >> 30), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 24) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 18) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (val & 0x3F), 8);
+            ok &= writeRawUInt(0xFC | (val >> 30), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 24) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 18) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (val & 0x3F), 8);
         }
         return ok;
     }
-    public boolean write_utf8_uint64(long val) {
+    
+    public boolean writeUTF8ULong(long val) {
         boolean ok = true;
         if (val < 0x80) {
-            return write_raw_uint32((int) val, 8);
+            return writeRawUInt((int) val, 8);
         } else if (val < 0x800) {
-            ok &= write_raw_uint32(0xC0 | (int) (val >> 6), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xC0 | (int) (val >> 6), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x10000) {
-            ok &= write_raw_uint32(0xE0 | (int) (val >> 12), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xE0 | (int) (val >> 12), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x200000) {
-            ok &= write_raw_uint32(0xF0 | (int) (val >> 18), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xF0 | (int) (val >> 18), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x4000000) {
-            ok &= write_raw_uint32(0xF8 | (int) (val >> 24), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xF8 | (int) (val >> 24), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else if (val < 0x80000000) {
-            ok &= write_raw_uint32(0xFC | (int) (val >> 30), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 24) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xFC | (int) (val >> 30), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         } else {
-            ok &= write_raw_uint32(0xFE, 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 30) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 24) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 18) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 12) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) ((val >> 6) & 0x3F), 8);
-            ok &= write_raw_uint32(0x80 | (int) (val & 0x3F), 8);
+            ok &= writeRawUInt(0xFE, 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 30) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 24) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 18) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 12) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) ((val >> 6) & 0x3F), 8);
+            ok &= writeRawUInt(0x80 | (int) (val & 0x3F), 8);
         }
         return ok;
     }
-    public boolean zero_pad_to_byte_boundary() {
+    
+    public boolean zeroPadToByteBoundary() {
         /* 0-pad to byte boundary */
-        if ((bits & 7) != 0)
-            return writeZeroes(8 - (bits & 7));
+        if ((inBits & 7) != 0)
+            return writeZeroes(8 - (inBits & 7));
         else
             return true;
     }
+    
     /*
      * DRR FIX boolean peek_bit(unsigned * val, boolean(* read_callback) (byte
      * buffer[], unsigned * bytes, void * client_data), void * client_data) {
@@ -544,42 +547,43 @@ public class InputBitStream {
      * return true; } else { if (!read_from_client_(bb, read_callback,
      * client_data)) return false; } } }
      */
+    
+    /**
+     * skip over bits in bit stream without updating CRC
+     * @param bits  Number of bits to skip
+     * @throws IOException  Thrown if error reading from input stream
+     */
     public void skipBitsNoCRC(int bits) throws IOException {
+        if (bits == 0) return;
+        int n = consumedBits & 7;
+        int m;
+        if (n != 0) {
+            m = Math.min(8 - n, bits);
+            readRawUInt(m);
+            bits -= m;
+        }
+        m = bits / 8;
+        if (m > 0) {
+            readByteBlockAlignedNoCRC(null, m);
+            bits %= 8;
+        }
         if (bits > 0) {
-            int n = consumedBits & 7;
-            int m;
-            int x;
-            if (n != 0) {
-                m = Math.min(8 - n, bits);
-                x = readRawUInt(m);
-                bits -= m;
-            }
-            m = bits / 8;
-            if (m > 0) {
-                readByteBlockAlignedNoCRC(null, m);
-                bits %= 8;
-            }
-            if (bits > 0) {
-                x = readRawUInt(bits);
-            }
+            readRawUInt(bits);
         }
     }
-    int readBit() throws IOException {
-        //  BitBuffer8 * bb,
-        //  unsigned * val,
-        //  boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-        // client_data),
-        //  void * client_data) {
-        int val;
+    
+    /**
+     * read a single bit
+     * @return  The bit
+     * @throws IOException  Thrown if error reading input stream
+     */
+    public int readBit() throws IOException {
         while (true) {
             if (totalConsumedBits < totalBits) {
-                val = ((buffer[consumedBlurbs] & (0x80 >> consumedBits)) != 0) ? 1 : 0;
+                int val = ((buffer[consumedBlurbs] & (0x80 >> consumedBits)) != 0) ? 1 : 0;
                 consumedBits++;
                 if (consumedBits == BITS_PER_BLURB) {
                     readCRC16 = CRC16.update(buffer[consumedBlurbs], readCRC16);
-                    //read_crc16 = (read_crc16<<8) ^
-                    // CRC.crc16_table[(read_crc16>>8) ^
-                    // buffer[consumed_blurbs]];
                     consumedBlurbs++;
                     consumedBits = 0;
                 }
@@ -590,6 +594,15 @@ public class InputBitStream {
             }
         }
     }
+    
+    /**
+     * read a bit into an integer value.
+     * The bits of the input integer are shifted left and the 
+     * read bit is placed into bit 0.
+     * @param val   The integer to shift and add read bit
+     * @return      The updated integer value
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int readBitToInt(int val) throws IOException {
         while (true) {
             if (totalConsumedBits < totalBits) {
@@ -608,6 +621,16 @@ public class InputBitStream {
             }
         }
     }
+    
+    /**
+     * peek at the next bit and add it to the input integer.
+     * The bits of the input integer are shifted left and the 
+     * read bit is placed into bit 0.
+     * @param val   The input integer
+     * @param bit   The bit to peek at
+     * @return      The updated integer value
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int peekBitToInt(int val, int bit) throws IOException {
         while (true) {
             if ((totalConsumedBits + bit) < totalBits) {
@@ -624,6 +647,15 @@ public class InputBitStream {
             }
         }
     }
+    
+    /**
+     * read a bit into a long value.
+     * The bits of the input long are shifted left and the 
+     * read bit is placed into bit 0.
+     * @param val   The long to shift and add read bit
+     * @return      The updated long value
+     * @throws IOException  Thrown if error reading input stream
+     */
     public long readBitToLong(long val) throws IOException {
         while (true) {
             if (totalConsumedBits < totalBits) {
@@ -642,6 +674,13 @@ public class InputBitStream {
             }
         }
     }
+    
+    /**
+     * read bits into an unsigned integer
+     * @param bits  The number of bits to read
+     * @return      The bits as an unsigned integer
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int readRawUInt(int bits) throws IOException {
         int val = 0;
         for (int i = 0; i < bits; i++) {
@@ -649,6 +688,13 @@ public class InputBitStream {
         }
         return val;
     }
+    
+    /**
+     * peek at bits into an unsigned integer without advancing the input stream
+     * @param bits  The number of bits to read
+     * @return      The bits as an unsigned integer
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int peekRawUInt(int bits) throws IOException {
         int val = 0;
         for (int i = 0; i < bits; i++) {
@@ -656,46 +702,55 @@ public class InputBitStream {
         }
         return val;
     }
-    public int readRawInt(int bits) throws IOException { //boolean(*
-        //read_callback) (byte buffer[], unsigned * bytes, void * client_data),
-        //void * client_data) # ifdef NO_MANUAL_INLINING { int i; int v; int
-        // val;
+    
+    /**
+     * read bits into a signed integer
+     * @param bits  The number of bits to read
+     * @return      The bits as a signed integer
+     * @throws IOException  Thrown if error reading input stream
+     */
+    public int readRawInt(int bits) throws IOException { 
         if (bits == 0) { return 0; }
-        int val;
         int v = 0;
         for (int i = 0; i < bits; i++) {
             v = readBitToInt(v);
         }
+        
         // fix the sign
+        int val;
         int i = 32 - bits;
-        //System.out.print("ReadInt i="+i+" v="+Integer.toHexString(v));
         if (i != 0) {
             v <<= i;
             val = (int) v;
             val >>= i;
-        } else
+        } else {
             val = (int) v;
-        //System.out.println(" val="+val);
+        }
         return val;
     }
     
-    public long readRawLong(int bits) throws IOException {
-        //boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-        // client_data),
-        //void * client_data) # ifdef NO_MANUAL_INLINING {
+    /**
+     * read bits into an unsigned long
+     * @param bits  The number of bits to read
+     * @return      The bits as an unsigned long
+     * @throws IOException  Thrown if error reading input stream
+     */
+    public long readRawULong(int bits) throws IOException {
         long val = 0;
         for (int i = 0; i < bits; i++) {
             val = readBitToLong(val);
         }
         return val;
     }
+    
+    /**
+     * read bits into an unsigned little endian integer
+     * @return      The bits as an unsigned integer
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int readRawIntLittleEndian() throws IOException {
-        int x8 = 0;
-        int x32 = 0;
-        // this doesn't need to be that fast as currently it is only used for
-        // vorbis comments
-        x32 = readRawUInt(8);
-        x8 = readRawUInt(8);
+        int x32 = readRawUInt(8);
+        int x8 = readRawUInt(8);
         x32 |= (x8 << 8);
         x8 = readRawUInt(8);
         x32 |= (x8 << 16);
@@ -703,43 +758,42 @@ public class InputBitStream {
         x32 |= (x8 << 24);
         return x32;
     }
+    
+    /**
+     * Read a block of bytes (aligned) without updating the CRC value
+     * @param val   The array to receive the bytes. If null, no bytes are returned
+     * @param nvals The number of bytes to read
+     * @throws IOException  Thrown if error reading input stream
+     */
     public void readByteBlockAlignedNoCRC(byte[] val, int nvals) throws IOException {
-        //boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-        // client_data),
-        //void * client_data) {
-        //byte[] val = new byte[nvals];
         while (nvals > 0) {
-            int chunk = Math.min(nvals, blurbs - consumedBlurbs);
+            int chunk = Math.min(nvals, inBlurbs - consumedBlurbs);
             if (chunk == 0) {
                 readFromStream();
             } else {
-                if (val != null)
-                    System.arraycopy(buffer, consumedBlurbs, val, 0, BYTES_PER_BLURB * chunk);
-                //val += BYTES_PER_BLURB * chunk;
-                //}
+                if (val != null) System.arraycopy(buffer, consumedBlurbs, val, 0, BYTES_PER_BLURB * chunk);
                 nvals -= chunk;
                 consumedBlurbs += chunk;
                 totalConsumedBits = (consumedBlurbs << BITS_PER_BLURB_LOG2);
             }
         }
     }
+    
+    /**
+     * Read and count the number of zero bits
+     * @return  The number of zero bits read
+     * @throws IOException  Thrown if error reading input stream
+     */
     public int readUnaryUnsigned() throws IOException {
-        //BitBuffer * bb,
-        //unsigned * val,
-        //boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-        // client_data),
-        //void * client_data) # ifdef NO_MANUAL_INLINING {
-        int bit, val_ = 0;
+        int val = 0;
         while (true) {
-            bit = readBit();
-            //   return false;
-            if (bit != 0)
-                break;
-            val_++;
+            int bit = readBit();
+            if (bit != 0) break;
+            val++;
         }
-        //* val = val_;
-        return val_;
+        return val;
     }
+    
     /*
      * # ifdef SYMMETRIC_RICE boolean read_symmetric_rice_signed( BitBuffer8 *
      * bb, int * val, unsigned parameter, boolean(* read_callback) (byte
@@ -770,19 +824,16 @@ public class InputBitStream {
      * 
      * return true; }
      */
-    public void readRiceSignedBlock(int vals[], int pos, int nvals, int parameter) throws IOException {
-        //boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-        // client_data),
-        //void * client_data) {
-        //const blurb * buffer = buffer;
+    
+    public void readRiceSignedBlock(int[] vals, int pos, int nvals, int parameter) throws IOException {
         int i, j, val_i = 0;
         int cbits = 0, uval = 0, msbs = 0, lsbs_left = 0;
         byte blurb, save_blurb;
         int state = 0; // 0 = getting unary MSBs, 1 = getting binary LSBs
         if (nvals == 0) return;
         i = consumedBlurbs;
-        // We unroll the main loop to take care of partially consumed blurbs
-        // here.
+        
+        // We unroll the main loop to take care of partially consumed blurbs here.
         if (consumedBits > 0) {
             save_blurb = blurb = buffer[i];
             cbits = consumedBits;
@@ -793,6 +844,7 @@ public class InputBitStream {
                         for (j = 0; (blurb & BLURB_TOP_BIT_ONE) == 0; j++)
                             blurb <<= 1;
                         msbs += j;
+                        
                         // dispose of the unary end bit
                         blurb <<= 1;
                         j++;
@@ -822,9 +874,9 @@ public class InputBitStream {
                             // compose the value
                             uval |= (msbs << parameter);
                             if ((uval & 1) != 0)
-                                vals[pos+val_i++] = -((int) (uval >> 1)) - 1;
+                                vals[pos + val_i++] = -((int) (uval >> 1)) - 1;
                             else
-                                vals[pos+val_i++] = (int) (uval >> 1);
+                                vals[pos + val_i++] = (int) (uval >> 1);
                             if (val_i == nvals)
                                 break;
                             msbs = 0;
@@ -840,9 +892,9 @@ public class InputBitStream {
                         // compose the value
                         uval |= (msbs << parameter);
                         if ((uval & 1) != 0)
-                            vals[pos+val_i++] = -((int) (uval >> 1)) - 1;
+                            vals[pos + val_i++] = -((int) (uval >> 1)) - 1;
                         else
-                            vals[pos+val_i++] = (int) (uval >> 1);
+                            vals[pos + val_i++] = (int) (uval >> 1);
                         if (val_i == nvals) {
                             // back up one if we exited the for loop because we
                             // read all nvals but the end came in the middle of
@@ -860,9 +912,10 @@ public class InputBitStream {
             consumedBits = cbits;
             totalConsumedBits = (i << BITS_PER_BLURB_LOG2) | cbits;
         }
+        
         // Now that we are blurb-aligned the logic is slightly simpler
         while (val_i < nvals) {
-            for (; i < blurbs && val_i < nvals; i++) {
+            for (; i < inBlurbs && val_i < nvals; i++) {
                 save_blurb = blurb = buffer[i];
                 cbits = 0;
                 while (true) {
@@ -899,9 +952,9 @@ public class InputBitStream {
                                 // compose the value
                                 uval |= (msbs << parameter);
                                 if ((uval & 1) == 1)
-                                    vals[pos+val_i++] = -((int) (uval >> 1)) - 1;
+                                    vals[pos + val_i++] = -((int) (uval >> 1)) - 1;
                                 else
-                                    vals[pos+val_i++] = (int) (uval >> 1);
+                                    vals[pos + val_i++] = (int) (uval >> 1);
                                 if (val_i == nvals)
                                     break;
                                 msbs = 0;
@@ -917,9 +970,9 @@ public class InputBitStream {
                             // compose the value
                             uval |= (msbs << parameter);
                             if ((uval & 1) != 0)
-                                vals[pos+val_i++] = -((int) (uval >> 1)) - 1;
+                                vals[pos + val_i++] = -((int) (uval >> 1)) - 1;
                             else
-                                vals[pos+val_i++] = (int) (uval >> 1);
+                                vals[pos + val_i++] = (int) (uval >> 1);
                             if (val_i == nvals) {
                                 // back up one if we exited the for loop because
                                 // we read all nvals but the end came in the
@@ -944,9 +997,14 @@ public class InputBitStream {
             }
         }
     }
-    /*
+    
+    /**
+     * read UTF8 integer
      * on return, if *val == 0xffffffff then the utf-8 sequence was invalid, but
      * the return value will be true
+     * @param raw   The raw bytes read (output). If null, no bytes are returned
+     * @return      The integer read
+     * @throws IOException  Thrown if error reading input stream
      */
     public int readUTF8Int(ByteSpace raw) throws IOException {
         int val;
@@ -954,8 +1012,7 @@ public class InputBitStream {
         int x;
         int i;
         x = readRawUInt(8);
-        if (raw != null)
-            raw.space[raw.pos++] = (byte) x;
+        if (raw != null) raw.space[raw.pos++] = (byte) x;
         if ((x & 0x80) == 0) { // 0xxxxxxx
             v = x;
             i = 0;
@@ -993,9 +1050,14 @@ public class InputBitStream {
         val = v;
         return val;
     }
-    /*
+    
+    /**
+     * read UTF long
      * on return, if *val == 0xffffffffffffffff then the utf-8 sequence was
      * invalid, but the return value will be true
+     * @param raw   The raw bytes read (output). If null, no bytes are returned
+     * @return      The long read
+     * @throws IOException  Thrown if error reading input stream
      */
     public long readUTF8Long(ByteSpace raw) throws IOException {
         long v = 0;
@@ -1045,20 +1107,4 @@ public class InputBitStream {
         val = v;
         return val;
     }
-    /*
-     * DRR FIX void dump(const BitBuffer * bb, FILE * out) { unsigned i, j; if
-     * (bb == 0) { fprintf(out, "bitbuffer is NULL\n"); } else { fprintf( out,
-     * "bitbuffer: capacity=%u blurbs=%u bits=%u total_bits=%u consumed:
-     * blurbs=%u, bits=%u, total_bits=%u\n", capacity, blurbs, bits, total_bits,
-     * consumed_blurbs, consumed_bits, total_consumed_bits);
-     * 
-     * for (i = 0; i < blurbs; i++) { fprintf(out, "%08X: ", i); for (j = 0; j <
-     * BITS_PER_BLURB; j++) if (i * BITS_PER_BLURB + j < total_consumed_bits)
-     * fprintf(out, "."); else fprintf(out, "%01u", buffer[i] & (1 < <
-     * (BITS_PER_BLURB - j - 1)) ? 1 : 0); fprintf(out, "\n"); } if (bits > 0) {
-     * fprintf(out, "%08X: ", i); for (j = 0; j < bits; j++) if (i *
-     * BITS_PER_BLURB + j < total_consumed_bits) fprintf(out, "."); else
-     * fprintf(out, "%01u", buffer[i] & (1 < < (bits - j - 1)) ? 1 : 0);
-     * fprintf(out, "\n"); } } }
-     */
 }

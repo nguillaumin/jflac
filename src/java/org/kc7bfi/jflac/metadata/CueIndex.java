@@ -39,7 +39,7 @@ public class CueIndex {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public CueIndex(InputBitStream is) throws IOException {
-        offset = is.readRawLong(CUESHEET_INDEX_OFFSET_LEN);
+        offset = is.readRawULong(CUESHEET_INDEX_OFFSET_LEN);
         number = (byte) is.readRawUInt(CUESHEET_INDEX_NUMBER_LEN);
         is.skipBitsNoCRC(CUESHEET_INDEX_RESERVED_LEN);
     }

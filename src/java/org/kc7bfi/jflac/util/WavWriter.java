@@ -32,12 +32,14 @@ import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 
 public class WavWriter {
+    static final public int MAX_BLOCK_SIZE = 65535;
+    
     private long totalSamples;
     private int channels;
     private int bps;
     private int sampleRate;
     
-    private byte[] s8buffer = new byte[Constants.MAX_BLOCK_SIZE * Constants.MAX_CHANNELS * 4]; /* WATCHOUT: can be up to 2 megs */
+    private byte[] s8buffer = new byte[MAX_BLOCK_SIZE * Constants.MAX_CHANNELS * 4]; /* WATCHOUT: can be up to 2 megs */
     private int samplesProcessed = 0;
     private int frameCounter = 0;
     
@@ -48,6 +50,11 @@ public class WavWriter {
     private DataOutput os;
     private LittleEndianDataOutput osLE;
     
+    /**
+     * The constructor
+     * @param os            The output sream
+     * @param streamInfo    The FLAC stream info
+     */
     public WavWriter(DataOutput os, StreamInfo streamInfo) {
         this.os = os;
         this.osLE = new LittleEndianDataOutput(os);
@@ -57,6 +64,11 @@ public class WavWriter {
         this.sampleRate = streamInfo.sampleRate;
     }
     
+    /**
+     * The constructor
+     * @param os            The output sream
+     * @param streamInfo    The FLAC stream info
+     */
     public WavWriter(OutputStream os, StreamInfo streamInfo) {
         this.os = new DataOutputStream(os);
         this.osLE = new LittleEndianDataOutput(this.os);
@@ -66,9 +78,12 @@ public class WavWriter {
         this.sampleRate = streamInfo.sampleRate;
     }
     
+    /**
+     * Write a WAV file header
+     * @throws IOException  Thrown if error writing to output string.
+     */
     public void writeHeader() throws IOException {
         long dataSize = totalSamples * channels * ((bps + 7) / 8);
-        System.out.println("totalSamples="+totalSamples+" channels="+channels+" bps="+bps);
         if (totalSamples == 0) {
             if (!(os instanceof RandomAccessFile)) throw new IOException("Cannot seek in output stream");
             needsFixup = true;
@@ -76,9 +91,9 @@ public class WavWriter {
         //if (dataSize >= 0xFFFFFFDC) throw new IOException("ERROR: stream is too big to fit in a single file chunk (Datasize="+dataSize+")");
 
         os.write("RIFF".getBytes());
-        if (needsFixup) riffOffset = ((RandomAccessFile)os).getFilePointer();
+        if (needsFixup) riffOffset = ((RandomAccessFile) os).getFilePointer();
 
-        osLE.writeInt((int)dataSize + 36); // filesize-8
+        osLE.writeInt((int) dataSize + 36); // filesize-8
         os.write("WAVEfmt ".getBytes());
         os.write(new byte[] {0x10, 0x00, 0x00, 0x00}); // chunk size = 16
         os.write(new byte[] {0x01, 0x00}); // compression code == 1
@@ -88,11 +103,17 @@ public class WavWriter {
         osLE.writeShort(channels * ((bps + 7) / 8)); // block align
         osLE.writeShort(bps); // bits per sample
         os.write("data".getBytes());
-        if (needsFixup) dataOffset = ((RandomAccessFile)os).getFilePointer();
+        if (needsFixup) dataOffset = ((RandomAccessFile) os).getFilePointer();
         
-        osLE.writeInt((int)dataSize); // data size
+        osLE.writeInt((int) dataSize); // data size
     }
 
+    /**
+     * Write a WAV frame record
+     * @param frame         The FLAC frame
+     * @param channelData   The decoded channel data
+     * @throws IOException  Thrown if error writing to output channel
+     */
     public void writeFrame(Frame frame, ChannelData[] channelData) throws IOException {
         boolean isUnsignedSamples = (bps <= 8);
         int wideSamples = frame.header.blockSize;
@@ -108,7 +129,7 @@ public class WavWriter {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
                             //System.out.print("("+(int)((byte)(channelData[channel].output[wideSample] + 0x80))+")");
-                            s8buffer[sample++] = (byte)(channelData[channel].output[wideSample] + 0x80);
+                            s8buffer[sample++] = (byte) (channelData[channel].output[wideSample] + 0x80);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
@@ -120,14 +141,14 @@ public class WavWriter {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short)(channelData[channel].output[wideSample] + 0x8000);
+                            short val = (short) (channelData[channel].output[wideSample] + 0x8000);
                             s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short)(channelData[channel].output[wideSample]);
+                            short val = (short) (channelData[channel].output[wideSample]);
                             s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
                         }
@@ -137,7 +158,7 @@ public class WavWriter {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short)(channelData[channel].output[wideSample] + 0x800000);
+                            short val = (short) (channelData[channel].output[wideSample] + 0x800000);
                             s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
                             s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
@@ -145,7 +166,7 @@ public class WavWriter {
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short)(channelData[channel].output[wideSample]);
+                            short val = (short) (channelData[channel].output[wideSample]);
                             s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
                             s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             s8buffer[sample++] = (byte) (val & 0xff);
@@ -156,4 +177,3 @@ public class WavWriter {
         }
     }
 }
-

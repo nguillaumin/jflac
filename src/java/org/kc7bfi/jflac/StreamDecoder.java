@@ -41,39 +41,21 @@ import org.kc7bfi.jflac.util.CRC16;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamDecoder {
+    private static final int METADATA_TYPE_STREAMINFO = 0;
+    private static final int METADATA_TYPE_PADDING = 1;
+    private static final int METADATA_TYPE_APPLICATION = 2;
+    private static final int METADATA_TYPE_SEEKTABLE = 3;
+    private static final int METADATA_TYPE_VORBIS_COMMENT = 4;
+    private static final int METADATA_TYPE_CUESHEET = 5;
+    private static final int METADATA_TYPE_UNDEFINED = 6;
+    private static final byte[] STREAM_SYNC_STRING = new byte[] { (byte)'f', (byte)'L', (byte)'a', (byte)'C' };
+    private static final int STREAM_METADATA_IS_LAST_LEN = 1; /* bits */
+    private static final int STREAM_METADATA_TYPE_LEN = 7; /* bits */
+    private static final int STREAM_METADATA_LENGTH_LEN = 24; /* bits */
+    private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     
-    /***********************************************************************
-     *
-     * Private static data
-     *
-     ***********************************************************************/
-    
-    static private final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
-    static private final int MAX_CHANNELS = 8;
-    
-    // errors
-    /**< An error in the stream caused the decoder to lose synchronization. */
-    static private final int STREAM_DECODER_ERROR_STATUS_LOST_SYNC = 1;
-    
-    /**< The decoder encountered a corrupted frame header. */
-    static private final int STREAM_DECODER_ERROR_STATUS_BAD_HEADER = 2;
-    
-    /**< The frame's data did not match the CRC in the footer. */
-    static private final int STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH = 3;
-    
-    // write callback codes
-    
-    static private final int STREAM_DECODER_WRITE_STATUS_CONTINUE = 0;
-    /**< The write was OK and decoding can continue. */
-    
-    static private final int STREAM_DECODER_WRITE_STATUS_ABORT = 0;
-    /**< An unrecoverable error occurred.  The decoder will return from the process call. */
-    
-    /***********************************************************************
-     *
-     * Private class data
-     *
-     ***********************************************************************/
+    private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
+    private static final int MAX_CHANNELS = 8;
     
     private InputBitStream is;
     private ChannelData[] channelData = new ChannelData[MAX_CHANNELS];
@@ -92,41 +74,6 @@ public class StreamDecoder {
     private int sampleRate; /* in Hz */
     private int blockSize; /* in samples (per channel) */
     
-    /***********************************************************************
-     *
-     * Public static class data
-     *
-     ***********************************************************************/
-    
-    private static final String[] StreamDecoderStateString =
-        new String[] {
-            "STREAM_DECODER_SEARCH_FOR_METADATA",
-            "STREAM_DECODER_READ_METADATA",
-            "STREAM_DECODER_SEARCH_FOR_FRAME_SYNC",
-            "STREAM_DECODER_READ_FRAME",
-            "STREAM_DECODER_END_OF_STREAM",
-            "STREAM_DECODER_ABORTED",
-            "STREAM_DECODER_UNPARSEABLE_STREAM",
-            "STREAM_DECODER_MEMORY_ALLOCATION_ERROR",
-            "STREAM_DECODER_ALREADY_INITIALIZED",
-            "STREAM_DECODER_INVALID_CALLBACK",
-    "STREAM_DECODER_UNINITIALIZED" };
-    
-    private static final String[] StreamDecoderReadStatusString =
-        new String[] {
-            "STREAM_DECODER_READ_STATUS_CONTINUE",
-            "STREAM_DECODER_READ_STATUS_END_OF_STREAM",
-    "STREAM_DECODER_READ_STATUS_ABORT" };
-    
-    private static final String[] StreamDecoderWriteStatusString =
-        new String[] { "STREAM_DECODER_WRITE_STATUS_CONTINUE", "STREAM_DECODER_WRITE_STATUS_ABORT" };
-    
-    private static final String[] StreamDecoderErrorStatusString =
-        new String[] {
-            "STREAM_DECODER_ERROR_STATUS_LOST_SYNC",
-            "STREAM_DECODER_ERROR_STATUS_BAD_HEADER",
-    "STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH" };
-    
     // Decoder states
     private static final int STREAM_DECODER_SEARCH_FOR_METADATA = 0;
     private static final int STREAM_DECODER_READ_METADATA = 1;
@@ -140,6 +87,10 @@ public class StreamDecoder {
     private static final int STREAM_DECODER_INVALID_CALLBACK = 9;
     private static final int STREAM_DECODER_UNINITIALIZED = 10;
     
+    /**
+     * The constructor
+     * @param is    The input stream to read data from
+     */
     public StreamDecoder(InputStream is) {
         this.is = new InputBitStream(is);
         state = STREAM_DECODER_UNINITIALIZED;
@@ -148,41 +99,29 @@ public class StreamDecoder {
         state = STREAM_DECODER_SEARCH_FOR_METADATA;
     }
     
-    boolean finish() {
-        if (state == STREAM_DECODER_UNINITIALIZED)
-            return false;
-        outputCapacity = 0;
-        outputChannels = 0;
-        
-        //set_defaults_();
-        
-        state = STREAM_DECODER_UNINITIALIZED;
-        return true;
-    }
+    //int getState() {
+    //    return state;
+    //}
     
-    int getState() {
-        return state;
-    }
+    //int getChannels() {
+    //    return channels;
+    //}
     
-    int getChannels() {
-        return channels;
-    }
+    //int getChannelAssignment() {
+    //    return channelAssignment;
+    //}
     
-    int getChannelAssignment() {
-        return channelAssignment;
-    }
+    //int getBitsPerSample() {
+    //    return bitsPerSample;
+    //}
     
-    int getBitsPerSample() {
-        return bitsPerSample;
-    }
+    //int getSampleRate() {
+    //    return sampleRate;
+    //}
     
-    int getSampleRate() {
-        return sampleRate;
-    }
-    
-    int getBlockSize() {
-        return blockSize;
-    }
+    //int getBlockSize() {
+    //    return blockSize;
+    //}
     
     StreamInfo getStreamInfo() {
         return streamInfo;
@@ -190,6 +129,36 @@ public class StreamDecoder {
     
     ChannelData[] getChannelData() {
         return channelData;
+    }
+    
+    /**
+     * Read the FLAC stream info
+     * @return  The FLAC Stream Info record
+     */
+    public StreamInfo readStreamInfo() {
+        while (true) {
+            try {
+                findMetadata();
+                MetadataBase metadata = readMetadata();
+                if (metadata instanceof StreamInfo) return (StreamInfo) metadata;
+                if (metadata.isLast());
+            } catch (IOException e) {
+                return null;
+            }
+        }
+    }
+    
+    /**
+     * Read the next FLAC Metadata Record
+     * @return The Metadata Record
+     */
+    public MetadataBase readNextMetadata() {
+        try {
+            MetadataBase metadata = readMetadata();
+            return metadata;
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     boolean processSingle() throws IOException {
@@ -294,11 +263,13 @@ public class StreamDecoder {
         }
     }
     
-    int getInputBytesUnconsumed() {
+    /*
+    public int getInputBytesUnconsumed() {
         return is.getInputBytesUnconsumed();
     }
+    */
     
-    void allocateOutput(int size, int channels) {
+    private void allocateOutput(int size, int channels) {
         if (size <= outputCapacity && channels <= outputChannels) return;
         
         for (int i = 0; i < MAX_CHANNELS; i++) {
@@ -313,13 +284,13 @@ public class StreamDecoder {
         outputChannels = channels;
     }
     
-    void findMetadata() throws IOException {
+    private void findMetadata() throws IOException {
         boolean first = true;
         
         int id;
         for (int i = id = 0; i < 4;) {
             int x = is.readRawUInt(8);
-            if (x == Constants.STREAM_SYNC_STRING[i]) {
+            if (x == STREAM_SYNC_STRING[i]) {
                 first = true;
                 i++;
                 id = 0;
@@ -343,40 +314,39 @@ public class StreamDecoder {
                 }
             }
             i = 0;
-            if (first) {
-                System.err.println("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
-                throw new IOException("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
-            }
+            //if (first) {
+            //    System.err.println("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
+            //    throw new IOException("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
+            //}
         }
         
         state = STREAM_DECODER_READ_METADATA;
     }
     
-    void readMetadata() throws IOException {
-        MetadataBase block = null;
+    private MetadataBase readMetadata() throws IOException {
+        MetadataBase metadata = null;
         
-        boolean isLast = (is.readRawUInt(Constants.STREAM_METADATA_IS_LAST_LEN) != 0);
-        int type = is.readRawUInt(Constants.STREAM_METADATA_TYPE_LEN);
-        int length = is.readRawUInt(Constants.STREAM_METADATA_LENGTH_LEN);
+        boolean isLast = (is.readRawUInt(STREAM_METADATA_IS_LAST_LEN) != 0);
+        int type = is.readRawUInt(STREAM_METADATA_TYPE_LEN);
+        int length = is.readRawUInt(STREAM_METADATA_LENGTH_LEN);
         
-        if (type == Constants.METADATA_TYPE_STREAMINFO) {
-            block = streamInfo = new StreamInfo(is, isLast, length);
-        } else if (type == Constants.METADATA_TYPE_SEEKTABLE) {
-            block = seekTable = new SeekTable(is, isLast, length);
-        } else if (type == Constants.METADATA_TYPE_APPLICATION) {
-            block = new Application(is, isLast, length);
-        } else if (type == Constants.METADATA_TYPE_PADDING) {
-            System.out.println("METADATA_TYPE_PADDING: "+length);
+        if (type == METADATA_TYPE_STREAMINFO) {
+            metadata = streamInfo = new StreamInfo(is, isLast, length);
+        } else if (type == METADATA_TYPE_SEEKTABLE) {
+            metadata = seekTable = new SeekTable(is, isLast, length);
+        } else if (type == METADATA_TYPE_APPLICATION) {
+            metadata = new Application(is, isLast, length);
+        } else if (type == METADATA_TYPE_PADDING) {
             is.readByteBlockAlignedNoCRC(null, length);
-        } else if (type == Constants.METADATA_TYPE_VORBIS_COMMENT) {
-            block = new VorbisComment(is, isLast, length);
-        } else if (type == Constants.METADATA_TYPE_CUESHEET) {
-            block = new CueSheet(is, isLast, length);
+        } else if (type == METADATA_TYPE_VORBIS_COMMENT) {
+            metadata = new VorbisComment(is, isLast, length);
+        } else if (type == METADATA_TYPE_CUESHEET) {
+            metadata = new CueSheet(is, isLast, length);
         } else {
-            block = new Unknown(is,  isLast, length);
+            metadata = new Unknown(is,  isLast, length);
         }
-        if (block != null) metadata_callback(block);
         if (isLast) state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
+        return metadata;
     }
     
     
@@ -397,7 +367,7 @@ public class StreamDecoder {
         is.readByteBlockAlignedNoCRC(null, skip);
     }
     
-    void frameSync() throws IOException {
+    private void frameSync() throws IOException {
         boolean first = true;
         
         // If we know the total number of samples in the stream, stop if we've read that many.
@@ -436,7 +406,7 @@ public class StreamDecoder {
         }
     }
     
-    boolean readFrame() throws IOException {
+    public boolean readFrame() throws IOException {
         boolean gotAFrame = false;
         int channel;
         int i;
@@ -495,7 +465,7 @@ public class StreamDecoder {
         
         // Read the frame CRC-16 from the footer and check
         frameCRC = is.getReadCRC16();
-        x = is.readRawUInt(Constants.FRAME_FOOTER_CRC_LEN);
+        x = is.readRawUInt(FRAME_FOOTER_CRC_LEN);
         if (frameCRC == (short) x) {
             /* Undo any special channel coding */
             switch (frame.header.channelAssignment) {
@@ -529,7 +499,6 @@ public class StreamDecoder {
         } else {
             /* Bad frame, emit error and zero the output signal */
             System.out.println("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(x));
-            error_callback(STREAM_DECODER_ERROR_STATUS_FRAME_CRC_MISMATCH);
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
                     channelData[channel].output[j] = 0;
@@ -552,7 +521,7 @@ public class StreamDecoder {
         return true;// gotAFrame;
     }
     
-    void readSubframe(int channel, int bps) throws IOException {
+    private void readSubframe(int channel, int bps) throws IOException {
         int x;
         
         x = is.readRawUInt(8); /* MAGIC NUMBER */
@@ -569,7 +538,6 @@ public class StreamDecoder {
         // Lots of magic numbers here
         if ((x & 0x80) != 0) {
             System.out.println("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
-            error_callback(STREAM_DECODER_ERROR_STATUS_LOST_SYNC);
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             throw new IOException("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
             //return true;
@@ -600,21 +568,13 @@ public class StreamDecoder {
         }
     }
     
-    void readZeroPadding() throws IOException {
+    private void readZeroPadding() throws IOException {
         if (!is.isConsumedByteAligned()) {
             int zero = is.readRawUInt(is.bitsLeftForByteAlignment());
             if (zero != 0) {
                 System.out.println("ZeroPaddingError: "+Integer.toHexString(zero));
-                error_callback(STREAM_DECODER_ERROR_STATUS_LOST_SYNC);
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             }
         }
-    }
-    
-    void error_callback(int e) {
-        System.out.println("Error: "+e);
-    }
-    void metadata_callback(MetadataBase metadata) {
-        System.out.println("Metadata: "+metadata.getClass().getName()+" "+metadata);
     }
 }

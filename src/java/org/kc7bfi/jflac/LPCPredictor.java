@@ -197,6 +197,16 @@ public class LPCPredictor {
      }
      */
     
+    /**
+     * Restore the signal from the LPC compression
+     * @param residual  The residual signal
+     * @param dataLen   The length of the residual data
+     * @param qlpCoeff
+     * @param order     The predicate order
+     * @param lpQuantization
+     * @param data      The restored signal (output)
+     * @param startAt   The starting position in the data array
+     */
     public static void restoreSignal(int[] residual, int dataLen, int[] qlpCoeff, int order, int lpQuantization, int[] data, int startAt) {
         for (int i = 0; i < dataLen; i++) {
             int sum = 0;
@@ -207,6 +217,16 @@ public class LPCPredictor {
         }
     }
     
+    /**
+     * Restore the signal from the LPC compression
+     * @param residual  The residual signal
+     * @param dataLen   The length of the residual data
+     * @param qlpCoeff
+     * @param order     The predicate order
+     * @param lpQuantization
+     * @param data      The restored signal (output)
+     * @param startAt   The starting position in the data array
+     */
     public static void restoreSignalWide(int[] residual, int dataLen, int[] qlpCoeff, int order, int lpQuantization, int[] data, int startAt) {
         for (int i = 0; i < dataLen; i++) {
             long sum = 0;

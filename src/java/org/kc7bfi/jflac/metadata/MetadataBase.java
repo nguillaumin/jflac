@@ -37,4 +37,11 @@ public abstract class MetadataBase {
         this.length = length;
     }
 
+    /**
+     * Test iof last metatdata record
+     * @return True if last metadata record in the chain.
+     */
+    public boolean isLast() {
+        return isLast;
+    }
 }

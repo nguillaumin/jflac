@@ -56,7 +56,7 @@ public class CueSheet extends MetadataBase {
         super(isLast, length);
 
         is.readByteBlockAlignedNoCRC(mediaCatalogNumber, CUESHEET_MEDIA_CATALOG_NUMBER_LEN / 8);
-        leadIn = is.readRawLong(CUESHEET_LEAD_IN_LEN);
+        leadIn = is.readRawULong(CUESHEET_LEAD_IN_LEN);
         isCD = (is.readRawUInt(CUESHEET_IS_CD_LEN) != 0);
         is.skipBitsNoCRC(CUESHEET_RESERVED_LEN);
         numTracks = is.readRawUInt(CUESHEET_NUM_TRACKS_LEN);

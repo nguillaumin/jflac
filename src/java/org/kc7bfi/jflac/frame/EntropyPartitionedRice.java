@@ -22,10 +22,12 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class EntropyPartitionedRice extends EntropyCodingMethod {
+    private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN = 4; /* bits */
+    private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN = 5; /* bits */
+    private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER = 15;
 
     protected int order; // The partition order, i.e. # of contexts = 2 ^ order.
     protected EntropyPartitionedRiceContents contents; // The context's Rice parameters and/or raw bits.
@@ -48,14 +50,14 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
         contents.parameters = new int[partitions];
 
         for (int partition = 0; partition < partitions; partition++) {
-            int riceParameter = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN);
+            int riceParameter = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN);
             contents.parameters[partition] = riceParameter;
-            if (riceParameter < Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+            if (riceParameter < ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
                 int u = (partitionOrder == 0 || partition > 0) ? partitionSamples : partitionSamples - predictorOrder;
                 is.readRiceSignedBlock(residual, sample, u, riceParameter);
                 sample += u;
             } else {
-                riceParameter = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN);
+                riceParameter = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN);
                 contents.rawBits[partition] = riceParameter;
                 for (int u = (partitionOrder == 0 || partition > 0) ? 0 : predictorOrder; u < partitionSamples; u++, sample++) {
                     residual[sample] = is.readRawInt(riceParameter);

@@ -40,8 +40,8 @@ public class SeekPoint {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public SeekPoint(InputBitStream is) throws IOException {
-        sampleNumber = is.readRawLong(SEEKPOINT_SAMPLE_NUMBER_LEN);
-        streamOffset = is.readRawLong(SEEKPOINT_STREAM_OFFSET_LEN);
+        sampleNumber = is.readRawULong(SEEKPOINT_SAMPLE_NUMBER_LEN);
+        streamOffset = is.readRawULong(SEEKPOINT_STREAM_OFFSET_LEN);
         frameSamples = is.readRawUInt(SEEKPOINT_FRAME_SAMPLES_LEN);
     }
 }

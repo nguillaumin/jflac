@@ -21,85 +21,64 @@ package org.kc7bfi.jflac;
  */
 
 public class Constants {
-    /* VERSION should come from configure */
-    static final public String VERSION_STRING = "1.0";
-    /* yet one more hack because of MSVC6: */
-    static final public String VENDOR_STRING = "reference libFLAC 1.1.0 20030126";
+    public static final String VERSION_STRING = "1.0";
+    public static final String VENDOR_STRING = "reference libFLAC 1.1.0 20030126";
 
-    static final public byte[] STREAM_SYNC_STRING = new byte[] { (byte)'f', (byte)'L', (byte)'a', (byte)'C' };
-    static final public int STREAM_SYNC = 0x664C6143;
-    static final public int STREAM_SYNC_LEN = 32; /* bits */;
+    //public static final int STREAM_SYNC = 0x664C6143;
+    //public static final int STREAM_SYNC_LEN = 32; /* bits */;
     
-    static final public int MAX_CHANNELS = 8;
-    static final public int MAX_BLOCK_SIZE = 65535;
+    public static final int MAX_CHANNELS = 8;
 
-    static final public int STREAM_METADATA_IS_LAST_LEN = 1; /* bits */
-    static final public int STREAM_METADATA_TYPE_LEN = 7; /* bits */
-    static final public int STREAM_METADATA_LENGTH_LEN = 24; /* bits */
+    //public static final int FRAME_HEADER_SYNC = 0x3ffe;
+    //public static final int FRAME_HEADER_SYNC_LEN = 14; /* bits */
+    //public static final int FRAME_HEADER_RESERVED_LEN = 2; /* bits */
+    //public static final int FRAME_HEADER_BLOCK_SIZE_LEN = 4; /* bits */
+    //public static final int FRAME_HEADER_SAMPLE_RATE_LEN = 4; /* bits */
+    //public static final int FRAME_HEADER_CHANNEL_ASSIGNMENT_LEN = 4; /* bits */
+    //public static final int FRAME_HEADER_BITS_PER_SAMPLE_LEN = 3; /* bits */
+    //public static final int FRAME_HEADER_ZERO_PAD_LEN = 1; /* bits */
+    //public static final int FRAME_HEADER_CRC_LEN = 8; /* bits */
 
-    static final public int FRAME_HEADER_SYNC = 0x3ffe;
-    static final public int FRAME_HEADER_SYNC_LEN = 14; /* bits */
-    static final public int FRAME_HEADER_RESERVED_LEN = 2; /* bits */
-    static final public int FRAME_HEADER_BLOCK_SIZE_LEN = 4; /* bits */
-    static final public int FRAME_HEADER_SAMPLE_RATE_LEN = 4; /* bits */
-    static final public int FRAME_HEADER_CHANNEL_ASSIGNMENT_LEN = 4; /* bits */
-    static final public int FRAME_HEADER_BITS_PER_SAMPLE_LEN = 3; /* bits */
-    static final public int FRAME_HEADER_ZERO_PAD_LEN = 1; /* bits */
-    static final public int FRAME_HEADER_CRC_LEN = 8; /* bits */
 
-    static final public int FRAME_FOOTER_CRC_LEN = 16; /* bits */
+    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE = 0;
+    public static final int ENTROPY_CODING_METHOD_TYPE_LEN = 2; /* bits */
+    public static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4; /* bits */
 
-    static final public int ENTROPY_CODING_METHOD_PARTITIONED_RICE = 0;
-    static final public int ENTROPY_CODING_METHOD_TYPE_LEN = 2; /* bits */
-    static final public int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4; /* bits */
-    static final public int ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN = 4; /* bits */
-    static final public int ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN = 5; /* bits */
-
-    static final public int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER = 15;
     /* == (1<<ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN)-1 */
 
-    static final public String[] EntropyCodingMethodTypeString = new String[] { "PARTITIONED_RICE" };
+    //public static final String[] EntropyCodingMethodTypeString = new String[] { "PARTITIONED_RICE" };
 
-    static final public int SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN = 4; /* bits */
-    static final public int SUBFRAME_LPC_QLP_SHIFT_LEN = 5; /* bits */
 
-    static final public int SUBFRAME_ZERO_PAD_LEN = 1; /* bits */
-    static final public int SUBFRAME_TYPE_LEN = 6; /* bits */
-    static final public int SUBFRAME_WASTED_BITS_FLAG_LEN = 1; /* bits */
+    //public static final int SUBFRAME_ZERO_PAD_LEN = 1; /* bits */
+    //public static final int SUBFRAME_TYPE_LEN = 6; /* bits */
+    //public static final int SUBFRAME_WASTED_BITS_FLAG_LEN = 1; /* bits */
 
-    static final public int SUBFRAME_TYPE_CONSTANT_BYTE_ALIGNED_MASK = 0x00;
-    static final public int SUBFRAME_TYPE_VERBATIM_BYTE_ALIGNED_MASK = 0x02;
-    static final public int SUBFRAME_TYPE_FIXED_BYTE_ALIGNED_MASK = 0x10;
-    static final public int SUBFRAME_TYPE_LPC_BYTE_ALIGNED_MASK = 0x40;
+    //public static final int SUBFRAME_TYPE_CONSTANT_BYTE_ALIGNED_MASK = 0x00;
+    //public static final int SUBFRAME_TYPE_VERBATIM_BYTE_ALIGNED_MASK = 0x02;
+    //public static final int SUBFRAME_TYPE_FIXED_BYTE_ALIGNED_MASK = 0x10;
+    //public static final int SUBFRAME_TYPE_LPC_BYTE_ALIGNED_MASK = 0x40;
     
-    static final public int MAX_RICE_PARTITION_ORDER = 15;
+    //public static final int MAX_RICE_PARTITION_ORDER = 15;
     
     // metadata type
-    static final public int METADATA_TYPE_STREAMINFO = 0;
-    static final public int METADATA_TYPE_PADDING = 1;
-    static final public int METADATA_TYPE_APPLICATION = 2;
-    static final public int METADATA_TYPE_SEEKTABLE = 3;
-    static final public int METADATA_TYPE_VORBIS_COMMENT = 4;
-    static final public int METADATA_TYPE_CUESHEET = 5;
-    static final public int METADATA_TYPE_UNDEFINED = 6;
     
     // channel assignment
-    static final public int CHANNEL_ASSIGNMENT_INDEPENDENT = 0; /**< independent channels */
-    static final public int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1; /**< left+side stereo */
-    static final public int CHANNEL_ASSIGNMENT_RIGHT_SIDE = 2; /**< right+side stereo */
-    static final public int CHANNEL_ASSIGNMENT_MID_SIDE = 3; /**< mid+side stereo */
+    //public static final int CHANNEL_ASSIGNMENT_INDEPENDENT = 0; /**< independent channels */
+    //public static final int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1; /**< left+side stereo */
+    //public static final int CHANNEL_ASSIGNMENT_RIGHT_SIDE = 2; /**< right+side stereo */
+    //public static final int CHANNEL_ASSIGNMENT_MID_SIDE = 3; /**< mid+side stereo */
 
-    static final public String[] SubframeTypeString = new String[] { "CONSTANT", "VERBATIM", "FIXED", "LPC" };
+    //public static final String[] SubframeTypeString = new String[] { "CONSTANT", "VERBATIM", "FIXED", "LPC" };
 
-    static final public String[] ChannelAssignmentString = new String[] { "INDEPENDENT", "LEFT_SIDE", "RIGHT_SIDE", "MID_SIDE" };
+    //public static final String[] ChannelAssignmentString = new String[] { "INDEPENDENT", "LEFT_SIDE", "RIGHT_SIDE", "MID_SIDE" };
 
-    static final public String[] FrameNumberTypeString = new String[] 
-        { "FRAME_NUMBER_TYPE_FRAME_NUMBER", "FRAME_NUMBER_TYPE_SAMPLE_NUMBER" };
+    //public static final String[] FrameNumberTypeString = new String[] 
+    //    { "FRAME_NUMBER_TYPE_FRAME_NUMBER", "FRAME_NUMBER_TYPE_SAMPLE_NUMBER" };
 
-    static final public String[] MetadataTypeString = new String[] 
-        { "STREAMINFO", "PADDING", "APPLICATION", "SEEKTABLE", "VORBIS_COMMENT", "CUESHEET" };
+    //public static final String[] MetadataTypeString = new String[] 
+    //    { "STREAMINFO", "PADDING", "APPLICATION", "SEEKTABLE", "VORBIS_COMMENT", "CUESHEET" };
         
-    static final public int MAX_SAMPLE_RATE = 655350;
+    //public static final int MAX_SAMPLE_RATE = 655350;
 
 
         /*

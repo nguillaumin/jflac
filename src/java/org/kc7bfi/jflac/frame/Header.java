@@ -22,7 +22,6 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
@@ -182,13 +181,13 @@ public class Header {
             channels = 2;
             switch (asgnType & 7) {
                 case 0 :
-                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE;
+                    channelAssignment = CHANNEL_ASSIGNMENT_LEFT_SIDE;
                     break;
                 case 1 :
-                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE;
+                    channelAssignment = CHANNEL_ASSIGNMENT_RIGHT_SIDE;
                     break;
                 case 2 :
-                    channelAssignment = Constants.CHANNEL_ASSIGNMENT_MID_SIDE;
+                    channelAssignment = CHANNEL_ASSIGNMENT_MID_SIDE;
                     break;
                 default :
                     throw new BadHeaderException("Bad Channel Assignment (" + asgnType + ")");

@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.metadata.MetadataBase;
+import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.WavWriter;
 
 public class TestDecoder {
@@ -34,7 +36,25 @@ public class TestDecoder {
     
     private StreamDecoder decoder;
     
-    public TestDecoder() throws IOException {
+    public TestDecoder() {
+    }
+    
+    public void analyse() throws IOException {
+        System.out.println("["+inFileName+"]["+outFileName+"]");
+        FileInputStream is = new FileInputStream(inFileName);
+        FileOutputStream os = new FileOutputStream(outFileName);
+        decoder = new StreamDecoder(is);
+        
+        StreamInfo info = decoder.readStreamInfo();
+        System.out.println(info.toString());
+        MetadataBase metadata;
+        do {
+            metadata = decoder.readNextMetadata();
+            System.out.println(metadata.toString());
+        } while (!metadata.isLast());
+   }
+    
+    public void decode() throws IOException {
         System.out.println("["+inFileName+"]["+outFileName+"]");
         FileInputStream is = new FileInputStream(inFileName);
         FileOutputStream os = new FileOutputStream(outFileName);
@@ -60,7 +80,8 @@ public class TestDecoder {
         outFileName = args[1];
         
         try {
-            TestDecoder decoder = new TestDecoder();
+            TestDecoder decoder1 = new TestDecoder();
+            decoder1.analyse();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

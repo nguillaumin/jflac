@@ -48,7 +48,7 @@ public class CueTrack {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public CueTrack(InputBitStream is) throws IOException {
-        offset = is.readRawLong(CUESHEET_TRACK_OFFSET_LEN);
+        offset = is.readRawULong(CUESHEET_TRACK_OFFSET_LEN);
         number = (byte) is.readRawUInt(CUESHEET_TRACK_NUMBER_LEN);
         is.readByteBlockAlignedNoCRC(isrc, CUESHEET_TRACK_ISRC_LEN / 8);
         type = is.readRawUInt(CUESHEET_TRACK_TYPE_LEN);

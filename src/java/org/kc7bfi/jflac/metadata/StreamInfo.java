@@ -80,7 +80,7 @@ public class StreamInfo extends MetadataBase {
         bitsPerSample = is.readRawUInt(STREAMINFO_BITS_PER_SAMPLE_LEN) + 1;
         usedBits += STREAMINFO_BITS_PER_SAMPLE_LEN;
 
-        totalSamples = is.readRawLong(STREAMINFO_TOTAL_SAMPLES_LEN);
+        totalSamples = is.readRawULong(STREAMINFO_TOTAL_SAMPLES_LEN);
         usedBits += STREAMINFO_TOTAL_SAMPLES_LEN;
 
         is.readByteBlockAlignedNoCRC(md5sum, STREAMINFO_MD5SUM_LEN / 8);

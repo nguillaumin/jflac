@@ -29,6 +29,8 @@ import org.kc7bfi.jflac.util.BitMath;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelLPC extends ChannelBase {
+    private static final int SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN = 4; /* bits */
+    private static final int SUBFRAME_LPC_QLP_SHIFT_LEN = 5; /* bits */
     private static final int MAX_LPC_ORDER = 32;
 
     private EntropyCodingMethod entropyCodingMethod; // The residual coding method.
@@ -61,14 +63,14 @@ public class ChannelLPC extends ChannelBase {
         }
 
         // read qlp coeff precision
-        int u32 = is.readRawUInt(Constants.SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN);
-        if (u32 == (1 << Constants.SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN) - 1) {
+        int u32 = is.readRawUInt(SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN);
+        if (u32 == (1 << SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN) - 1) {
             throw new IOException("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
         }
         qlpCoeffPrecision = u32 + 1;
 
         // read qlp shift
-        quantizationLevel = is.readRawInt(Constants.SUBFRAME_LPC_QLP_SHIFT_LEN);
+        quantizationLevel = is.readRawInt(SUBFRAME_LPC_QLP_SHIFT_LEN);
 
         // read quantized lp coefficiencts
         for (int u = 0; u < order; u++) {
