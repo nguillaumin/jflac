@@ -61,6 +61,7 @@ public class FlacPacker extends JFrame {
         
         // text area
         textArea.setText("");
+        textArea.setAutoscrolls(true);
         this.getContentPane().add(textArea, BorderLayout.CENTER);
         
         // button pannel
@@ -92,6 +93,7 @@ public class FlacPacker extends JFrame {
     
     private void appendMsg(String msg) {
         textArea.setText(textArea.getText() + msg + "\n");
+        textArea.repaint();
     }
     
     private void addFilesToList() {
@@ -148,9 +150,15 @@ public class FlacPacker extends JFrame {
                 long frameStartOffs = decoder.getTotalBytesRead();
                 PackerFile aFile = new PackerFile(file, seekPoint, frameStartOffs);
                 albumFiles.add(aFile);
-                decoder.decode();
+                //System.out.println("Do decode " +i);
+                try {
+                    decoder.decodeFrames();
+                } catch (EOFException e) {
+                    //appendMsg("File " + file + ": " + e);
+                }
+                //System.out.println("Done decode");
                 long frameEndOffs = decoder.getTotalBytesRead();
-                appendMsg(frameStartOffs + " " + frameEndOffs);
+                //appendMsg(frameStartOffs + " " + frameEndOffs + " " + decoder.getSamplesDecoded());
                 lastSampleNumber += decoder.getSamplesDecoded();
                 lastStreamOffset += frameEndOffs - frameStartOffs;
             } catch (FileNotFoundException e) {

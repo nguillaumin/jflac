@@ -225,7 +225,7 @@ public class StreamInfo extends Metadata {
      * @return the Java Sound AudioFormat for this stream info.
      */
     public AudioFormat getAudioFormat() {
-        return new AudioFormat(sampleRate, bitsPerSample, channels, true, false);
+        return new AudioFormat(sampleRate, bitsPerSample, channels, (bitsPerSample <= 8) ? false : true, false);
     }
     
     /**

@@ -59,7 +59,7 @@ public class FLACDecoder {
     private int outputCapacity = 0;
     private int outputChannels = 0;
     private int lastFrameNumber;
-    private long samplesDecoded;
+    private long samplesDecoded = 0;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
     private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
@@ -571,7 +571,8 @@ public class FLACDecoder {
         int length = bitStream.readRawUInt(Metadata.STREAM_METADATA_LENGTH_LEN);
         
         if (type == Metadata.METADATA_TYPE_STREAMINFO) {
-            metadata = streamInfo = new StreamInfo(bitStream, length, isLast);
+            streamInfo = new StreamInfo(bitStream, length, isLast);
+            metadata = streamInfo;
             pcmProcessors.processStreamInfo((StreamInfo)metadata);
         } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
             metadata = new SeekTable(bitStream, length, isLast);
@@ -764,7 +765,9 @@ public class FLACDecoder {
         sampleRate = frame.header.sampleRate;
         blockSize = frame.header.blockSize;
         
-        samplesDecoded = frame.header.sampleNumber + frame.header.blockSize;
+        //samplesDecoded = frame.header.sampleNumber + frame.header.blockSize;
+        samplesDecoded += frame.header.blockSize;
+        //System.out.println(samplesDecoded+" "+frame.header.sampleNumber + " "+frame.header.blockSize);
         
         //state = DECODER_SEARCH_FOR_FRAME_SYNC;
         //return;

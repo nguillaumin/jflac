@@ -20,6 +20,7 @@ package org.kc7bfi.jflac.apps;
  */
 
 
+import java.io.EOFException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -57,7 +58,11 @@ public class Player implements PCMProcessor {
         
         FLACDecoder decoder = new FLACDecoder(is);
         decoder.addPCMProcessor(this);
-        decoder.decode();
+        try {
+            decoder.decode();
+        } catch (EOFException e) {
+            // skip
+        }
         
         line.drain();
         line.close();
