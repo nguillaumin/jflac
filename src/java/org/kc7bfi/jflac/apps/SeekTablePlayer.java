@@ -38,7 +38,7 @@ import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.SeekPoint;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 
 
 /**
@@ -114,8 +114,8 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
      * @param pcm The decoded PCM data
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
-    public void processPCM(ByteSpace pcm) {
-        line.write(pcm.space, 0, pcm.pos);
+    public void processPCM(ByteData pcm) {
+        line.write(pcm.getData(), 0, pcm.getLen());
     }
 
     /**

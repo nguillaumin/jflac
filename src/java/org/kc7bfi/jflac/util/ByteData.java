@@ -21,24 +21,24 @@ package org.kc7bfi.jflac.util;
  */
 
 /**
- * Expandable byte storage.
+ * Expandable byte data storage.
  * @author kc7bfi
  */
-public class ByteSpace {
+public class ByteData {
     
     /** The byte array where data is stored. */
-    public byte[] space;
+    private byte[] data;
     
     /** The number of bytes stored in the array. */
-    public int pos;
+    private int len;
     
     /**
      * The default constructor.
      * @param maxSpace  The maximum space in the internal byte array.
      */
-    public ByteSpace(int maxSpace) {
-        space = new byte[maxSpace];
-        pos = 0;
+    public ByteData(int maxSpace) {
+        data = new byte[maxSpace];
+        len = 0;
     }
     
     /**
@@ -46,7 +46,29 @@ public class ByteSpace {
      * @param b byte to extend
      */
     public void append(byte b) {
-        space[pos++] = b;
+        data[len++] = b;
     }
     
+    /**
+     * @return Returns the data.
+     */
+    public byte[] getData() {
+        return data;
+    }
+    
+    /**
+     * Return a data byte.
+     * @param idx   The data byte to return
+     * @return Returns the data.
+     */
+    public byte getData(int idx) {
+        return data[idx];
+    }
+    
+    /**
+     * @return Returns the len.
+     */
+    public int getLen() {
+        return len;
+    }
 }

@@ -44,7 +44,7 @@ import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.metadata.Unknown;
 import org.kc7bfi.jflac.metadata.VorbisComment;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 import org.kc7bfi.jflac.util.CRC16;
 
 public class FLACDecoder {
@@ -202,7 +202,7 @@ public class FLACDecoder {
         }
     }
     
-    private void callPCMProcessors(ByteSpace pcm) {
+    private void callPCMProcessors(ByteData pcm) {
         synchronized (pcmProcessors) {
             Iterator it = pcmProcessors.iterator();
             while (it.hasNext()) {
@@ -213,16 +213,16 @@ public class FLACDecoder {
     }
     
     private void callPCMProcessors(Frame frame) {
-        ByteSpace space = null;
+        ByteData space = null;
         if (streamInfo.bitsPerSample == 8) {
-            space = new ByteSpace(frame.header.blockSize * channels);
+            space = new ByteData(frame.header.blockSize * channels);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     space.append((byte) (channelData[channel].getOutput()[i] + 0x80));
                 }
             }
         } else if (streamInfo.bitsPerSample == 16) {
-            space = new ByteSpace(frame.header.blockSize * channels * 2);
+            space = new ByteData(frame.header.blockSize * channels * 2);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     short val = (short) (channelData[channel].getOutput()[i]);
@@ -231,7 +231,7 @@ public class FLACDecoder {
                 }
             }
         } else if (streamInfo.bitsPerSample == 24) {
-            space = new ByteSpace(frame.header.blockSize * channels * 3);
+            space = new ByteData(frame.header.blockSize * channels * 3);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     int val = (channelData[channel].getOutput()[i]);

@@ -40,31 +40,27 @@ import javax.sound.sampled.spi.FormatConversionProvider;
  * returned by one of the getAudioInputStream methods.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FlacFormatConvertionProvider extends FormatConversionProvider {
 
     /** */
-    public static final AudioFormat.Encoding[] NO_ENCODING = {};
+    private static final AudioFormat.Encoding[] NO_ENCODING = {};
 
     /** */
-    public static final AudioFormat.Encoding[] PCM_ENCODING = { AudioFormat.Encoding.PCM_SIGNED };
+    private static final AudioFormat.Encoding[] PCM_ENCODING = { AudioFormat.Encoding.PCM_SIGNED };
 
     /** */
-    public static final AudioFormat.Encoding[] FLAC_ENCODING = { FlacEncoding.FLAC };
+    private static final AudioFormat.Encoding[] FLAC_ENCODING = { FlacEncoding.FLAC };
 
     /** */
-    public static final AudioFormat.Encoding[] BOTH_ENCODINGS = {
+    private static final AudioFormat.Encoding[] BOTH_ENCODINGS = {
             FlacEncoding.FLAC, 
             AudioFormat.Encoding.PCM_SIGNED 
     };
 
     /** */
-    public static final AudioFormat[] NO_FORMAT = {};
-    
-    public FlacFormatConvertionProvider() {
-        super();
-    }
+    private static final AudioFormat[] NO_FORMAT = {};
 
     /**
      * Obtains the set of source format encodings from which format conversion
@@ -154,8 +150,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * @param sourceStream - stream from which data to be processed should be read.
      * @return stream from which processed data with the specified target
      * encoding may be read.
-     * @exception IllegalArgumentException - if the format combination supplied
-     * is not supported.
      */
     public AudioInputStream getAudioInputStream(AudioFormat.Encoding targetEncoding, AudioInputStream sourceStream) {
         if (isConversionSupported(targetEncoding, sourceStream.getFormat())) {
@@ -189,8 +183,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * @param sourceStream - stream from which data to be processed should be read.
      * @return stream from which processed data with the specified format may be
      * read.
-     * @exception IllegalArgumentException - if the format combination supplied
-     * is not supported.
      */
     public AudioInputStream getAudioInputStream(AudioFormat targetFormat, AudioInputStream sourceStream) {
         if (isConversionSupported(targetFormat, sourceStream.getFormat())) {

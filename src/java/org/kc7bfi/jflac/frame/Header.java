@@ -25,7 +25,7 @@ import java.io.IOException;
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 import org.kc7bfi.jflac.util.CRC8;
 
 /**
@@ -70,17 +70,17 @@ public class Header {
     public Header(BitInputStream is, byte[] headerWarmup, StreamInfo streamInfo) throws IOException, BadHeaderException {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
-        ByteSpace rawHeader = new ByteSpace(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
+        ByteData rawHeader = new ByteData(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
         boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize != streamInfo.maxBlockSize);
         boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize == streamInfo.maxBlockSize);
         
         // init the raw header with the saved bits from synchronization
-        rawHeader.space[rawHeader.pos++] = headerWarmup[0];
-        rawHeader.space[rawHeader.pos++] = headerWarmup[1];
+        rawHeader.append(headerWarmup[0]);
+        rawHeader.append(headerWarmup[1]);
         
         // check to make sure that the reserved bits are 0
-        if ((rawHeader.space[1] & 0x03) != 0) { // MAGIC NUMBER
-            throw new BadHeaderException("Bad Magic Number: " + (rawHeader.space[1] & 0xff));
+        if ((rawHeader.getData(1) & 0x03) != 0) { // MAGIC NUMBER
+            throw new BadHeaderException("Bad Magic Number: " + (rawHeader.getData(1) & 0xff));
         }
         
         // Note that along the way as we read the header, we look for a sync
@@ -92,10 +92,10 @@ public class Header {
             if (is.peekRawUInt(8) == 0xff) { // MAGIC NUMBER for the first 8 frame sync bits
                 throw new BadHeaderException("Found sync byte");
             }
-            rawHeader.space[rawHeader.pos++] = (byte) is.readRawUInt(8);
+            rawHeader.append((byte) is.readRawUInt(8));
         }
         
-        int bsType = (rawHeader.space[2] >> 4) & 0x0f;
+        int bsType = (rawHeader.getData(2) >> 4) & 0x0f;
         switch (bsType) {
             case 0 :
                 if (!isKnownFixedBlockSizeStream)
@@ -130,7 +130,7 @@ public class Header {
         }
         //System.out.println("BSType="+bsType+" BS="+blockSize);
         
-        int srType = rawHeader.space[2] & 0x0f;
+        int srType = rawHeader.getData(2) & 0x0f;
         switch (srType) {
             case 0 :
                 if (streamInfo == null)
@@ -175,7 +175,7 @@ public class Header {
             default :
         }
         
-        int asgnType = (int) ((rawHeader.space[3] >> 4) & 0x0f);
+        int asgnType = (int) ((rawHeader.getData(3) >> 4) & 0x0f);
         //System.out.println("AsgnType="+asgnType+" "+(rawHeader.space[3] >> 4));
         if ((asgnType & 8) != 0) {
             channels = 2;
@@ -197,7 +197,7 @@ public class Header {
             channelAssignment = Constants.CHANNEL_ASSIGNMENT_INDEPENDENT;
         }
         
-        int bpsType = (int) (rawHeader.space[3] & 0x0e) >> 1;
+        int bpsType = (int) (rawHeader.getData(3) & 0x0e) >> 1;
         switch (bpsType) {
             case 0 :
                 if (streamInfo != null)
@@ -227,7 +227,7 @@ public class Header {
                 break;
         }
         
-        if ((rawHeader.space[3] & 0x01) != 0) { // this should be a zero padding bit
+        if ((rawHeader.getData(3) & 0x01) != 0) { // this should be a zero padding bit
             throw new BadHeaderException("this should be a zero padding bit");
         }
         
@@ -246,10 +246,10 @@ public class Header {
         
         if (blocksizeHint != 0) {
             int blockSizeCode = is.readRawUInt(8);
-            rawHeader.space[rawHeader.pos++] = (byte) blockSizeCode;
+            rawHeader.append((byte) blockSizeCode);
             if (blocksizeHint == 7) {
                 int blockSizeCode2 = is.readRawUInt(8);
-                rawHeader.space[rawHeader.pos++] = (byte) blockSizeCode2;
+                rawHeader.append((byte) blockSizeCode2);
                 blockSizeCode = (blockSizeCode << 8) | blockSizeCode2;
             }
             blockSize = blockSizeCode + 1;
@@ -257,10 +257,10 @@ public class Header {
         
         if (sampleRateHint != 0) {
             int sampleRateCode = is.readRawUInt(8);
-            rawHeader.space[rawHeader.pos++] = (byte) sampleRateCode;
+            rawHeader.append((byte) sampleRateCode);
             if (sampleRateHint != 12) {
                 int sampleRateCode2 = is.readRawUInt(8);
-                rawHeader.space[rawHeader.pos++] = (byte) sampleRateCode2;
+                rawHeader.append((byte) sampleRateCode2);
                 sampleRateCode = (sampleRateCode << 8) | sampleRateCode2;
             }
             if (sampleRateHint == 12)
@@ -274,7 +274,7 @@ public class Header {
         // read the CRC-8 byte
         byte crc8 = (byte) is.readRawUInt(8);
         
-        if (CRC8.calc(rawHeader.space, rawHeader.pos) != crc8) {
+        if (CRC8.calc(rawHeader.getData(), rawHeader.getLen()) != crc8) {
             throw new BadHeaderException("STREAM_DECODER_ERROR_STATUS_BAD_HEADER");
         }
     }

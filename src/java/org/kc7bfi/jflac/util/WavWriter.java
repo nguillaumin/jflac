@@ -217,7 +217,7 @@ public class WavWriter {
      * @param space The PCM data
      * @throws IOException  Thrown if error writing to file
      */
-    public void writePCM(ByteSpace space) throws IOException {
-        os.write(space.space, 0, space.pos);
+    public void writePCM(ByteData space) throws IOException {
+        os.write(space.getData(), 0, space.getLen());
     }
 }

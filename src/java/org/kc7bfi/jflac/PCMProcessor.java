@@ -7,7 +7,7 @@
 package org.kc7bfi.jflac;
 
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 
 /**
  * PCMProcessor interface.
@@ -26,5 +26,5 @@ public interface PCMProcessor {
      * Called when each data frame is decompressed.
      * @param pcm The decompressed PCM data
      */
-    public void processPCM(ByteSpace pcm);
+    public void processPCM(ByteData pcm);
 }

@@ -28,13 +28,13 @@ import javax.sound.sampled.AudioFormat;
 import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 
 /**
  * Converts an Flac bitstream into a PCM 16bits/sample audio stream.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements PCMProcessor {
 
@@ -159,8 +159,8 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
      * @param pcm The decoded PCM data
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
-    public void processPCM(ByteSpace pcm) {
-        buffer.resize(pcm.pos * 2);
-        buffer.put(pcm.space, 0, pcm.pos);
+    public void processPCM(ByteData pcm) {
+        buffer.resize(pcm.getLen() * 2);
+        buffer.put(pcm.getData(), 0, pcm.getLen());
     }
 }

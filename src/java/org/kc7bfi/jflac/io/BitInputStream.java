@@ -23,7 +23,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 import org.kc7bfi.jflac.util.CRC16;
 
 
@@ -623,13 +623,13 @@ public class BitInputStream {
      * @return      The integer read
      * @throws IOException  Thrown if error reading input stream
      */
-    public int readUTF8Int(ByteSpace raw) throws IOException {
+    public int readUTF8Int(ByteData raw) throws IOException {
         int val;
         int v = 0;
         int x;
         int i;
         x = readRawUInt(8);
-        if (raw != null) raw.space[raw.pos++] = (byte) x;
+        if (raw != null) raw.append((byte) x);
         if ((x & 0x80) == 0) { // 0xxxxxxx
             v = x;
             i = 0;
@@ -660,7 +660,7 @@ public class BitInputStream {
             }
             x = readRawUInt(8);
             if (raw != null)
-                raw.space[raw.pos++] = (byte) x;
+                raw.append((byte) x);
             v <<= 6;
             v |= (x & 0x3F);
         }
@@ -676,14 +676,14 @@ public class BitInputStream {
      * @return      The long read
      * @throws IOException  Thrown if error reading input stream
      */
-    public long readUTF8Long(ByteSpace raw) throws IOException {
+    public long readUTF8Long(ByteData raw) throws IOException {
         long v = 0;
         int x;
         int i;
         long val;
         x = readRawUInt(8);
         if (raw != null)
-            raw.space[raw.pos++] = (byte) x;
+            raw.append((byte) x);
         if (((x & 0x80) == 0)) { // 0xxxxxxx
             v = x;
             i = 0;
@@ -717,7 +717,7 @@ public class BitInputStream {
             }
             x = readRawUInt(8);
             if (raw != null)
-                raw.space[raw.pos++] = (byte) x;
+                raw.append((byte) x);
             v <<= 6;
             v |= (x & 0x3F);
         }

@@ -27,7 +27,7 @@ import java.io.IOException;
 import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.ByteData;
 import org.kc7bfi.jflac.util.WavWriter;
 
 /**
@@ -72,7 +72,7 @@ public class Decoder implements PCMProcessor {
      * @param pcm The decoded PCM data
      * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
      */
-    public void processPCM(ByteSpace pcm) {
+    public void processPCM(ByteData pcm) {
         try {
             System.out.println("Write PCM");
             wav.writePCM(pcm);
