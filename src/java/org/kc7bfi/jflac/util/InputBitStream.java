@@ -1106,4 +1106,12 @@ public class InputBitStream {
         val = v;
         return val;
     }
+    
+    /**
+     * Consumed Blurbs.
+     * @return Returns the consumedBlurbs.
+     */
+    public int getConsumedBlurbs() {
+        return consumedBlurbs;
+    }
 }

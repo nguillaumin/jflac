@@ -224,7 +224,7 @@ public class StreamDecoder {
                 findMetadata();
                 Metadata metadata = readMetadata();
                 if (metadata instanceof StreamInfo) return (StreamInfo) metadata;
-                if (metadata.isLast());
+                if (metadata.isLast()) return null;
             } catch (IOException e) {
                 return null;
             }
@@ -360,6 +360,14 @@ public class StreamDecoder {
                 return null;
             }
         }
+    }
+    
+    /**
+     * Bytes consumed.
+     * @return  The number of bytes read
+     */
+    public long getBytesConsumed() {
+        return is.getConsumedBlurbs();
     }
     
     /*

@@ -26,7 +26,6 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class SeekTable extends Metadata {
     private static final int SEEKPOINT_LENGTH = 18;
-    private static final long SEEKPOINT_PLACEHOLDER = 0xffffffffffffffffL;
 
     protected SeekPoint[] points;
 
@@ -51,24 +50,13 @@ public class SeekTable extends Metadata {
         // if there is a partial point left, skip over it
         if (length > 0) is.readByteBlockAlignedNoCRC(null, length);
     }
-
+    
     /**
-     * Validates if the Seek Table is leagle
-     * @return  True if a leagle Seek Table
+     * Constructor.
+     * @param points    Seek Points
      */
-    boolean isLegal() {
-        long prevSampleNumber = 0;
-        boolean gotPrev = false;
-
-        for (int i = 0; i < points.length; i++) {
-            if (gotPrev) {
-                if (points[i].sampleNumber != SEEKPOINT_PLACEHOLDER && points[i].sampleNumber <= prevSampleNumber)
-                    return false;
-            }
-            prevSampleNumber = points[i].sampleNumber;
-            gotPrev = true;
-        }
-
-        return true;
+    public SeekTable(SeekPoint[] points) {
+        super(false, 0);
+        this.points = points;
     }
 }

@@ -92,6 +92,19 @@ public class StreamInfo extends Metadata {
     }
     
     /**
+     * Check for compatiable StreamInfo.
+     * Checks if sampleRate, channels, and bitsPerSample are equal
+     * @param info  The StreamInfo block to check
+     * @return  True if this and info are compatable
+     */
+    public boolean compatiable(StreamInfo info) {
+        if (sampleRate != info.sampleRate) return false;
+        if (channels != info.channels) return false;
+        if (bitsPerSample != info.bitsPerSample) return false;
+        return true;
+    }
+    
+    /**
      * @see java.lang.Object#toString()
      */
     public String toString() {

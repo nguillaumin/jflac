@@ -44,4 +44,10 @@ public class SeekPoint {
         streamOffset = is.readRawULong(SEEKPOINT_STREAM_OFFSET_LEN);
         frameSamples = is.readRawUInt(SEEKPOINT_FRAME_SAMPLES_LEN);
     }
+    
+    public SeekPoint(long sampleNumber, long streamOffset, int frameSamples) {
+        this.sampleNumber = sampleNumber;
+        this.streamOffset = streamOffset;
+        this.frameSamples = frameSamples;
+    }
 }
