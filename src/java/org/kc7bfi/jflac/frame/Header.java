@@ -1,10 +1,24 @@
-/*
- * Created on Mar 12, 2004
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 package org.kc7bfi.jflac.frame;
+
+/**
+ * libFLAC - Free Lossless Audio Codec library
+ * Copyright (C) 2001,2002,2003  Josh Coalson
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA  02111-1307, USA.
+ */
 
 import java.io.IOException;
 
@@ -14,12 +28,6 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
 
-/**
- * @author kc7bfi
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 public class Header {
     static final public int CHANNEL_ASSIGNMENT_INDEPENDENT = 0; // independent channels
     static final public int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1; // left+side stereo
@@ -46,7 +54,7 @@ public class Header {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
         ByteSpace rawHeader = new ByteSpace(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
-        int rawHeaderLen;
+        //int rawHeaderLen;
         boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize != streamInfo.maxBlockSize);
         boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.minBlockSize == streamInfo.maxBlockSize);
 

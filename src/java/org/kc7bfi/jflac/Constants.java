@@ -1,7 +1,7 @@
 package org.kc7bfi.jflac;
 
-
-/* libFLAC - Free Lossless Audio Codec library
+/**
+ *  libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000,2001,2002,2003  Josh Coalson
  *
  * This library is free software; you can redistribute it and/or

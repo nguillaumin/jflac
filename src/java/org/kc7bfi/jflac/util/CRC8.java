@@ -1,6 +1,7 @@
 package org.kc7bfi.jflac.util;
 
-/* libFLAC - Free Lossless Audio Codec library
+/**
+ *  libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000,2001,2002,2003  Josh Coalson
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,10 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
-public class CRC8 {
+public final class CRC8 {
     
-    /* CRC-8, poly = x^8 + x^2 + x^1 + x^0, init = 0 */
-
-    static private final byte[] crc8_table =
+    /** CRC-8, poly = x^8 + x^2 + x^1 + x^0, init = 0 */
+    private static final byte[] CRC8Table =
         new byte[] {
             (byte) 0x00,
             (byte) 0x07,
@@ -282,21 +282,43 @@ public class CRC8 {
             (byte) 0xF4,
             (byte) 0xF3 };
 
-    static public byte update(byte data, byte crc) {
-        return crc8_table[crc ^ data];
+    /**
+     * Update the CRC value with a byte data.
+     * 
+     * @param data  The byte data
+     * @param crc   The starting CRC value
+     * @return      The updated CRC value
+     */
+    public static byte update(byte data, byte crc) {
+        return CRC8Table[crc ^ data];
     }
 
-    static public byte updateBlock(byte[] data, int len, byte crc) {
+    /**
+     * Update the CRC value with data from a byte array.
+     * 
+     * @param data  The byte array
+     * @param len   The byte array length
+     * @param crc   The starting CRC value
+     * @return      The updated CRC value
+     */
+    public static byte updateBlock(byte[] data, int len, byte crc) {
         for (int i = 0; i < len; i++)
-            crc = crc8_table[crc ^ data[i]];
+            crc = CRC8Table[crc ^ data[i]];
         return crc;
     }
 
-    static public byte calc(byte[] data, int len) {
+    /**
+     * Calculate the CRC value with data from a byte array.
+     * 
+     * @param data  The byte array
+     * @param len   The byte array length
+     * @return      The calculated CRC value
+     */
+    public static byte calc(byte[] data, int len) {
         byte crc = 0;
 
         for (int i = 0; i < len; i++)
-            crc = crc8_table[(crc ^ data[i]) & 0xff];
+            crc = CRC8Table[(crc ^ data[i]) & 0xff];
 
         return crc;
     }

@@ -1,12 +1,6 @@
 package org.kc7bfi.jflac.io;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
 
-import org.kc7bfi.jflac.util.ByteSpace;
-import org.kc7bfi.jflac.util.CRC16;
-import org.kc7bfi.jflac.util.CRC8;
-/*
+/**
  * libFLAC - Free Lossless Audio Codec library Copyright (C) 2000,2001,2002,2003
  * Josh Coalson
  * 
@@ -24,35 +18,20 @@ import org.kc7bfi.jflac.util.CRC8;
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-/*
- * Along the way you will see two versions of some functions, selected by a
- * FLAC__NO_MANUAL_INLINING macro. One is the simplified, more readable, and
- * slow version, and the other is the same function where crucial parts have
- * been manually inlined and are much faster.
- *  
- */
-/*
- * This should be at least twice as large as the largest number of blurbs
- * required to represent any 'number' (in any encoding) you are going to read.
- * With FLAC this is on the order of maybe a few hundred bits. If the buffer is
- * smaller than that, the decoder won't be able to read in a whole number that
- * is in a variable length encoding (e.g. Rice).
- * 
- * The number we are actually using here is based on what would be the
- * approximate maximum size of a verbatim frame at the default block size, for
- * CD audio (4096 sample * 4 bytes per sample), plus some wiggle room. 32kbytes
- * sounds reasonable. For kicks we subtract out 64 bytes for any alignment or
- * malloc overhead.
- * 
- * Increase this number to decrease the number of read callbacks, at the expense
- * of using more memory. Or decrease for the reverse effect, keeping in mind the
- * limit from the first paragraph.
- */
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.CRC16;
+import org.kc7bfi.jflac.util.CRC8;
+
 public class InputBitStream {
     static private final int BITS_PER_BLURB = 8;
     static private final int BITS_PER_BLURB_LOG2 = 3;
     static private final int BYTES_PER_BLURB = 1;
-    static private final byte BLURB_ALL_ONES = ((byte) 0xff);
+    //static private final byte BLURB_ALL_ONES = ((byte) 0xff);
     static private final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
     //static private final int BLURB_BIT_TO_MASK(b) (((blurb)'\x80') >> (b))
     //static private final int CRC16_UPDATE_BLURB(bb, blurb, crc)
@@ -181,6 +160,8 @@ public class InputBitStream {
         totalConsumedBits = 0;
         return clear();
     }
+    
+    /*
     private boolean initFrom(byte[] inBuffer, int bytes) {
         if (!init())
             return false;
@@ -192,6 +173,8 @@ public class InputBitStream {
         totalBits = bytes << 3;
         return true;
     }
+    */
+    
     public boolean concatenateAligned(InputBitStream src) {
         int bits_to_add = src.totalBits - src.totalConsumedBits;
         if (bits_to_add == 0)

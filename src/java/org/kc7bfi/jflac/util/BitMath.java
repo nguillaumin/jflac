@@ -1,6 +1,7 @@
 package org.kc7bfi.jflac.util;
 
-/* libFLAC - Free Lossless Audio Codec library
+/**
+ * libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001,2002,2003  Josh Coalson
  *
  * This library is free software; you can redistribute it and/or
@@ -19,9 +20,10 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
-public class BitMath {
-
-    /* An example of what FLAC__bitmath_ilog2() computes:
+public final class BitMath {
+    
+    /**
+     *  An example of what ilog2() computes:
      *
      * ilog2( 0) = assertion failure
      * ilog2( 1) = 0
@@ -42,14 +44,18 @@ public class BitMath {
      * ilog2(16) = 4
      * ilog2(17) = 4
      * ilog2(18) = 4
+     * 
+     * @param v     The value
+     * @return      The ilog2 value
      */
     public static int ilog2(int v) {
         int l = 0;
         while ((v >>= 1) != 0) l++;
         return l;
     }
-
-    /* An example of what silog2() computes:
+    
+    /**
+     * An example of what silog2() computes:
      *
      * silog2(-10) = 5
      * silog2(- 9) = 5
@@ -72,6 +78,9 @@ public class BitMath {
      * silog2(  8) = 5
      * silog2(  9) = 5
      * silog2( 10) = 5
+     * 
+     * @param v     The value
+     * @return      The silog2 value
      */
     public static int silog2(int v) {
         while (true) {
@@ -89,7 +98,35 @@ public class BitMath {
             v = -v;
         }
     }
-
+    
+    /**
+     * An example of what silog2() computes:
+     *
+     * silog2(-10) = 5
+     * silog2(- 9) = 5
+     * silog2(- 8) = 4
+     * silog2(- 7) = 4
+     * silog2(- 6) = 4
+     * silog2(- 5) = 4
+     * silog2(- 4) = 3
+     * silog2(- 3) = 3
+     * silog2(- 2) = 2
+     * silog2(- 1) = 2
+     * silog2(  0) = 0
+     * silog2(  1) = 2
+     * silog2(  2) = 3
+     * silog2(  3) = 3
+     * silog2(  4) = 4
+     * silog2(  5) = 4
+     * silog2(  6) = 4
+     * silog2(  7) = 4
+     * silog2(  8) = 5
+     * silog2(  9) = 5
+     * silog2( 10) = 5
+     * 
+     * @param v     The value
+     * @return      The silog2 value
+     */
     public static int silog2Wide(long v) {
         while (true) {
             if (v == 0) return 0;

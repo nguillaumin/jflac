@@ -1,6 +1,7 @@
 package org.kc7bfi.jflac.util;
 
-/* libFLAC - Free Lossless Audio Codec library
+/**
+ *  libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000,2001,2002,2003  Josh Coalson
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,10 @@ package org.kc7bfi.jflac.util;
  * Boston, MA  02111-1307, USA.
  */
 
-public class CRC16 {
+public final class CRC16 {
 
-    /* CRC-16, poly = x^16 + x^15 + x^2 + x^0, init = 0 */
-
-    static private final short[] crc16Table =
+    /** CRC-16, poly = x^16 + x^15 + x^2 + x^0, init = 0 */
+    private static final short[] CRC16Table =
         new short[] {
             (short) 0x0000,
             (short) 0x8005,
@@ -282,22 +282,45 @@ public class CRC16 {
             (short) 0x8207,
             (short) 0x0202 };
 
-    static public short update(byte data, short crc) {
-        crc = (short) ((crc << 8) ^ crc16Table[((crc >> 8) ^ data) & 0xff]);
+    /**
+     * Update the CRC with the byte data.
+     * 
+     * @param data  The byte data
+     * @param crc   The starting CRC value
+     * @return      The updated CRC value
+     */
+    public static short update(byte data, short crc) {
+        crc = (short) ((crc << 8) ^ CRC16Table[((crc >> 8) ^ data) & 0xff]);
         return crc;
     }
 
-    static public short updateBlock(byte[] data, int len, short crc) {
+    /**
+     * Update the CRC with the byte array data.
+     * 
+     * @param data  The byte array data
+     * @param len   The byte array length
+     * @param crc   The starting CRC value
+     * @return      The updated CRC value
+     */
+    public static short updateBlock(byte[] data, int len, short crc) {
         for (int i = 0; i < len; i++)
-            crc = (short) ((crc << 8) ^ crc16Table[(crc >> 8) ^ data[i]]);
+            crc = (short) ((crc << 8) ^ CRC16Table[(crc >> 8) ^ data[i]]);
         return crc;
     }
 
-    static public short calc(byte[] data, int len) {
+
+    /**
+     * Calculate the CRC over a byte array.
+     * 
+     * @param data  The byte data
+     * @param len   The byte array length
+     * @return      The calculated CRC value
+     */
+    public static short calc(byte[] data, int len) {
         short crc = 0;
 
         for (int i = 0; i < len; i++)
-            crc = (short) ((crc << 8) ^ crc16Table[(crc >> 8) ^ data[i]]);
+            crc = (short) ((crc << 8) ^ CRC16Table[(crc >> 8) ^ data[i]]);
 
         return crc;
     }
