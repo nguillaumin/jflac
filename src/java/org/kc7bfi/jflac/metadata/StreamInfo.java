@@ -93,6 +93,12 @@ public class StreamInfo extends Metadata {
         is.readByteBlockAlignedNoCRC(null, length);
     }
     
+    /**
+     * Write out the metadata block.
+     * @param os    The output stream
+     * @param isLast    True if this is the last metadata block
+     * @throws IOException  Thrown if error writing data
+     */
     public void write(OutputBitStream os, boolean isLast) throws IOException {
 
         os.writeRawUInt(isLast, STREAM_METADATA_IS_LAST_LEN);
@@ -108,6 +114,7 @@ public class StreamInfo extends Metadata {
         os.writeRawULong(bitsPerSample - 1, STREAMINFO_BITS_PER_SAMPLE_LEN);
         os.writeRawULong(totalSamples, STREAMINFO_TOTAL_SAMPLES_LEN);
         os.writeByteBlock(md5sum, md5sum.length);
+        os.flushByteAligned();
     }
     
     private int calcLength() {

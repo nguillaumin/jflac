@@ -81,13 +81,11 @@ public class OutputBitStream {
     
     private boolean grow(int minBlurbsToAdd) {
         int newCapacity = Math.max(outCapacity * 2, outCapacity + minBlurbsToAdd);
-        System.out.print(" growCap="+newCapacity);
         return resize(newCapacity);
     }
     
     private boolean ensureSize(int bitsToAdd) {
         if ((outCapacity << 3) < totalBits + bitsToAdd) {
-            System.out.print(" grow="+((bitsToAdd >> 3) + 2));
             return grow((bitsToAdd >> 3) + 2);
         }
         return true;
@@ -261,11 +259,9 @@ public class OutputBitStream {
         if (bits == 0) return;
         
         // inline the size check so we don't incure a function call unnecessarily
-        System.out.print("capacity="+outCapacity+" totalBits="+totalBits+" bits="+bits);
         if ((outCapacity << 3) < totalBits + bits) {
             if (!ensureSize(bits)) throw new IOException("Memory allocation error");
         }
-        System.out.println(" newCap="+outCapacity);
         
         // zero-out unused bits; WATCHOUT: other code relies on this, so this needs to stay
         if (bits < 32) val &= (~(0xffffffff << bits)); // zero-out unused bits
@@ -526,9 +522,24 @@ public class OutputBitStream {
         }
     }
     
+    /**
+     * Write zero bits to byte boundry.
+     * @throws IOException  On error writing to bit stream
+     */
     public void zeroPadToByteBoundary() throws IOException {
         // 0-pad to byte boundary
         if ((outBits & 7) != 0) writeZeroes(8 - (outBits & 7));
+    }
+    
+    /**
+     * Flush bit stream after aligning byte boundry.
+     * @throws IOException  On error writing.
+     */
+    public void flushByteAligned() throws IOException {
+        zeroPadToByteBoundary();
+        if (outBlurbs == 0) return;
+        os.write(buffer, 0, outBlurbs);
+        outBlurbs = 0;
     }
     
     /*
@@ -571,4 +582,20 @@ public class OutputBitStream {
      * 
      * return true; }
      */
+    
+    /**
+     * Returns the totalBits.
+     * @return Returns the totalBits.
+     */
+    public int getTotalBits() {
+        return totalBits;
+    }
+    
+    /**
+     * Returns the totalBlurbs.
+     * @return Returns the totalBlurbs.
+     */
+    public int getTotalBlurbs() {
+        return (totalBits + 7) / 8;
+    }
 }

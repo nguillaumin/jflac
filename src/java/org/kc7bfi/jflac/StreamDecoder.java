@@ -20,6 +20,7 @@ package org.kc7bfi.jflac;
  * Boston, MA  02111-1307, USA.
  */
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -494,24 +495,29 @@ public class StreamDecoder {
         }
         
         int x;
-        while (true) {
-            x = is.readRawUInt(8);
-            if (x == 0xff) { /* MAGIC NUMBER for the first 8 frame sync bits */
-                headerWarmup[0] = (byte) x;
-                x = is.peekRawUInt(8);
-                
-                /* we have to check if we just read two 0xff's in a row; the second may actually be the beginning of the sync code */
-                /* else we have to check if the second byte is the end of a sync code */
-                if (x >> 2 == 0x3e) { /* MAGIC NUMBER for the last 6 sync bits */
-                    headerWarmup[1] = (byte) is.readRawUInt(8);
-                    state = STREAM_DECODER_READ_FRAME;
-                    return;
+        try {
+            while (true) {
+                x = is.readRawUInt(8);
+                if (x == 0xff) { // MAGIC NUMBER for the first 8 frame sync bits
+                    headerWarmup[0] = (byte) x;
+                    x = is.peekRawUInt(8);
+                    
+                    /* we have to check if we just read two 0xff's in a row; the second may actually be the beginning of the sync code */
+                    /* else we have to check if the second byte is the end of a sync code */
+                    if (x >> 2 == 0x3e) { /* MAGIC NUMBER for the last 6 sync bits */
+                        headerWarmup[1] = (byte) is.readRawUInt(8);
+                        state = STREAM_DECODER_READ_FRAME;
+                        return;
+                    }
+                }
+                if (first) {
+                    callErrorListeners("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
+                    first = false;
                 }
             }
-            if (first) {
-                callErrorListeners("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
-                first = false;
-            }
+        } catch (EOFException e) {
+            if (!first) callErrorListeners("FindSync LOST_SYNC: Left over data in file");
+            state = STREAM_DECODER_END_OF_STREAM;
         }
     }
     

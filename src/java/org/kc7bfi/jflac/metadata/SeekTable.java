@@ -23,13 +23,14 @@ package org.kc7bfi.jflac.metadata;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.util.OutputBitStream;
 
 /**
  * SeekTable Metadata block.
  * @author kc7bfi
  */
 public class SeekTable extends Metadata {
-    private static final int SEEKPOINT_LENGTH = 18;
+    private static final int SEEKPOINT_LENGTH_BYTES = 18;
 
     protected SeekPoint[] points;
 
@@ -40,13 +41,13 @@ public class SeekTable extends Metadata {
      * @throws IOException      Thrown if error reading from InputBitStream
      */
     public SeekTable(InputBitStream is, int length) throws IOException {
-        int numPoints = length / SEEKPOINT_LENGTH;
+        int numPoints = length / SEEKPOINT_LENGTH_BYTES;
 
         points = new SeekPoint[numPoints];
         for (int i = 0; i < points.length; i++) {
             points[i] = new SeekPoint(is);
         }
-        length -= (length * SEEKPOINT_LENGTH);
+        length -= (length * SEEKPOINT_LENGTH_BYTES);
         
         // if there is a partial point left, skip over it
         if (length > 0) is.readByteBlockAlignedNoCRC(null, length);
@@ -58,5 +59,42 @@ public class SeekTable extends Metadata {
      */
     public SeekTable(SeekPoint[] points) {
         this.points = points;
+    }
+    
+    /**
+     * Write out the metadata block.
+     * @param os    The output stream
+     * @param isLast    True if this is the last metadata block
+     * @throws IOException  Thrown if error writing data
+     */
+    public void write(OutputBitStream os, boolean isLast) throws IOException {
+
+        os.writeRawUInt(isLast, STREAM_METADATA_IS_LAST_LEN);
+        os.writeRawUInt(METADATA_TYPE_SEEKTABLE, STREAM_METADATA_TYPE_LEN);
+        os.writeRawUInt(calcLength(), STREAM_METADATA_LENGTH_LEN);
+        
+        for (int i = 0; i < points.length; i++) {
+            points[i].write(os);
+        }
+        
+        os.flushByteAligned();
+    }
+    
+    private int calcLength() {
+        return points.length * SEEKPOINT_LENGTH_BYTES;
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SeekTable: points=" + points.length + "\n");
+        for (int i = 0; i < points.length; i++) {
+            sb.append("\tPoint " + points[i].toString() + "\n");
+        }
+        
+        return sb.toString();
+        
     }
 }

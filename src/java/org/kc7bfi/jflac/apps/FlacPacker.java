@@ -11,11 +11,13 @@ import java.awt.FlowLayout;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -40,6 +42,7 @@ public class FlacPacker extends JFrame {
     private JTextArea textArea = new JTextArea(16, 50);
     private JButton addButton = new JButton("Add Files");
     private JButton makeButton = new JButton("Pack FLAC");
+    private JFileChooser chooser = new JFileChooser();
     
     private ArrayList flacFiles = new ArrayList();
     private ArrayList albumFiles = new ArrayList();
@@ -56,6 +59,7 @@ public class FlacPacker extends JFrame {
         this.getContentPane().setLayout(new BorderLayout());
         
         // text area
+        textArea.setText("");
         this.getContentPane().add(textArea, BorderLayout.CENTER);
         
         // button pannel
@@ -85,13 +89,17 @@ public class FlacPacker extends JFrame {
         });
     }
     
+    private void appendMsg(String msg) {
+        textArea.setText(textArea.getText() + msg + "\n");
+    }
+    
     private void addFilesToList() {
-        JFileChooser chooser = new JFileChooser();
         ExtensionFileFilter filter = new ExtensionFileFilter();
         filter.addExtension("flac");
         filter.setDescription("FLAC files");
         chooser.setMultiSelectionEnabled(true);
         chooser.setFileFilter(filter);
+        chooser.setCurrentDirectory(new File("."));
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal != JFileChooser.APPROVE_OPTION) return;
         File[] files = chooser.getSelectedFiles();
@@ -99,11 +107,11 @@ public class FlacPacker extends JFrame {
     }
     
     private File getOutputFile() {
-        JFileChooser chooser = new JFileChooser();
         ExtensionFileFilter filter = new ExtensionFileFilter();
         filter.addExtension("flac");
         filter.setDescription("FLAC files");
         chooser.setFileFilter(filter);
+        chooser.setCurrentDirectory(new File("."));
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal != JFileChooser.APPROVE_OPTION) return null;
         File file = chooser.getSelectedFile();
@@ -118,16 +126,19 @@ public class FlacPacker extends JFrame {
         for (int i = 0; i < flacFiles.size(); i++) {
             File file = (File)flacFiles.get(i);
             try {
-                System.out.print("SeekTable select " + i);
                 FileInputStream is = new FileInputStream(file);
                 StreamDecoder decoder = new StreamDecoder(is);
                 decoder.processMetadata();
                 StreamInfo info = decoder.getStreamInfo();
-                if (masterStreamInfo == null) masterStreamInfo = info;
+                if (masterStreamInfo == null) {
+                    masterStreamInfo = info;
+                    masterStreamInfo.totalSamples = 0;
+                }
                 if (!info.compatiable(masterStreamInfo)) {
-                    System.out.println("Bad StreamInfo " + file + ": " + info);
+                    appendMsg("Bad StreamInfo " + file + ": " + info);
                     continue;
                 }
+                masterStreamInfo.totalSamples += info.totalSamples;
                 
                 SeekPoint seekPoint = new SeekPoint(lastSampleNumber, lastStreamOffset, 0);
                 AlbumFile aFile = new AlbumFile(file, seekPoint);
@@ -135,9 +146,9 @@ public class FlacPacker extends JFrame {
                 lastSampleNumber += info.totalSamples;
                 lastStreamOffset += file.length() - decoder.getBytesConsumed();
             } catch (FileNotFoundException e) {
-                System.out.println("File " + file + ": " + e);
+                appendMsg("File " + file + ": " + e);
             } catch (IOException e) {
-                System.out.println("File " + file + ": " + e);
+                appendMsg("File " + file + ": " + e);
             }
         }
         
@@ -145,7 +156,7 @@ public class FlacPacker extends JFrame {
         SeekPoint[] points = new SeekPoint[albumFiles.size()];
         for (int i = 0; i < albumFiles.size(); i++) {
             AlbumFile aFile = (AlbumFile)albumFiles.get(i);
-            System.out.print("SeekTable build " + i);
+            appendMsg("SeekTable build " + i);
             points[i] = aFile.seekPoint;
         }
         
@@ -168,26 +179,28 @@ public class FlacPacker extends JFrame {
         SeekTable seekTable = makeSeekTable();
         if (masterStreamInfo == null) return;
         
-        // output StreamInfo
-        System.out.println("Write header");
+        // write FLAC marker
         os.writeByteBlock(Constants.STREAM_SYNC_STRING, Constants.STREAM_SYNC_STRING.length);
-        System.out.println("Write SI");
+        
+        // output StreamInfo
         masterStreamInfo.write(os, false);
-        System.out.println("Rest");
+        
         // output SeekTable
+        seekTable.write(os, true);
         
         // generate output file
         for (int i = 0; i < albumFiles.size(); i++) {
             AlbumFile aFile = (AlbumFile)albumFiles.get(i);
-            System.out.println("Process file " + i + ": " + aFile.file);
+            appendMsg("Process file " + i + ": " + aFile.file);
             try {
+                RandomAccessFile raf = new RandomAccessFile(aFile.file, "r");
                 FileInputStream is = new FileInputStream(aFile.file);
                 StreamDecoder decoder = new StreamDecoder(is);
                 decoder.processMetadata();
             } catch (FileNotFoundException e) {
-                System.out.println("File " + aFile.file + ": " + e);
+                appendMsg("File " + aFile.file + ": " + e);
             } catch (IOException e) {
-                System.out.println("File " + aFile.file + ": " + e);
+                appendMsg("File " + aFile.file + ": " + e);
             }
         }
     }

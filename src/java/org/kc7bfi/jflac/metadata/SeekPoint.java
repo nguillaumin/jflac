@@ -23,6 +23,7 @@ package org.kc7bfi.jflac.metadata;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.util.OutputBitStream;
 
 /**
  * An entry into the seek table.
@@ -59,5 +60,24 @@ public class SeekPoint {
         this.sampleNumber = sampleNumber;
         this.streamOffset = streamOffset;
         this.frameSamples = frameSamples;
+    }
+    
+    /**
+     * Write out an individual seek point.
+     * @param os    The output stream
+     * @throws IOException  Thrown if error writing data
+     */
+    public void write(OutputBitStream os) throws IOException {
+
+        os.writeRawULong(sampleNumber, SEEKPOINT_SAMPLE_NUMBER_LEN);
+        os.writeRawULong(streamOffset, SEEKPOINT_STREAM_OFFSET_LEN);
+        os.writeRawUInt(frameSamples, SEEKPOINT_FRAME_SAMPLES_LEN);
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "sampleNumber=" + sampleNumber + " streamOffset=" + streamOffset + " frameSamples=" + frameSamples;
     }
 }
