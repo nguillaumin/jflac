@@ -22,19 +22,23 @@ package org.kc7bfi.jflac.frame;
 
 public class EntropyPartitionedRiceContents {
 
-    protected int[] parameters = null; // The Rice parameters for each context.
-    protected int[] rawBits = null; // Widths for escape-coded partitions.
+    protected int[] parameters; // The Rice parameters for each context.
+    protected int[] rawBits; // Widths for escape-coded partitions.
 
-    /** The capacity of the \a parameters and \a raw_bits arrays
-     * specified as an order, i.e. the number of array elements
-     * allocated is 2 ^ \a capacity_by_order.
+    /** 
+     * The capacity of the parameters and raw_bits arrays specified as an order.
+     * i.e. the number of array elements allocated is 2 ^ capacity_by_order.
      */
     protected int capacityByOrder = 0;
     
-    public void ensureSize(int max_partition_order) {
-        if (capacityByOrder >= max_partition_order) return;
-        parameters = new int[(1 << max_partition_order)];
-        rawBits = new int[(1 << max_partition_order)]; 
-        capacityByOrder = max_partition_order;
+    /**
+     * Ensure enough menory has been allocated
+     * @param maxPartitionOrder The maximum partition order
+     */
+    public void ensureSize(int maxPartitionOrder) {
+        if (capacityByOrder >= maxPartitionOrder) return;
+        parameters = new int[(1 << maxPartitionOrder)];
+        rawBits = new int[(1 << maxPartitionOrder)]; 
+        capacityByOrder = maxPartitionOrder;
     }
 }

@@ -25,11 +25,18 @@ import java.io.IOException;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class SeekTable extends MetadataBase {
-    static final private int SEEKPOINT_LENGTH = 18;
-    static final private long SEEKPOINT_PLACEHOLDER = 0xffffffffffffffffL;
+    private static final int SEEKPOINT_LENGTH = 18;
+    private static final long SEEKPOINT_PLACEHOLDER = 0xffffffffffffffffL;
 
     protected SeekPoint[] points;
 
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public SeekTable(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
 
@@ -45,6 +52,10 @@ public class SeekTable extends MetadataBase {
         if (length > 0) is.readByteBlockAlignedNoCRC(null, length);
     }
 
+    /**
+     * Validates if the Seek Table is leagle
+     * @return  True if a leagle Seek Table
+     */
     boolean isLegal() {
         long prevSampleNumber = 0;
         boolean gotPrev = false;
@@ -60,39 +71,4 @@ public class SeekTable extends MetadataBase {
 
         return true;
     }
-
-    /* DRR FIX
-        int format_seektable_sort(StreamMetadata_SeekTable seek_table) {
-            unsigned i, j;
-            boolean first;
-
-            // sort the seekpoints
-            qsort(
-                seek_table - > points,
-                seek_table - > num_points,
-                sizeof(StreamMetadata_SeekPoint),
-                (int (*) (const void *, const void *)) seekpoint_compare_);
-
-            // uniquify the seekpoints
-            first = true;
-            for (i = j = 0; i < seek_table - > num_points; i++) {
-                if (seek_table - > points[i].sample_number != SEEKPOINT_PLACEHOLDER) {
-                    if (!first) {
-                        if (seek_table - > points[i].sample_number == seek_table - > points[j - 1].sample_number)
-                            continue;
-                    }
-                }
-                first = false;
-                seek_table - > points[j++] = seek_table - > points[i];
-            }
-
-            for (i = j; i < seek_table - > num_points; i++) {
-                seek_table - > points[i].sample_number = SEEKPOINT_PLACEHOLDER;
-                seek_table - > points[i].stream_offset = 0;
-                seek_table - > points[i].frame_samples = 0;
-            }
-
-            return j;
-        }
-        */
 }

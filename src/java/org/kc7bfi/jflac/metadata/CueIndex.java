@@ -26,13 +26,18 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class CueIndex {
 
-    static final private int CUESHEET_INDEX_OFFSET_LEN = 64; // bits
-    static final private int CUESHEET_INDEX_NUMBER_LEN = 8; // bits
-    static final private int CUESHEET_INDEX_RESERVED_LEN = 3 * 8; // bits
+    private static final int CUESHEET_INDEX_OFFSET_LEN = 64; // bits
+    private static final int CUESHEET_INDEX_NUMBER_LEN = 8; // bits
+    private static final int CUESHEET_INDEX_RESERVED_LEN = 3 * 8; // bits
 
     protected long offset; // Offset in samples, relative to the track offset, of the index point.
     protected byte number; // The index point number.
     
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public CueIndex(InputBitStream is) throws IOException {
         offset = is.readRawLong(CUESHEET_INDEX_OFFSET_LEN);
         number = (byte) is.readRawUInt(CUESHEET_INDEX_NUMBER_LEN);

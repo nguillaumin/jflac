@@ -31,7 +31,6 @@ public abstract class MetadataBase {
      * The constructor.
      * @param isLast            True if last metadata record
      * @param length            Length of the record
-     * @throws IOException      Thrown if error reading from InputBitStream
      */
     public MetadataBase(boolean isLast, int length) {
         this.isLast = isLast;

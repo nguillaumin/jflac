@@ -26,13 +26,15 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class CueSheet extends MetadataBase {
 
-    static final private int CUESHEET_MEDIA_CATALOG_NUMBER_LEN = 128 * 8; // bits
-    static final private int CUESHEET_LEAD_IN_LEN = 64; // bits
-    static final private int CUESHEET_IS_CD_LEN = 1; // bit
-    static final private int CUESHEET_RESERVED_LEN = 7 + 258 * 8; // bits
-    static final private int CUESHEET_NUM_TRACKS_LEN = 8; // bits
+    private static final int CUESHEET_MEDIA_CATALOG_NUMBER_LEN = 128 * 8; // bits
+    private static final int CUESHEET_LEAD_IN_LEN = 64; // bits
+    private static final int CUESHEET_IS_CD_LEN = 1; // bit
+    private static final int CUESHEET_RESERVED_LEN = 7 + 258 * 8; // bits
+    private static final int CUESHEET_NUM_TRACKS_LEN = 8; // bits
 
-    /** Media catalog number, in ASCII printable characters 0x20-0x7e.  In
+    /** 
+     * Media catalog number.
+     * in ASCII printable characters 0x20-0x7e.  In
      * general, the media catalog number may be 0 to 128 bytes long; any
      * unused characters should be right-padded with NUL characters.
      */
@@ -41,8 +43,15 @@ public class CueSheet extends MetadataBase {
     protected long leadIn = 0; // The number of lead-in samples.
     protected boolean isCD = false; // true if CUESHEET corresponds to a Compact Disc, else false
     protected int numTracks = 0; // The number of tracks.
-    protected CueTrack[] tracks = null; // NULL if num_tracks == 0, else pointer to array of tracks.
+    protected CueTrack[] tracks; // NULL if num_tracks == 0, else pointer to array of tracks.
 
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public CueSheet(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
 
@@ -60,6 +69,11 @@ public class CueSheet extends MetadataBase {
         }
     }
 
+    /**
+     * Verifys the Cue Sheet
+     * @param checkCdDaSubset   True for check CD subset
+     * @throws Violation        Thrown if invalid Cue Sheet
+     */
     void isLegal(boolean checkCdDaSubset) throws Violation {
 
         if (checkCdDaSubset) {

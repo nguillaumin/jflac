@@ -26,15 +26,15 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamInfo extends MetadataBase {
 
-    static final private int STREAMINFO_MIN_BLOCK_SIZE_LEN = 16; // bits
-    static final private int STREAMINFO_MAX_BLOCK_SIZE_LEN = 16; // bits
-    static final private int STREAMINFO_MIN_FRAME_SIZE_LEN = 24; // bits
-    static final private int STREAMINFO_MAX_FRAME_SIZE_LEN = 24; // bits
-    static final private int STREAMINFO_SAMPLE_RATE_LEN = 20; // bits
-    static final private int STREAMINFO_CHANNELS_LEN = 3; // bits
-    static final private int STREAMINFO_BITS_PER_SAMPLE_LEN = 5; // bits
-    static final private int STREAMINFO_TOTAL_SAMPLES_LEN = 36; // bits
-    static final private int STREAMINFO_MD5SUM_LEN = 128; // bits
+    private static final int STREAMINFO_MIN_BLOCK_SIZE_LEN = 16; // bits
+    private static final int STREAMINFO_MAX_BLOCK_SIZE_LEN = 16; // bits
+    private static final int STREAMINFO_MIN_FRAME_SIZE_LEN = 24; // bits
+    private static final int STREAMINFO_MAX_FRAME_SIZE_LEN = 24; // bits
+    private static final int STREAMINFO_SAMPLE_RATE_LEN = 20; // bits
+    private static final int STREAMINFO_CHANNELS_LEN = 3; // bits
+    private static final int STREAMINFO_BITS_PER_SAMPLE_LEN = 5; // bits
+    private static final int STREAMINFO_TOTAL_SAMPLES_LEN = 36; // bits
+    private static final int STREAMINFO_MD5SUM_LEN = 128; // bits
 
     protected byte[] md5sum = new byte[16];
 

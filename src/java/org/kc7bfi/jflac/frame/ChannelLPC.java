@@ -29,15 +29,15 @@ import org.kc7bfi.jflac.util.BitMath;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelLPC extends ChannelBase {
-    static final private int MAX_LPC_ORDER = 32;
+    private static final int MAX_LPC_ORDER = 32;
 
-    protected EntropyCodingMethod entropyCodingMethod; // The residual coding method.
-    protected int order; // The FIR order.
-    protected int qlpCoeffPrecision; // Quantized FIR filter coefficient precision in bits.
-    protected int quantizationLevel; // The qlp coeff shift needed.
-    protected int[] qlpCoeff = new int[MAX_LPC_ORDER]; // FIR filter coefficients.
-    protected int[] warmup = new int[MAX_LPC_ORDER]; // Warmup samples to prime the predictor, length == order.
-    protected int[] residual; // The residual signal, length == (blocksize minus order) samples.
+    private EntropyCodingMethod entropyCodingMethod; // The residual coding method.
+    private int order; // The FIR order.
+    private int qlpCoeffPrecision; // Quantized FIR filter coefficient precision in bits.
+    private int quantizationLevel; // The qlp coeff shift needed.
+    private int[] qlpCoeff = new int[MAX_LPC_ORDER]; // FIR filter coefficients.
+    private int[] warmup = new int[MAX_LPC_ORDER]; // Warmup samples to prime the predictor, length == order.
+    private int[] residual; // The residual signal, length == (blocksize minus order) samples.
 
     /**
      * The constructor.
@@ -107,8 +107,11 @@ public class ChannelLPC extends ChannelBase {
         }
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
-        return "FLACSubframe_LPC: WastedBits="+wastedBits;
+        return "FLACSubframe_LPC: WastedBits=" + wastedBits;
     }
 
 }

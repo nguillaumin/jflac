@@ -21,7 +21,9 @@ package org.kc7bfi.jflac.frame;
  */
 
 public class Footer {
-    /** CRC-16 (polynomial = x^16 + x^15 + x^2 + x^0, initialized with
+    /** 
+     * CRC-16 (polynomial = x^16 + x^15 + x^2 + x^0.
+     * initialized with
      * 0) of the bytes before the crc, back to and including the frame header
      * sync code.
      */

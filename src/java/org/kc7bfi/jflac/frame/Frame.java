@@ -23,7 +23,12 @@ package org.kc7bfi.jflac.frame;
 import org.kc7bfi.jflac.Constants;
 
 public class Frame {
+    /** The frame header */
     public Header header;
+    
+    /** The subframes - One per channel. */
     public ChannelBase[] subframes = new ChannelBase[Constants.MAX_CHANNELS];
+    
+    /** The frame footer */
     public Footer footer;
 }

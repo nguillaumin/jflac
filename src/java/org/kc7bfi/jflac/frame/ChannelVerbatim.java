@@ -26,7 +26,7 @@ import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class ChannelVerbatim extends ChannelBase {
-    protected int[] data; // A pointer to verbatim signal.
+    private int[] data; // A pointer to verbatim signal.
     
     /**
      * The constructor.
@@ -50,7 +50,10 @@ public class ChannelVerbatim extends ChannelBase {
         System.arraycopy(data, 0, channelData.output, 0, header.blockSize);
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
-        return "ChannelVerbatim: WastedBits="+wastedBits;
+        return "ChannelVerbatim: WastedBits=" + wastedBits;
     }
 }

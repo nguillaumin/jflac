@@ -30,6 +30,16 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
     protected int order; // The partition order, i.e. # of contexts = 2 ^ order.
     protected EntropyPartitionedRiceContents contents; // The context's Rice parameters and/or raw bits.
 
+    /**
+     * Read compressed signal residual data.
+     * 
+     * @param is                The InputBitStream
+     * @param predictorOrder    The predicate order
+     * @param partitionOrder    The partition order
+     * @param header            The FLAC Frame Header
+     * @param residual          The residual signal (output)
+     * @throws IOException      On error reading from InputBitStream
+     */
     void readResidual(InputBitStream is, int predictorOrder, int partitionOrder, Header header, int[] residual) throws IOException {
         int sample = 0;
         int partitions = 1 << partitionOrder;

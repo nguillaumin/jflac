@@ -25,8 +25,15 @@ import java.io.IOException;
 import org.kc7bfi.jflac.util.InputBitStream;
 
 public class Unknown extends MetadataBase {
-    protected byte[] data = null;
+    protected byte[] data;
     
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public Unknown(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
 

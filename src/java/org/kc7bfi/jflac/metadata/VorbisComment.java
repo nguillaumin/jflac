@@ -26,7 +26,7 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class VorbisComment extends MetadataBase {
 
-    static final private int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
+    private static final int VORBIS_COMMENT_NUM_COMMENTS_LEN = 32; // bits
 
     protected byte[] vendorString = new byte[0];
     protected int numComments = 0;

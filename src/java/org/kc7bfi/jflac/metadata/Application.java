@@ -26,11 +26,18 @@ import org.kc7bfi.jflac.util.InputBitStream;
 
 public class Application extends MetadataBase {
 
-    static final private int APPLICATION_ID_LEN = 32; // bits
+    private static final int APPLICATION_ID_LEN = 32; // bits
 
-    protected byte[] id = new byte[4];
-    protected byte[] data = null;
+    private byte[] id = new byte[4];
+    private byte[] data;
 
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public Application(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
 
