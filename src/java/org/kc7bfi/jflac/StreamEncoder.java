@@ -1906,613 +1906,613 @@ public class StreamEncoder {
       }
       */
     
-/*
-private int evaluateVerbatimSubframe(int[] signal, int blocksize, int subframe_bps, ChannelVerbatim subframe) {
-
-	subframe.data = signal;
-
-	return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (blocksize * subframe_bps);
-}
-*/
-
-/*
-private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int residual_samples, int predictor_order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, EntropyPartitionedRice best_partitioned_rice) {
-	int r;
-	unsigned residual_bits, best_residual_bits = 0;
-	unsigned residual_sample;
-	unsigned best_parameters_index = 0;
-	unsigned blocksize = residual_samples + predictor_order;
-
-	// compute abs(residual) for use later
-	for(residual_sample = 0; residual_sample < residual_samples; residual_sample++) {
-		r = residual[residual_sample];
-		abs_residual[residual_sample] = (uint32)(r<0? -r : r);
-	}
-
-	max_partition_order = format_get_max_rice_partition_order_from_blocksize_limited_max_and_predictor_order(max_partition_order, blocksize, predictor_order);
-	min_partition_order = min(min_partition_order, max_partition_order);
-
-	if (precompute_partition_sums) {
-		int partition_order;
-		unsigned sum;
-
-		precompute_partition_info_sums_(abs_residual, abs_residual_partition_sums, residual_samples, predictor_order, min_partition_order, max_partition_order);
-
-		if (do_escape_coding)
-			precompute_partition_info_escapes_(residual, raw_bits_per_partition, residual_samples, predictor_order, min_partition_order, max_partition_order);
-
-		for(partition_order = (int)max_partition_order, sum = 0; partition_order >= (int)min_partition_order; partition_order--) {
-			if (!
-				set_partitioned_rice_with_precompute_(
-					abs_residual,
-					abs_residual_partition_sums+sum,
-					raw_bits_per_partition+sum,
-					residual_samples,
-					predictor_order,
-					rice_parameter,
-					rice_parameter_search_dist,
-					(unsigned)partition_order,
-					do_escape_coding,
-					&partitioned_rice_contents_extra[!best_parameters_index],
-					&residual_bits
-				)
-			)
-			{
-				ASSERT(best_residual_bits != 0);
-				break;
-			}
-			sum += 1 << partition_order;
-			if (best_residual_bits == 0 || residual_bits < best_residual_bits) {
-				best_residual_bits = residual_bits;
-				best_parameters_index = !best_parameters_index;
-				best_partitioned_rice.order = partition_order;
-			}
-		}
-	}
-	else {
-		unsigned partition_order;
-		for(partition_order = min_partition_order; partition_order <= max_partition_order; partition_order++) {
-			if (!
-				set_partitioned_rice_(
-					abs_residual,
-					residual_samples,
-					predictor_order,
-					rice_parameter,
-					rice_parameter_search_dist,
-					partition_order,
-					&partitioned_rice_contents_extra[!best_parameters_index],
-					&residual_bits
-				)
-			)
-			{
-				break;
-			}
-			if (best_residual_bits == 0 || residual_bits < best_residual_bits) {
-				best_residual_bits = residual_bits;
-				best_parameters_index = !best_parameters_index;
-				best_partitioned_rice.order = partition_order;
-			}
-		}
-	}
-
-	// We are allowed to de-the pointer based on our special knowledge; it is to the outside world.
-	{
-		EntropyPartitionedRiceContents best_partitioned_rice_contents = (EntropyPartitionedRiceContents)best_partitioned_rice->contents;
-		format_entropy_coding_method_partitioned_rice_contents_ensure_size(best_partitioned_rice_contents, max(6, best_partitioned_rice->order));
-		memcpy(best_partitioned_rice_contents->parameters, partitioned_rice_contents_extra[best_parameters_index].parameters, sizeof(unsigned)*(1<<(best_partitioned_rice->order)));
-		memcpy(best_partitioned_rice_contents->raw_bits, partitioned_rice_contents_extra[best_parameters_index].raw_bits, sizeof(unsigned)*(1<<(best_partitioned_rice->order)));
-	}
-
-	return best_residual_bits;
-}
-*/
-
-/*
-private void precomputePartitionInfoSums(
-	int[] abs_residual,
-	long[] abs_residual_partition_sums,
-	int residual_samples,
-	int predictor_order,
-	int min_partition_order,
-	int max_partition_order
-)
-{
-	int partition_order;
-	unsigned from_partition, to_partition = 0;
-	unsigned blocksize = residual_samples + predictor_order;
-
-	// first do max_partition_order
-	for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
-		long abs_residual_partition_sum;
-		int abs_r;
-		int partition, partition_sample, partition_samples, residual_sample;
-		int partitions = 1 << partition_order;
-		int default_partition_samples = blocksize >> partition_order;
-
-		for(partition = residual_sample = 0; partition < partitions; partition++) {
-			partition_samples = default_partition_samples;
-			if (partition == 0)
-				partition_samples -= predictor_order;
-			abs_residual_partition_sum = 0;
-			for(partition_sample = 0; partition_sample < partition_samples; partition_sample++) {
-				abs_r = abs_residual[residual_sample];
-				abs_residual_partition_sum += abs_r;
-				residual_sample++;
-			}
-			abs_residual_partition_sums[partition] = abs_residual_partition_sum;
-		}
-		to_partition = partitions;
-		break;
-	}
-
-	// now merge partitions for lower orders
-	for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
-		long s;
-		int i;
-		int partitions = 1 << partition_order;
-		for(i = 0; i < partitions; i++) {
-			s = abs_residual_partition_sums[from_partition];
-			from_partition++;
-			abs_residual_partition_sums[to_partition] = s + abs_residual_partition_sums[from_partition];
-			from_partition++;
-			to_partition++;
-		}
-	}
-}
-*/
-
-/*
-private void precomputePartitionInfoEscapes(
-	int[] residual,
-	int[] raw_bits_per_partition,
-	int residual_samples,
-	int predictor_order,
-	int min_partition_order,
-	int max_partition_order
-)
-{
-	int partition_order;
-	unsigned from_partition, to_partition = 0;
-	unsigned blocksize = residual_samples + predictor_order;
-
-	// first do max_partition_order
-	for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
-		int r, residual_partition_min, residual_partition_max;
-		int silog2_min, silog2_max;
-		int partition, partition_sample, partition_samples, residual_sample;
-		int partitions = 1 << partition_order;
-		int default_partition_samples = blocksize >> partition_order;
-
-		for(partition = residual_sample = 0; partition < partitions; partition++) {
-			partition_samples = default_partition_samples;
-			if (partition == 0)
-				partition_samples -= predictor_order;
-			residual_partition_min = residual_partition_max = 0;
-			for(partition_sample = 0; partition_sample < partition_samples; partition_sample++) {
-				r = residual[residual_sample];
-				if (r < residual_partition_min)
-					residual_partition_min = r;
-				else if (r > residual_partition_max)
-					residual_partition_max = r;
-				residual_sample++;
-			}
-			silog2_min = bitmath_silog2(residual_partition_min);
-			silog2_max = bitmath_silog2(residual_partition_max);
-			raw_bits_per_partition[partition] = max(silog2_min, silog2_max);
-		}
-		to_partition = partitions;
-		break;
-	}
-
-	// now merge partitions for lower orders
-	for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
-		int m;
-		int i;
-		int partitions = 1 << partition_order;
-		for(i = 0; i < partitions; i++) {
-			m = raw_bits_per_partition[from_partition];
-			from_partition++;
-			raw_bits_per_partition[to_partition] = max(m, raw_bits_per_partition[from_partition]);
-			from_partition++;
-			to_partition++;
-		}
-	}
-}
-*/
-
-/*
-private VARIABLE_RICE_BITS(value, parameter) { return ((value) >> (parameter)); }
-
-boolean set_partitioned_rice_(
-	int[] abs_residual,
-    int residual_samples,
-    int predictor_order,
-    int suggested_rice_parameter,
-    int rice_parameter_search_dist,
-    int partition_order,
-	EntropyPartitionedRiceContents partitioned_rice_contents,
-    int *bits
-)
-{
-    int rice_parameter, partition_bits;
-    int best_partition_bits;
-    int min_rice_parameter, max_rice_parameter, best_rice_parameter = 0;
-    int bits_ = ENTROPY_CODING_METHOD_TYPE_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
-    int *parameters;
-
-	format_entropy_coding_method_partitioned_rice_contents_ensure_size(partitioned_rice_contents, max(6, partition_order));
-	parameters = partitioned_rice_contents.parameters;
-
-	if (partition_order == 0) {
-		unsigned i;
-
-		if (rice_parameter_search_dist) {
-			if (suggested_rice_parameter < rice_parameter_search_dist)
-				min_rice_parameter = 0;
-			else
-				min_rice_parameter = suggested_rice_parameter - rice_parameter_search_dist;
-			max_rice_parameter = suggested_rice_parameter + rice_parameter_search_dist;
-			if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-				fprintf(stderr, "clipping rice_parameter (%u -> %u) @2\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-				max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-			}
-		}
-		else
-			min_rice_parameter = max_rice_parameter = suggested_rice_parameter;
-
-		best_partition_bits = 0xffffffff;
-		for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
-			unsigned rice_parameter_estimate = rice_parameter-1;
-			partition_bits = (1+rice_parameter) * residual_samples;
-			partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
-			for(i = 0; i < residual_samples; i++) {
-				partition_bits += VARIABLE_RICE_BITS(abs_residual[i], rice_parameter_estimate);
-			}
-			if (partition_bits < best_partition_bits) {
-				best_rice_parameter = rice_parameter;
-				best_partition_bits = partition_bits;
-			}
-		}
-		parameters[0] = best_rice_parameter;
-		bits_ += best_partition_bits;
-	}
-	else {
-		unsigned partition, residual_sample, save_residual_sample, partition_sample;
-		unsigned partition_samples;
-		uint64 mean, k;
-		int partitions = 1 << partition_order;
-		for(partition = residual_sample = 0; partition < partitions; partition++) {
-			partition_samples = (residual_samples+predictor_order) >> partition_order;
-			if (partition == 0) {
-				if (partition_samples <= predictor_order)
-					return false;
-				else
-					partition_samples -= predictor_order;
-			}
-			mean = 0;
-			save_residual_sample = residual_sample;
-			for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++)
-				mean += abs_residual[residual_sample];
-			residual_sample = save_residual_sample;
-			// calc rice_parameter ala LOCO-I
-			for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
-				;
-			if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-				fprintf(stderr, "clipping rice_parameter (%u -> %u) @3\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-				rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-			}
-
-			if (rice_parameter_search_dist) {
-				if (rice_parameter < rice_parameter_search_dist)
-					min_rice_parameter = 0;
-				else
-					min_rice_parameter = rice_parameter - rice_parameter_search_dist;
-				max_rice_parameter = rice_parameter + rice_parameter_search_dist;
-				if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-					fprintf(stderr, "clipping rice_parameter (%u -> %u) @4\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-					max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-				}
-			}
-			else
-				min_rice_parameter = max_rice_parameter = rice_parameter;
-
-			best_partition_bits = 0xffffffff;
-			for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
-				unsigned rice_parameter_estimate = rice_parameter-1;
-				partition_bits = (1+rice_parameter) * partition_samples;
-				partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
-				save_residual_sample = residual_sample;
-				for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++) {
-					partition_bits += VARIABLE_RICE_BITS(abs_residual[residual_sample], rice_parameter);
-				}
-				if (rice_parameter != max_rice_parameter)
-					residual_sample = save_residual_sample;
-				if (partition_bits < best_partition_bits) {
-					best_rice_parameter = rice_parameter;
-					best_partition_bits = partition_bits;
-				}
-			}
-			parameters[partition] = best_rice_parameter;
-			bits_ += best_partition_bits;
-		}
-	}
-
-	*bits = bits_;
-	return true;
-}
-*/
-
-/*
-boolean set_partitioned_rice_with_precompute_(
-	int[] abs_residual,
-	long[] abs_residual_partition_sums,
-	int[] raw_bits_per_partition,
-    int residual_samples,
-    int predictor_order,
-    int suggested_rice_parameter,
-    int rice_parameter_search_dist,
-    int partition_order,
-	boolean search_for_escapes,
-	EntropyPartitionedRiceContents partitioned_rice_contents,
-    int *bits
-)
-{
-    int rice_parameter, partition_bits;
-    int best_partition_bits;
-    int min_rice_parameter, max_rice_parameter, best_rice_parameter = 0;
-    int flat_bits;
-    int bits_ = ENTROPY_CODING_METHOD_TYPE_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
-    int *parameters, *raw_bits;
-
-	format_entropy_coding_method_partitioned_rice_contents_ensure_size(partitioned_rice_contents, max(6, partition_order));
-	parameters = partitioned_rice_contents.parameters;
-	raw_bits = partitioned_rice_contents.raw_bits;
-
-	if (partition_order == 0) {
-		unsigned i;
-
-		if (rice_parameter_search_dist) {
-			if (suggested_rice_parameter < rice_parameter_search_dist)
-				min_rice_parameter = 0;
-			else
-				min_rice_parameter = suggested_rice_parameter - rice_parameter_search_dist;
-			max_rice_parameter = suggested_rice_parameter + rice_parameter_search_dist;
-			if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-				fprintf(stderr, "clipping rice_parameter (%u -> %u) @5\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-				max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-			}
-		}
-		else
-			min_rice_parameter = max_rice_parameter = suggested_rice_parameter;
-
-		best_partition_bits = 0xffffffff;
-		for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
-			unsigned rice_parameter_estimate = rice_parameter-1;
-			partition_bits = (1+rice_parameter) * residual_samples;
-			partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
-			for(i = 0; i < residual_samples; i++) {
-				partition_bits += VARIABLE_RICE_BITS(abs_residual[i], rice_parameter_estimate);
-			}
-			if (partition_bits < best_partition_bits) {
-				best_rice_parameter = rice_parameter;
-				best_partition_bits = partition_bits;
-			}
-		}
-		if (search_for_escapes) {
-			flat_bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[0] * residual_samples;
-			if (flat_bits <= best_partition_bits) {
-				raw_bits[0] = raw_bits_per_partition[0];
-				best_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
-				best_partition_bits = flat_bits;
-			}
-		}
-		parameters[0] = best_rice_parameter;
-		bits_ += best_partition_bits;
-	}
-	else {
-		unsigned partition, residual_sample, save_residual_sample, partition_sample;
-		unsigned partition_samples;
-		uint64 mean, k;
-		unsigned partitions = 1 << partition_order;
-		for(partition = residual_sample = 0; partition < partitions; partition++) {
-			partition_samples = (residual_samples+predictor_order) >> partition_order;
-			if (partition == 0) {
-				if (partition_samples <= predictor_order)
-					return false;
-				else
-					partition_samples -= predictor_order;
-			}
-			mean = abs_residual_partition_sums[partition];
-			// calc rice_parameter ala LOCO-I
-			for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
-				;
-			if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-				fprintf(stderr, "clipping rice_parameter (%u -> %u) @6\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-				rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-			}
-
-			if (rice_parameter_search_dist) {
-				if (rice_parameter < rice_parameter_search_dist)
-					min_rice_parameter = 0;
-				else
-					min_rice_parameter = rice_parameter - rice_parameter_search_dist;
-				max_rice_parameter = rice_parameter + rice_parameter_search_dist;
-				if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
-					fprintf(stderr, "clipping rice_parameter (%u -> %u) @7\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
-					max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
-				}
-			}
-			else
-				min_rice_parameter = max_rice_parameter = rice_parameter;
-
-			best_partition_bits = 0xffffffff;
-			for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
-				unsigned rice_parameter_estimate = rice_parameter-1;
-				partition_bits = (1+rice_parameter) * partition_samples;
-				partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
-				save_residual_sample = residual_sample;
-				for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++) {
-					partition_bits += VARIABLE_RICE_BITS(abs_residual[residual_sample], rice_parameter_estimate);
-				}
-				if (rice_parameter != max_rice_parameter)
-					residual_sample = save_residual_sample;
-				if (partition_bits < best_partition_bits) {
-					best_rice_parameter = rice_parameter;
-					best_partition_bits = partition_bits;
-				}
-			}
-			if (search_for_escapes) {
-				flat_bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[partition] * partition_samples;
-				if (flat_bits <= best_partition_bits) {
-					raw_bits[partition] = raw_bits_per_partition[partition];
-					best_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
-					best_partition_bits = flat_bits;
-				}
-			}
-			parameters[partition] = best_rice_parameter;
-			bits_ += best_partition_bits;
-		}
-	}
-
-	*bits = bits_;
-	return true;
-}
-*/
-
-/*
-private int getWastedBits(int[] signal, int samples) {
-	int i, shift;
-	int x = 0;
-
-	for(i = 0; i < samples && !(x&1); i++)
-		x |= signal[i];
-
-	if (x == 0) {
-		shift = 0;
-	}
-	else {
-		for(shift = 0; !(x&1); shift++)
-			x >>= 1;
-	}
-
-	if (shift > 0) {
-		for(i = 0; i < samples; i++)
-			 signal[i] >>= shift;
-	}
-
-	return shift;
-}
-*/
-
-/*
-private void appendToVerifyFifo(verify_input_fifo fifo, int[][] input, int input_offset, unsigned channels, unsigned wide_samples) {
-	unsigned channel;
-
-	for(channel = 0; channel < channels; channel++)
-		memcpy(&fifo.data[channel][fifo->tail], &input[channel][input_offset], sizeof(int) * wide_samples);
-
-	fifo.tail += wide_samples;
-}
-
-private void appendToVerifyFifoInterleaved(verify_input_fifo fifo, int input[], int input_offset, int channels, int wide_samples) {
-	int tail = fifo.tail;
-
-	int sample = input_offset * channels;
-	for(int wide_sample = 0; wide_sample < wide_samples; wide_sample++) {
-		for(int channel = 0; channel < channels; channel++)
-			fifo.data[channel][tail] = input[sample++];
-		tail++;
-	}
-	fifo.tail = tail;
-}
-*/
-
-/*
-StreamDecoderReadStatus verify_read_callback_(StreamDecoder decoder, byte buffer[], unsigned *bytes, void *client_data)
-{
-	StreamEncoder *encoder = (StreamEncoder*)client_data;
-	unsigned encoded_bytes = verifyData.output.bytes;
-	(void)decoder;
-
-	if (verifyData.needs_magic_hack) {
-		ASSERT(*bytes >= STREAM_SYNC_LENGTH);
-		*bytes = STREAM_SYNC_LENGTH;
-		memcpy(buffer, STREAM_SYNC_STRING, *bytes);
-		verifyData.needs_magic_hack = false;
-	}
-	else {
-		if (encoded_bytes == 0) {
-			// If we get here, a FIFO underflow has occurred, which means there is a bug somewhere.
-			ASSERT(0);
-			return STREAM_DECODER_READ_STATUS_ABORT;
-		}
-		else if (encoded_bytes < *bytes)
-			*bytes = encoded_bytes;
-		memcpy(buffer, verifyData.output.data, *bytes);
-		verifyData.output.data += *bytes;
-		verifyData.output.bytes -= *bytes;
-	}
-
-	return STREAM_DECODER_READ_STATUS_CONTINUE;
-}
-*/
-
-/*
-StreamDecoderWriteStatus verify_write_callback_(StreamDecoder *decoder, Frame *frame, int * buffer[], void *client_data)
-{
-	StreamEncoder *encoder = (StreamEncoder *)client_data;
-	unsigned channel;
-	unsigned channels = stream_decoder_get_channels(decoder);
-	unsigned blocksize = frame->header.blocksize;
-	unsigned bytes_per_block = sizeof(int) * blocksize;
-
-	for(channel = 0; channel < channels; channel++) {
-		if (0 != memcmp(buffer[channel], verifyData.input_fifo.data[channel], bytes_per_block)) {
-			unsigned i, sample = 0;
-			int expect = 0, got = 0;
-
-			for(i = 0; i < blocksize; i++) {
-				if (buffer[channel][i] != verifyData.input_fifo.data[channel][i]) {
-					sample = i;
-					expect = (int)verifyData.input_fifo.data[channel][i];
-					got = (int)buffer[channel][i];
-					break;
-				}
-			}
-			ASSERT(i < blocksize);
-			ASSERT(frame->header.number_type == FRAME_NUMBER_TYPE_SAMPLE_NUMBER);
-			verifyData.error_stats.absolute_sample = frame->header.number.sample_number + sample;
-			verifyData.error_stats.frame_number = (unsigned)(frame->header.number.sample_number / blocksize);
-			verifyData.error_stats.channel = channel;
-			verifyData.error_stats.sample = sample;
-			verifyData.error_stats.expected = expect;
-			verifyData.error_stats.got = got;
-			state = STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA;
-			return STREAM_DECODER_WRITE_STATUS_ABORT;
-		}
-	}
-	// dequeue the frame from the fifo
-	for(channel = 0; channel < channels; channel++) {
-		memmove(&verifyData.input_fifo.data[channel][0], &verifyData.input_fifo.data[channel][blocksize], verifyData.input_fifo.tail - blocksize);
-	}
-	verifyData.input_fifo.tail -= blocksize;
-	return STREAM_DECODER_WRITE_STATUS_CONTINUE;
-}
-*/
-
-/*
-void verify_metadata_callback_(StreamDecoder *decoder, StreamMetadata *metadata, void *client_data)
-{
-	(void)decoder, (void)metadata, (void)client_data;
-}
-*/
-
-/*
-void verify_error_callback_(StreamDecoder *decoder, StreamDecoderErrorStatus status, void *client_data)
-{
-	StreamEncoder *encoder = (StreamEncoder*)client_data;
-	(void)decoder, (void)status;
-	state = STREAM_ENCODER_VERIFY_DECODER_ERROR;
-}
-*/
+    /*
+     private int evaluateVerbatimSubframe(int[] signal, int blocksize, int subframe_bps, ChannelVerbatim subframe) {
+     
+     subframe.data = signal;
+     
+     return SUBFRAME_ZERO_PAD_LEN + SUBFRAME_TYPE_LEN + SUBFRAME_WASTED_BITS_FLAG_LEN + (blocksize * subframe_bps);
+     }
+     */
+    
+    /*
+     private int findBestPartitionOrder(int[] residual, int[] abs_residual, long[] abs_residual_partition_sums, int[] raw_bits_per_partition, int residual_samples, int predictor_order, int rice_parameter, int min_partition_order, int max_partition_order, boolean precompute_partition_sums, boolean do_escape_coding, int rice_parameter_search_dist, EntropyPartitionedRice best_partitioned_rice) {
+     int r;
+     unsigned residual_bits, best_residual_bits = 0;
+     unsigned residual_sample;
+     unsigned best_parameters_index = 0;
+     unsigned blocksize = residual_samples + predictor_order;
+     
+     // compute abs(residual) for use later
+      for(residual_sample = 0; residual_sample < residual_samples; residual_sample++) {
+      r = residual[residual_sample];
+      abs_residual[residual_sample] = (uint32)(r<0? -r : r);
+      }
+      
+      max_partition_order = format_get_max_rice_partition_order_from_blocksize_limited_max_and_predictor_order(max_partition_order, blocksize, predictor_order);
+      min_partition_order = min(min_partition_order, max_partition_order);
+      
+      if (precompute_partition_sums) {
+      int partition_order;
+      unsigned sum;
+      
+      precompute_partition_info_sums_(abs_residual, abs_residual_partition_sums, residual_samples, predictor_order, min_partition_order, max_partition_order);
+      
+      if (do_escape_coding)
+      precompute_partition_info_escapes_(residual, raw_bits_per_partition, residual_samples, predictor_order, min_partition_order, max_partition_order);
+      
+      for(partition_order = (int)max_partition_order, sum = 0; partition_order >= (int)min_partition_order; partition_order--) {
+      if (!
+      set_partitioned_rice_with_precompute_(
+      abs_residual,
+      abs_residual_partition_sums+sum,
+      raw_bits_per_partition+sum,
+      residual_samples,
+      predictor_order,
+      rice_parameter,
+      rice_parameter_search_dist,
+      (unsigned)partition_order,
+      do_escape_coding,
+      &partitioned_rice_contents_extra[!best_parameters_index],
+      &residual_bits
+      )
+      )
+      {
+      ASSERT(best_residual_bits != 0);
+      break;
+      }
+      sum += 1 << partition_order;
+      if (best_residual_bits == 0 || residual_bits < best_residual_bits) {
+      best_residual_bits = residual_bits;
+      best_parameters_index = !best_parameters_index;
+      best_partitioned_rice.order = partition_order;
+      }
+      }
+      }
+      else {
+      unsigned partition_order;
+      for(partition_order = min_partition_order; partition_order <= max_partition_order; partition_order++) {
+      if (!
+      set_partitioned_rice_(
+      abs_residual,
+      residual_samples,
+      predictor_order,
+      rice_parameter,
+      rice_parameter_search_dist,
+      partition_order,
+      &partitioned_rice_contents_extra[!best_parameters_index],
+      &residual_bits
+      )
+      )
+      {
+      break;
+      }
+      if (best_residual_bits == 0 || residual_bits < best_residual_bits) {
+      best_residual_bits = residual_bits;
+      best_parameters_index = !best_parameters_index;
+      best_partitioned_rice.order = partition_order;
+      }
+      }
+      }
+      
+      // We are allowed to de-the pointer based on our special knowledge; it is to the outside world.
+       {
+       EntropyPartitionedRiceContents best_partitioned_rice_contents = (EntropyPartitionedRiceContents)best_partitioned_rice->contents;
+       format_entropy_coding_method_partitioned_rice_contents_ensure_size(best_partitioned_rice_contents, max(6, best_partitioned_rice->order));
+       memcpy(best_partitioned_rice_contents->parameters, partitioned_rice_contents_extra[best_parameters_index].parameters, sizeof(unsigned)*(1<<(best_partitioned_rice->order)));
+       memcpy(best_partitioned_rice_contents->raw_bits, partitioned_rice_contents_extra[best_parameters_index].raw_bits, sizeof(unsigned)*(1<<(best_partitioned_rice->order)));
+       }
+       
+       return best_residual_bits;
+       }
+       */
+    
+    /*
+     private void precomputePartitionInfoSums(
+     int[] abs_residual,
+     long[] abs_residual_partition_sums,
+     int residual_samples,
+     int predictor_order,
+     int min_partition_order,
+     int max_partition_order
+     )
+     {
+     int partition_order;
+     unsigned from_partition, to_partition = 0;
+     unsigned blocksize = residual_samples + predictor_order;
+     
+     // first do max_partition_order
+      for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
+      long abs_residual_partition_sum;
+      int abs_r;
+      int partition, partition_sample, partition_samples, residual_sample;
+      int partitions = 1 << partition_order;
+      int default_partition_samples = blocksize >> partition_order;
+      
+      for(partition = residual_sample = 0; partition < partitions; partition++) {
+      partition_samples = default_partition_samples;
+      if (partition == 0)
+      partition_samples -= predictor_order;
+      abs_residual_partition_sum = 0;
+      for(partition_sample = 0; partition_sample < partition_samples; partition_sample++) {
+      abs_r = abs_residual[residual_sample];
+      abs_residual_partition_sum += abs_r;
+      residual_sample++;
+      }
+      abs_residual_partition_sums[partition] = abs_residual_partition_sum;
+      }
+      to_partition = partitions;
+      break;
+      }
+      
+      // now merge partitions for lower orders
+       for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
+       long s;
+       int i;
+       int partitions = 1 << partition_order;
+       for(i = 0; i < partitions; i++) {
+       s = abs_residual_partition_sums[from_partition];
+       from_partition++;
+       abs_residual_partition_sums[to_partition] = s + abs_residual_partition_sums[from_partition];
+       from_partition++;
+       to_partition++;
+       }
+       }
+       }
+       */
+    
+    /*
+     private void precomputePartitionInfoEscapes(
+     int[] residual,
+     int[] raw_bits_per_partition,
+     int residual_samples,
+     int predictor_order,
+     int min_partition_order,
+     int max_partition_order
+     )
+     {
+     int partition_order;
+     unsigned from_partition, to_partition = 0;
+     unsigned blocksize = residual_samples + predictor_order;
+     
+     // first do max_partition_order
+      for(partition_order = (int)max_partition_order; partition_order >= 0; partition_order--) {
+      int r, residual_partition_min, residual_partition_max;
+      int silog2_min, silog2_max;
+      int partition, partition_sample, partition_samples, residual_sample;
+      int partitions = 1 << partition_order;
+      int default_partition_samples = blocksize >> partition_order;
+      
+      for(partition = residual_sample = 0; partition < partitions; partition++) {
+      partition_samples = default_partition_samples;
+      if (partition == 0)
+      partition_samples -= predictor_order;
+      residual_partition_min = residual_partition_max = 0;
+      for(partition_sample = 0; partition_sample < partition_samples; partition_sample++) {
+      r = residual[residual_sample];
+      if (r < residual_partition_min)
+      residual_partition_min = r;
+      else if (r > residual_partition_max)
+      residual_partition_max = r;
+      residual_sample++;
+      }
+      silog2_min = bitmath_silog2(residual_partition_min);
+      silog2_max = bitmath_silog2(residual_partition_max);
+      raw_bits_per_partition[partition] = max(silog2_min, silog2_max);
+      }
+      to_partition = partitions;
+      break;
+      }
+      
+      // now merge partitions for lower orders
+       for(from_partition = 0, --partition_order; partition_order >= (int)min_partition_order; partition_order--) {
+       int m;
+       int i;
+       int partitions = 1 << partition_order;
+       for(i = 0; i < partitions; i++) {
+       m = raw_bits_per_partition[from_partition];
+       from_partition++;
+       raw_bits_per_partition[to_partition] = max(m, raw_bits_per_partition[from_partition]);
+       from_partition++;
+       to_partition++;
+       }
+       }
+       }
+       */
+    
+    /*
+     private VARIABLE_RICE_BITS(value, parameter) { return ((value) >> (parameter)); }
+     
+     boolean set_partitioned_rice_(
+     int[] abs_residual,
+     int residual_samples,
+     int predictor_order,
+     int suggested_rice_parameter,
+     int rice_parameter_search_dist,
+     int partition_order,
+     EntropyPartitionedRiceContents partitioned_rice_contents,
+     int *bits
+     )
+     {
+     int rice_parameter, partition_bits;
+     int best_partition_bits;
+     int min_rice_parameter, max_rice_parameter, best_rice_parameter = 0;
+     int bits_ = ENTROPY_CODING_METHOD_TYPE_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
+     int *parameters;
+     
+     format_entropy_coding_method_partitioned_rice_contents_ensure_size(partitioned_rice_contents, max(6, partition_order));
+     parameters = partitioned_rice_contents.parameters;
+     
+     if (partition_order == 0) {
+     unsigned i;
+     
+     if (rice_parameter_search_dist) {
+     if (suggested_rice_parameter < rice_parameter_search_dist)
+     min_rice_parameter = 0;
+     else
+     min_rice_parameter = suggested_rice_parameter - rice_parameter_search_dist;
+     max_rice_parameter = suggested_rice_parameter + rice_parameter_search_dist;
+     if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+     fprintf(stderr, "clipping rice_parameter (%u -> %u) @2\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+     max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+     }
+     }
+     else
+     min_rice_parameter = max_rice_parameter = suggested_rice_parameter;
+     
+     best_partition_bits = 0xffffffff;
+     for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
+     unsigned rice_parameter_estimate = rice_parameter-1;
+     partition_bits = (1+rice_parameter) * residual_samples;
+     partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+     for(i = 0; i < residual_samples; i++) {
+     partition_bits += VARIABLE_RICE_BITS(abs_residual[i], rice_parameter_estimate);
+     }
+     if (partition_bits < best_partition_bits) {
+     best_rice_parameter = rice_parameter;
+     best_partition_bits = partition_bits;
+     }
+     }
+     parameters[0] = best_rice_parameter;
+     bits_ += best_partition_bits;
+     }
+     else {
+     unsigned partition, residual_sample, save_residual_sample, partition_sample;
+     unsigned partition_samples;
+     uint64 mean, k;
+     int partitions = 1 << partition_order;
+     for(partition = residual_sample = 0; partition < partitions; partition++) {
+     partition_samples = (residual_samples+predictor_order) >> partition_order;
+     if (partition == 0) {
+     if (partition_samples <= predictor_order)
+     return false;
+     else
+     partition_samples -= predictor_order;
+     }
+     mean = 0;
+     save_residual_sample = residual_sample;
+     for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++)
+     mean += abs_residual[residual_sample];
+     residual_sample = save_residual_sample;
+     // calc rice_parameter ala LOCO-I
+      for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
+      ;
+      if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+      fprintf(stderr, "clipping rice_parameter (%u -> %u) @3\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+      rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+      }
+      
+      if (rice_parameter_search_dist) {
+      if (rice_parameter < rice_parameter_search_dist)
+      min_rice_parameter = 0;
+      else
+      min_rice_parameter = rice_parameter - rice_parameter_search_dist;
+      max_rice_parameter = rice_parameter + rice_parameter_search_dist;
+      if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+      fprintf(stderr, "clipping rice_parameter (%u -> %u) @4\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+      max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+      }
+      }
+      else
+      min_rice_parameter = max_rice_parameter = rice_parameter;
+      
+      best_partition_bits = 0xffffffff;
+      for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
+      unsigned rice_parameter_estimate = rice_parameter-1;
+      partition_bits = (1+rice_parameter) * partition_samples;
+      partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+      save_residual_sample = residual_sample;
+      for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++) {
+      partition_bits += VARIABLE_RICE_BITS(abs_residual[residual_sample], rice_parameter);
+      }
+      if (rice_parameter != max_rice_parameter)
+      residual_sample = save_residual_sample;
+      if (partition_bits < best_partition_bits) {
+      best_rice_parameter = rice_parameter;
+      best_partition_bits = partition_bits;
+      }
+      }
+      parameters[partition] = best_rice_parameter;
+      bits_ += best_partition_bits;
+      }
+      }
+      
+      *bits = bits_;
+      return true;
+      }
+      */
+    
+    /*
+     boolean set_partitioned_rice_with_precompute_(
+     int[] abs_residual,
+     long[] abs_residual_partition_sums,
+     int[] raw_bits_per_partition,
+     int residual_samples,
+     int predictor_order,
+     int suggested_rice_parameter,
+     int rice_parameter_search_dist,
+     int partition_order,
+     boolean search_for_escapes,
+     EntropyPartitionedRiceContents partitioned_rice_contents,
+     int *bits
+     )
+     {
+     int rice_parameter, partition_bits;
+     int best_partition_bits;
+     int min_rice_parameter, max_rice_parameter, best_rice_parameter = 0;
+     int flat_bits;
+     int bits_ = ENTROPY_CODING_METHOD_TYPE_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN;
+     int *parameters, *raw_bits;
+     
+     format_entropy_coding_method_partitioned_rice_contents_ensure_size(partitioned_rice_contents, max(6, partition_order));
+     parameters = partitioned_rice_contents.parameters;
+     raw_bits = partitioned_rice_contents.raw_bits;
+     
+     if (partition_order == 0) {
+     unsigned i;
+     
+     if (rice_parameter_search_dist) {
+     if (suggested_rice_parameter < rice_parameter_search_dist)
+     min_rice_parameter = 0;
+     else
+     min_rice_parameter = suggested_rice_parameter - rice_parameter_search_dist;
+     max_rice_parameter = suggested_rice_parameter + rice_parameter_search_dist;
+     if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+     fprintf(stderr, "clipping rice_parameter (%u -> %u) @5\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+     max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+     }
+     }
+     else
+     min_rice_parameter = max_rice_parameter = suggested_rice_parameter;
+     
+     best_partition_bits = 0xffffffff;
+     for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
+     unsigned rice_parameter_estimate = rice_parameter-1;
+     partition_bits = (1+rice_parameter) * residual_samples;
+     partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+     for(i = 0; i < residual_samples; i++) {
+     partition_bits += VARIABLE_RICE_BITS(abs_residual[i], rice_parameter_estimate);
+     }
+     if (partition_bits < best_partition_bits) {
+     best_rice_parameter = rice_parameter;
+     best_partition_bits = partition_bits;
+     }
+     }
+     if (search_for_escapes) {
+     flat_bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[0] * residual_samples;
+     if (flat_bits <= best_partition_bits) {
+     raw_bits[0] = raw_bits_per_partition[0];
+     best_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
+     best_partition_bits = flat_bits;
+     }
+     }
+     parameters[0] = best_rice_parameter;
+     bits_ += best_partition_bits;
+     }
+     else {
+     unsigned partition, residual_sample, save_residual_sample, partition_sample;
+     unsigned partition_samples;
+     uint64 mean, k;
+     unsigned partitions = 1 << partition_order;
+     for(partition = residual_sample = 0; partition < partitions; partition++) {
+     partition_samples = (residual_samples+predictor_order) >> partition_order;
+     if (partition == 0) {
+     if (partition_samples <= predictor_order)
+     return false;
+     else
+     partition_samples -= predictor_order;
+     }
+     mean = abs_residual_partition_sums[partition];
+     // calc rice_parameter ala LOCO-I
+      for(rice_parameter = 0, k = partition_samples; k < mean; rice_parameter++, k <<= 1)
+      ;
+      if (rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+      fprintf(stderr, "clipping rice_parameter (%u -> %u) @6\n", rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+      rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+      }
+      
+      if (rice_parameter_search_dist) {
+      if (rice_parameter < rice_parameter_search_dist)
+      min_rice_parameter = 0;
+      else
+      min_rice_parameter = rice_parameter - rice_parameter_search_dist;
+      max_rice_parameter = rice_parameter + rice_parameter_search_dist;
+      if (max_rice_parameter >= ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+      fprintf(stderr, "clipping rice_parameter (%u -> %u) @7\n", max_rice_parameter, ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1);
+      max_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER - 1;
+      }
+      }
+      else
+      min_rice_parameter = max_rice_parameter = rice_parameter;
+      
+      best_partition_bits = 0xffffffff;
+      for(rice_parameter = min_rice_parameter; rice_parameter <= max_rice_parameter; rice_parameter++) {
+      unsigned rice_parameter_estimate = rice_parameter-1;
+      partition_bits = (1+rice_parameter) * partition_samples;
+      partition_bits += ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+      save_residual_sample = residual_sample;
+      for(partition_sample = 0; partition_sample < partition_samples; residual_sample++, partition_sample++) {
+      partition_bits += VARIABLE_RICE_BITS(abs_residual[residual_sample], rice_parameter_estimate);
+      }
+      if (rice_parameter != max_rice_parameter)
+      residual_sample = save_residual_sample;
+      if (partition_bits < best_partition_bits) {
+      best_rice_parameter = rice_parameter;
+      best_partition_bits = partition_bits;
+      }
+      }
+      if (search_for_escapes) {
+      flat_bits = ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN + raw_bits_per_partition[partition] * partition_samples;
+      if (flat_bits <= best_partition_bits) {
+      raw_bits[partition] = raw_bits_per_partition[partition];
+      best_rice_parameter = ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
+      best_partition_bits = flat_bits;
+      }
+      }
+      parameters[partition] = best_rice_parameter;
+      bits_ += best_partition_bits;
+      }
+      }
+      
+      *bits = bits_;
+      return true;
+      }
+      */
+    
+    /*
+     private int getWastedBits(int[] signal, int samples) {
+     int i, shift;
+     int x = 0;
+     
+     for(i = 0; i < samples && !(x&1); i++)
+     x |= signal[i];
+     
+     if (x == 0) {
+     shift = 0;
+     }
+     else {
+     for(shift = 0; !(x&1); shift++)
+     x >>= 1;
+     }
+     
+     if (shift > 0) {
+     for(i = 0; i < samples; i++)
+     signal[i] >>= shift;
+     }
+     
+     return shift;
+     }
+     */
+    
+    /*
+     private void appendToVerifyFifo(verify_input_fifo fifo, int[][] input, int input_offset, unsigned channels, unsigned wide_samples) {
+     unsigned channel;
+     
+     for(channel = 0; channel < channels; channel++)
+     memcpy(&fifo.data[channel][fifo->tail], &input[channel][input_offset], sizeof(int) * wide_samples);
+     
+     fifo.tail += wide_samples;
+     }
+     
+     private void appendToVerifyFifoInterleaved(verify_input_fifo fifo, int input[], int input_offset, int channels, int wide_samples) {
+     int tail = fifo.tail;
+     
+     int sample = input_offset * channels;
+     for(int wide_sample = 0; wide_sample < wide_samples; wide_sample++) {
+     for(int channel = 0; channel < channels; channel++)
+     fifo.data[channel][tail] = input[sample++];
+     tail++;
+     }
+     fifo.tail = tail;
+     }
+     */
+    
+    /*
+     StreamDecoderReadStatus verify_read_callback_(StreamDecoder decoder, byte buffer[], unsigned *bytes, void *client_data)
+     {
+     StreamEncoder *encoder = (StreamEncoder*)client_data;
+     unsigned encoded_bytes = verifyData.output.bytes;
+     (void)decoder;
+     
+     if (verifyData.needs_magic_hack) {
+     ASSERT(*bytes >= STREAM_SYNC_LENGTH);
+     *bytes = STREAM_SYNC_LENGTH;
+     memcpy(buffer, STREAM_SYNC_STRING, *bytes);
+     verifyData.needs_magic_hack = false;
+     }
+     else {
+     if (encoded_bytes == 0) {
+     // If we get here, a FIFO underflow has occurred, which means there is a bug somewhere.
+      ASSERT(0);
+      return STREAM_DECODER_READ_STATUS_ABORT;
+      }
+      else if (encoded_bytes < *bytes)
+      *bytes = encoded_bytes;
+      memcpy(buffer, verifyData.output.data, *bytes);
+      verifyData.output.data += *bytes;
+      verifyData.output.bytes -= *bytes;
+      }
+      
+      return STREAM_DECODER_READ_STATUS_CONTINUE;
+      }
+      */
+    
+    /*
+     StreamDecoderWriteStatus verify_write_callback_(StreamDecoder *decoder, Frame *frame, int * buffer[], void *client_data)
+     {
+     StreamEncoder *encoder = (StreamEncoder *)client_data;
+     unsigned channel;
+     unsigned channels = stream_decoder_get_channels(decoder);
+     unsigned blocksize = frame->header.blocksize;
+     unsigned bytes_per_block = sizeof(int) * blocksize;
+     
+     for(channel = 0; channel < channels; channel++) {
+     if (0 != memcmp(buffer[channel], verifyData.input_fifo.data[channel], bytes_per_block)) {
+     unsigned i, sample = 0;
+     int expect = 0, got = 0;
+     
+     for(i = 0; i < blocksize; i++) {
+     if (buffer[channel][i] != verifyData.input_fifo.data[channel][i]) {
+     sample = i;
+     expect = (int)verifyData.input_fifo.data[channel][i];
+     got = (int)buffer[channel][i];
+     break;
+     }
+     }
+     ASSERT(i < blocksize);
+     ASSERT(frame->header.number_type == FRAME_NUMBER_TYPE_SAMPLE_NUMBER);
+     verifyData.error_stats.absolute_sample = frame->header.number.sample_number + sample;
+     verifyData.error_stats.frame_number = (unsigned)(frame->header.number.sample_number / blocksize);
+     verifyData.error_stats.channel = channel;
+     verifyData.error_stats.sample = sample;
+     verifyData.error_stats.expected = expect;
+     verifyData.error_stats.got = got;
+     state = STREAM_ENCODER_VERIFY_MISMATCH_IN_AUDIO_DATA;
+     return STREAM_DECODER_WRITE_STATUS_ABORT;
+     }
+     }
+     // dequeue the frame from the fifo
+      for(channel = 0; channel < channels; channel++) {
+      memmove(&verifyData.input_fifo.data[channel][0], &verifyData.input_fifo.data[channel][blocksize], verifyData.input_fifo.tail - blocksize);
+      }
+      verifyData.input_fifo.tail -= blocksize;
+      return STREAM_DECODER_WRITE_STATUS_CONTINUE;
+      }
+      */
+    
+    /*
+     void verify_metadata_callback_(StreamDecoder *decoder, StreamMetadata *metadata, void *client_data)
+     {
+     (void)decoder, (void)metadata, (void)client_data;
+     }
+     */
+    
+    /*
+     void verify_error_callback_(StreamDecoder *decoder, StreamDecoderErrorStatus status, void *client_data)
+     {
+     StreamEncoder *encoder = (StreamEncoder*)client_data;
+     (void)decoder, (void)status;
+     state = STREAM_ENCODER_VERIFY_DECODER_ERROR;
+     }
+     */
 }
