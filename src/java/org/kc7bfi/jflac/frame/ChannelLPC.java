@@ -58,9 +58,11 @@ public class ChannelLPC extends ChannelBase {
         this.order = order;
 
         // read warm-up samples
+        //System.out.println("Order="+order);
         for (int u = 0; u < order; u++) {
             warmup[u] = is.readRawInt(bps);
         }
+        //for (int i = 0; i < order; i++) System.out.println("Warm "+i+" "+warmup[i]);
 
         // read qlp coeff precision
         int u32 = is.readRawUInt(SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN);
@@ -68,9 +70,11 @@ public class ChannelLPC extends ChannelBase {
             throw new IOException("STREAM_DECODER_ERROR_STATUS_LOST_SYNC");
         }
         qlpCoeffPrecision = u32 + 1;
+        //System.out.println("qlpCoeffPrecision="+qlpCoeffPrecision);
 
         // read qlp shift
         quantizationLevel = is.readRawInt(SUBFRAME_LPC_QLP_SHIFT_LEN);
+        //System.out.println("quantizationLevel="+quantizationLevel);
 
         // read quantized lp coefficiencts
         for (int u = 0; u < order; u++) {
@@ -79,6 +83,7 @@ public class ChannelLPC extends ChannelBase {
 
         // read entropy coding method info
         int codingType = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_TYPE_LEN);
+        System.out.println("codingType="+codingType);
         switch (codingType) {
             case Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE :
                 entropyCodingMethod = new EntropyPartitionedRice();

@@ -417,7 +417,7 @@ public class StreamDecoder {
             try {
                 readSubframe(channel, bps);
             } catch (IOException e) {
-                System.out.println("ReadSubframe: "+e);
+                System.out.println("ReadSubframe: "+e);e.printStackTrace();
             }
             if (state != STREAM_DECODER_READ_FRAME) {
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
@@ -495,7 +495,7 @@ public class StreamDecoder {
         int wastedBits = 0;
         if (haveWastedBits) {
             wastedBits = is.readUnaryUnsigned() + 1;
-            bps -= frame.subframes[channel].WastedBits();
+            bps -= wastedBits;
         }
         
         // Lots of magic numbers here
