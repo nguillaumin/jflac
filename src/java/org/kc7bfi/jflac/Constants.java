@@ -21,25 +21,27 @@ package org.kc7bfi.jflac;
  */
 
 public class Constants {
-    public static final String VERSION_STRING = "1.0";
-    public static final String VENDOR_STRING = "reference libFLAC 1.1.0 20030126";
+    //public static final String VERSION_STRING = "1.0";
+    //public static final String VENDOR_STRING = "reference libFLAC 1.1.0 20030126";
 
     //public static final int STREAM_SYNC = 0x664C6143;
     //public static final int STREAM_SYNC_LEN = 32; /* bits */;
     
+    /** The maximum number of audio channels */
     public static final int MAX_CHANNELS = 8;
+    
     public static final int MAX_BLOCK_SIZE = 65535;
 
     /** The maximum Rice partition order permitted by the format. */
     public static final int MAX_RICE_PARTITION_ORDER = 15;
     
-    /** independent channels */
+    /** independent channels. */
     public static final int CHANNEL_ASSIGNMENT_INDEPENDENT = 0;
-    /** left+side stereo */
+    /** left+side stereo. */
     public static final int CHANNEL_ASSIGNMENT_LEFT_SIDE = 1;
-    /** right+side stereo */
+    /** right+side stereo. */
     public static final int CHANNEL_ASSIGNMENT_RIGHT_SIDE = 2;
-    /** mid+side stereo */
+    /** mid+side stereo. */
     public static final int CHANNEL_ASSIGNMENT_MID_SIDE = 3;
 
     //public static final int FRAME_HEADER_SYNC = 0x3ffe;
