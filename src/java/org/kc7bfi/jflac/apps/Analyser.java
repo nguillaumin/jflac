@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac;
+package org.kc7bfi.jflac.apps;
 
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000,2001,2002,2003  Josh Coalson
@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import org.kc7bfi.jflac.StreamDecoder;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.MetadataBase;
 import org.kc7bfi.jflac.metadata.StreamInfo;

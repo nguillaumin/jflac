@@ -100,11 +100,11 @@ public class StreamDecoder {
         state = STREAM_DECODER_SEARCH_FOR_METADATA;
     }
     
-    StreamInfo getStreamInfo() {
+    public StreamInfo getStreamInfo() {
         return streamInfo;
     }
     
-    ChannelData[] getChannelData() {
+    public ChannelData[] getChannelData() {
         return channelData;
     }
     
@@ -151,7 +151,7 @@ public class StreamDecoder {
         }
     }
     
-    void processMetadata() throws IOException {
+    public void processMetadata() throws IOException {
         
         while (true) {
             switch (state) {
@@ -199,7 +199,7 @@ public class StreamDecoder {
         }
     }
     
-    Frame getNextFrame() throws IOException {
+    public Frame getNextFrame() throws IOException {
         //boolean got_a_frame;
         
         while (true) {

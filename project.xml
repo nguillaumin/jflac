@@ -78,6 +78,20 @@ on SourceForge</p>
 	<build>
 		<nagEmailAddress>drrobison1@cox.net</nagEmailAddress>
 		<sourceDirectory>src/java</sourceDirectory>
+		<unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+		<unitTest>
+			<includes>
+				<include>**/*Test.java</include>
+			</includes>
+			<resources>
+			<resource>
+				<directory>testdata</directory>
+				<includes>
+					<include>*.flac</include>
+				</includes>
+			</resource>
+		</resources>
+		</unitTest>
 	</build>
 
   <reports>
