@@ -25,7 +25,7 @@ package org.kc7bfi.jflac.util;
  * @author David R Robison
  */
 public class RingBuffer {
-    protected static int DEFAULT_BUFFER_SIZE = 2048;
+    protected static final int DEFAULT_BUFFER_SIZE = 2048;
     protected int bufferSize = 0;
     protected byte[] buffer = null;
     protected int putHere = 0;
@@ -73,9 +73,8 @@ public class RingBuffer {
         
         synchronized (signal) {
             // see if we have enough room
-            System.out.println(putAvailable() + " vs "+len);
             while (putAvailable() < len) {
-                try { signal.wait(1000); } catch (Exception e) {System.out.println("Put.Signal.wait:"+e);}
+                try { signal.wait(1000); } catch (Exception e) { System.out.println("Put.Signal.wait:" + e); }
             }
             
             // copy data
@@ -109,7 +108,7 @@ public class RingBuffer {
             // see if we have enough data
             while (getAvailable() <= 0) {
                 if (eof) return (-1);
-                try { signal.wait(1000); } catch (Exception e) {System.out.println("Get.Signal.wait:"+e);}
+                try { signal.wait(1000); } catch (Exception e) { System.out.println("Get.Signal.wait:" + e); }
             }
             len = Math.min(len, getAvailable());
             
@@ -140,6 +139,7 @@ public class RingBuffer {
     public boolean isEOF() {
         return eof;
     }
+    
     /**
      * @param eof The eof to set.
      */

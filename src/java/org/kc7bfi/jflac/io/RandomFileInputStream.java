@@ -52,6 +52,7 @@ public class RandomFileInputStream extends InputStream {
     /**
      * Read a byte value.
      * @return the byte value
+     * @throws IOException on IO error
      * @see java.io.InputStream#read()
      */
     public int read() throws IOException {
@@ -96,7 +97,7 @@ public class RandomFileInputStream extends InputStream {
      * Skip bytes in the input file.
      * @param bytes The number of bytes to skip
      * @return the number of bytes skiped
-     * @return IOException on IO error
+     * @throws IOException on IO error
      * @see java.io.InputStream#skip(long)
      */
     public long skip(long bytes) throws IOException {

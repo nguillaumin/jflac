@@ -26,11 +26,15 @@ import org.kc7bfi.jflac.util.CRC16;
 import org.kc7bfi.jflac.util.CRC8;
 
 
+/**
+ * Bit-wide output stream.
+ * @author kc7bfi
+ */
 public class BitOutputStream {
     private static final int BITS_PER_BLURB = 8;
-    private static final int BITS_PER_BLURB_LOG2 = 3;
-    private static final int BYTES_PER_BLURB = 1;
-    private static final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
+    //private static final int BITS_PER_BLURB_LOG2 = 3;
+    //private static final int BYTES_PER_BLURB = 1;
+    //private static final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
     private static final long[] MASK32 = new long[]{0, 0x0000000000000001, 0x0000000000000003, 0x0000000000000007, 0x000000000000000F,
             0x000000000000001F, 0x000000000000003F, 0x000000000000007F, 0x00000000000000FF, 0x00000000000001FF, 0x00000000000003FF,
             0x00000000000007FF, 0x0000000000000FFF, 0x0000000000001FFF, 0x0000000000003FFF, 0x0000000000007FFF, 0x000000000000FFFF,
@@ -131,8 +135,8 @@ public class BitOutputStream {
     */
     
     /**
-     * The constructor
-     * @param is    The InputStream to read bits from
+     * The constructor.
+     * @param os    The InputStream to read bits from
      */
     public BitOutputStream(OutputStream os) {
         this.os = os;
@@ -142,9 +146,9 @@ public class BitOutputStream {
     
     /** TODO
      */
-    public void clear() {
-        
-    }
+    //public void clear() {
+    //    
+    //}
     
     /**
      * Concatinate one InputBitStream to the end of this one.
@@ -175,7 +179,7 @@ public class BitOutputStream {
     }
     
     /**
-     * Reset the read CRC-16 value
+     * Reset the read CRC-16 value.
      * @param seed  The initial CRC-16 value
      */
     public void resetReadCRC16(short seed) {
@@ -183,7 +187,7 @@ public class BitOutputStream {
     }
     
     /**
-     * return the read CRC-16 value
+     * return the read CRC-16 value.
      * @return  The read CRC-16 value
      */
     public short getReadCRC16() {
@@ -191,7 +195,7 @@ public class BitOutputStream {
     }
     
     /**
-     * return the write CRC-16 value
+     * return the write CRC-16 value.
      * @return The write CRC-16 value
      */
     public short getWriteCRC16() {
@@ -199,15 +203,15 @@ public class BitOutputStream {
     }
     
     /**
-     * return the write CRC-8 value
-     * @return  The write CRC-8 val;ue
+     * return the write CRC-8 value.
+     * @return  The write CRC-8 value
      */
     public byte getWriteCRC8() {
         return CRC8.calc(buffer, outBlurbs);
     }
     
     /**
-     * Test if the Bit Stream is byte aligned
+     * Test if the Bit Stream is byte aligned.
      * @return  True of bit stream is byte aligned
      */
     public boolean isByteAligned() {
@@ -215,7 +219,7 @@ public class BitOutputStream {
     }
     
     /**
-     * Test if the Bit Stream consumed bits is byte aligned
+     * Test if the Bit Stream consumed bits is byte aligned.
      * @return  True of bit stream consumed bits is byte aligned
      */
     public boolean isConsumedByteAligned() {
@@ -223,7 +227,7 @@ public class BitOutputStream {
     }
     
     /**
-     * return the number of bits to read to align the byte
+     * return the number of bits to read to align the byte.
      * @return  The number of bits to align the byte
      */
     public int bitsLeftForByteAlignment() {
@@ -231,7 +235,7 @@ public class BitOutputStream {
     }
     
     /**
-     * return the number of bytes left to read
+     * return the number of bytes left to read.
      * @return  The number of bytes left to read
      */
     public int getInputBytesUnconsumed() {
@@ -430,7 +434,10 @@ public class BitOutputStream {
      */
     
     public void writeRiceSigned(int val, int parameter) throws IOException {
-        int total_bits, interesting_bits, msbs, uval;
+        int totalBits;
+        int interestingBits;
+        int msbs;
+        int uval;
         int pattern;
         
         // fold signed to unsigned
@@ -441,17 +448,17 @@ public class BitOutputStream {
             uval = (int) (val << 1);
         }
         msbs = uval >> parameter;
-        interesting_bits = 1 + parameter;
-        total_bits = interesting_bits + msbs;
+        interestingBits = 1 + parameter;
+        totalBits = interestingBits + msbs;
         pattern = 1 << parameter; /* the unary end bit */
         pattern |= (uval & ((1 << parameter) - 1)); /* the binary LSBs */
-        if (total_bits <= 32) {
-            writeRawUInt(pattern, total_bits);
+        if (totalBits <= 32) {
+            writeRawUInt(pattern, totalBits);
         } else {
             /* write the unary MSBs */
             writeZeroes(msbs);
             /* write the unary end bit and binary LSBs */
-            writeRawUInt(pattern, interesting_bits);
+            writeRawUInt(pattern, interestingBits);
         }
     }
     

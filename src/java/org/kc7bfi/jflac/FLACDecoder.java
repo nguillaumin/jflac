@@ -49,7 +49,7 @@ import org.kc7bfi.jflac.util.CRC16;
 
 public class FLACDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
-    private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
+    private static final byte[] ID3V2_TAG = new byte[] { 'I', 'D', '3' };
     
     private BitInputStream is;
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
@@ -80,14 +80,14 @@ public class FLACDecoder {
     private static final int STREAM_DECODER_END_OF_STREAM = 4;
     private static final int STREAM_DECODER_ABORTED = 5;
     private static final int STREAM_DECODER_UNPARSEABLE_STREAM = 6;
-    private static final int STREAM_DECODER_MEMORY_ALLOCATION_ERROR = 7;
-    private static final int STREAM_DECODER_ALREADY_INITIALIZED = 8;
-    private static final int STREAM_DECODER_INVALID_CALLBACK = 9;
+    //private static final int STREAM_DECODER_MEMORY_ALLOCATION_ERROR = 7;
+    //private static final int STREAM_DECODER_ALREADY_INITIALIZED = 8;
+    //private static final int STREAM_DECODER_INVALID_CALLBACK = 9;
     private static final int STREAM_DECODER_UNINITIALIZED = 10;
     
     /**
-     * The constructor
-     * @param is    The input stream to read data from
+     * The constructor.
+     * @param inputStream    The input stream to read data from
      */
     public FLACDecoder(InputStream inputStream) {
         this.inputStream = inputStream;
@@ -224,7 +224,7 @@ public class FLACDecoder {
     }
     
     /**
-     * Read the FLAC stream info
+     * Read the FLAC stream info.
      * @return  The FLAC Stream Info record
      */
     public StreamInfo readStreamInfo() {
@@ -479,7 +479,7 @@ public class FLACDecoder {
                 id = 0;
                 continue;
             }
-            if (x == ID3V2_TAG_[id]) {
+            if (x == ID3V2_TAG[id]) {
                 id++;
                 i = 0;
                 if (id == 3) skipID3v2Tag();
@@ -554,7 +554,7 @@ public class FLACDecoder {
     
     private void frameSync() throws IOException {
         boolean first = true;
-        int cnt=0;
+        //int cnt=0;
         
         // If we know the total number of samples in the stream, stop if we've read that many.
         // This will stop us, for example, from wasting time trying to sync on an ID3V1 tag.
@@ -587,7 +587,7 @@ public class FLACDecoder {
                     }
                 }
                 if (first) {
-                    callErrorListeners("FindSync LOST_SYNC: "+Integer.toHexString((x & 0xff)));
+                    callErrorListeners("FindSync LOST_SYNC: " + Integer.toHexString((x & 0xff)));
                     first = false;
                 }
             }
@@ -603,7 +603,7 @@ public class FLACDecoder {
         int i;
         int mid, side, left, right;
         short frameCRC; /* the one we calculate from the input stream */
-        int x;
+        //int x;
         
         /* init the CRC */
         frameCRC = 0;
@@ -614,10 +614,10 @@ public class FLACDecoder {
         try {
             frame.header = new Header(is, headerWarmup, streamInfo);
         } catch (BadHeaderException e) {
-            callErrorListeners("Found bad header: "+e);
+            callErrorListeners("Found bad header: " + e);
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
         }
-        if (state == STREAM_DECODER_SEARCH_FOR_FRAME_SYNC) return false;// gotAFrame;
+        if (state == STREAM_DECODER_SEARCH_FOR_FRAME_SYNC) return false;
         allocateOutput(frame.header.blockSize, frame.header.channels);
         for (channel = 0; channel < frame.header.channels; channel++) {
             // first figure the correct bits-per-sample of the subframe
@@ -644,11 +644,11 @@ public class FLACDecoder {
             try {
                 readSubframe(channel, bps);
             } catch (IOException e) {
-                callErrorListeners("ReadSubframe: "+e);
+                callErrorListeners("ReadSubframe: " + e);
             }
             if (state != STREAM_DECODER_READ_FRAME) {
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
-                return false;// gotAFrame;
+                return false;
             }
         }
         readZeroPadding();
@@ -727,9 +727,9 @@ public class FLACDecoder {
         
         // Lots of magic numbers here
         if ((x & 0x80) != 0) {
-            callErrorListeners("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
+            callErrorListeners("ReadSubframe LOST_SYNC: " + Integer.toHexString(x & 0xff));
             state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
-            throw new IOException("ReadSubframe LOST_SYNC: "+Integer.toHexString(x&0xff));
+            throw new IOException("ReadSubframe LOST_SYNC: " + Integer.toHexString(x & 0xff));
             //return true;
         } else if (x == 0) {
             frame.subframes[channel] = new ChannelConstant(is, frame.header, channelData[channel], bps, wastedBits);
@@ -737,13 +737,13 @@ public class FLACDecoder {
             frame.subframes[channel] = new ChannelVerbatim(is, frame.header, channelData[channel], bps, wastedBits);
         } else if (x < 16) {
             state = STREAM_DECODER_UNPARSEABLE_STREAM;
-            throw new IOException("ReadSubframe Bad Subframe Type: "+Integer.toHexString(x&0xff));
+            throw new IOException("ReadSubframe Bad Subframe Type: " + Integer.toHexString(x & 0xff));
         } else if (x <= 24) {
             //FLACSubframe_Fixed subframe = read_subframe_fixed_(channel, bps, (x >> 1) & 7);
             frame.subframes[channel] = new ChannelFixed(is, frame.header, channelData[channel], bps, wastedBits, (x >> 1) & 7);
         } else if (x < 64) {
             state = STREAM_DECODER_UNPARSEABLE_STREAM;
-            throw new IOException("ReadSubframe Bad Subframe Type: "+Integer.toHexString(x&0xff));
+            throw new IOException("ReadSubframe Bad Subframe Type: " + Integer.toHexString(x & 0xff));
         } else {
             frame.subframes[channel] = new ChannelLPC(is, frame.header, channelData[channel], bps, wastedBits, ((x >> 1) & 31) + 1);
         }
@@ -759,7 +759,7 @@ public class FLACDecoder {
         if (!is.isConsumedByteAligned()) {
             int zero = is.readRawUInt(is.bitsLeftForByteAlignment());
             if (zero != 0) {
-                callErrorListeners("ZeroPaddingError: "+Integer.toHexString(zero));
+                callErrorListeners("ZeroPaddingError: " + Integer.toHexString(zero));
                 state = STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
             }
         }

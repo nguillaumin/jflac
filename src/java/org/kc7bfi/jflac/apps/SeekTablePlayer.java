@@ -56,6 +56,8 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
     /**
      * Decode and play an input FLAC file.
      * @param inFileName    The input FLAC file name
+     * @param fromSeekPoint The starting Seek Point
+     * @param toSeekPoint   The ending Seek Point (non-inclusive)
      * @throws IOException  Thrown if error reading file
      * @throws LineUnavailableException Thrown if error playing file
      */
@@ -116,15 +118,17 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
         line.write(pcm.space, 0, pcm.pos);
     }
 
-    /* (non-Javadoc)
-     * @see org.kc7bfi.jflac.FrameListener#processMetadata(org.kc7bfi.jflac.metadata.Metadata)
+    /**
+     * Called for each Metadata frame read.
+     * @param metadata The metadata frame read
      */
     public void processMetadata(Metadata metadata) {
         if (metadata instanceof SeekTable) seekTable = (SeekTable)metadata;
     }
 
-    /* (non-Javadoc)
-     * @see org.kc7bfi.jflac.FrameListener#processFrame(org.kc7bfi.jflac.frame.Frame)
+    /**
+     * Called for each data frame read.
+     * @param frame The data frame read
      */
     public void processFrame(Frame frame) {
     }

@@ -48,7 +48,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
     
@@ -275,7 +275,6 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     public AudioInputStream getAudioInputStream(File file) throws UnsupportedAudioFileException, IOException {
-        System.out.println("getAudioInputStream "+file);
         InputStream inputStream = new FileInputStream(file);
         try {
             return getAudioInputStream(inputStream, (int) file.length());
@@ -303,7 +302,6 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     public AudioInputStream getAudioInputStream(URL url) throws UnsupportedAudioFileException, IOException {
-        System.out.println("getAudioInputStream "+url);
         InputStream inputStream = url.openStream();
         try {
             return getAudioInputStream(inputStream);
@@ -332,7 +330,6 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     public AudioInputStream getAudioInputStream(InputStream stream) throws UnsupportedAudioFileException, IOException {
-        System.out.println("getAudioInputStream "+stream);
         return getAudioInputStream(stream, AudioSystem.NOT_SPECIFIED);
     }
 
@@ -353,10 +350,7 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     protected AudioInputStream getAudioInputStream(InputStream inputStream, int medialength) throws UnsupportedAudioFileException, IOException {
-        System.out.println("getAudioInputStream "+inputStream+" "+medialength);
-        //ByteArrayOutputStream baos = new ByteArrayOutputStream(128);
         AudioFileFormat audioFileFormat = getAudioFileFormat(inputStream, medialength);
-        System.out.println("AudioFormat="+audioFileFormat+"\n\t"+audioFileFormat.getFormat()+" "+audioFileFormat.getFrameLength());
         
         // push back the StreamInfo
         ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();

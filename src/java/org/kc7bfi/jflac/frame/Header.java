@@ -28,6 +28,10 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
 
+/**
+ * Frame header class.
+ * @author kc7bfi
+ */
 public class Header {
     
     /** The number of samples per subframe. */
@@ -56,7 +60,7 @@ public class Header {
     protected byte crc;
     
     /**
-     * The constructor
+     * The constructor.
      * @param is                    The InputBitStream
      * @param headerWarmup          The header warm-up bytes
      * @param streamInfo            The FLAC Stream Info
@@ -276,15 +280,17 @@ public class Header {
     }
     
     /**
+     * Return a descriptive string for this object.
+     * @return the string description
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "FrameHeader:" +
-            " BlockSize=" + blockSize +
-            " SampleRate=" + sampleRate +
-            " Channels=" + channels +
-            " ChannelAssignment=" + channelAssignment +
-            " BPS=" + bitsPerSample +
-            " SampleNumber=" + sampleNumber;
+        return "FrameHeader:"
+            + " BlockSize=" + blockSize
+            + " SampleRate=" + sampleRate
+            + " Channels=" + channels
+            + " ChannelAssignment=" + channelAssignment
+            + " BPS=" + bitsPerSample
+            + " SampleNumber=" + sampleNumber;
     }
 }

@@ -40,7 +40,7 @@ import javax.sound.sampled.spi.FormatConversionProvider;
  * returned by one of the getAudioInputStream methods.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FlacFormatConvertionProvider extends FormatConversionProvider {
 
@@ -64,7 +64,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
     
     public FlacFormatConvertionProvider() {
         super();
-        System.out.println("Init FlacFormatConvertionProvider");
     }
 
     /**
@@ -74,7 +73,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * The array will always have a length of at least 1.
      */
     public AudioFormat.Encoding[] getSourceEncodings() {
-        System.out.println("getSourceEncodings");
         AudioFormat.Encoding[] encodings = { 
                 FlacEncoding.FLAC,
                 AudioFormat.Encoding.PCM_SIGNED 
@@ -89,7 +87,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * The array will always have a length of at least 1.
      */
     public AudioFormat.Encoding[] getTargetEncodings() {
-        System.out.println("getTargetEncodings");
         AudioFormat.Encoding[] encodings = { 
                 FlacEncoding.FLAC, 
                 AudioFormat.Encoding.PCM_SIGNED 
@@ -105,7 +102,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * @return array of supported target format encodings.
      */
     public AudioFormat.Encoding[] getTargetEncodings(AudioFormat sourceFormat) {
-        System.out.println("getTargetEncodings "+sourceFormat);
         if (sourceFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)) {
             AudioFormat.Encoding[] encodings = { FlacEncoding.FLAC };
             return encodings;
@@ -127,7 +123,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * @return array of supported target formats.
      */
     public AudioFormat[] getTargetFormats(AudioFormat.Encoding targetEncoding, AudioFormat sourceFormat) {
-        System.out.println("getTargetEncodings "+sourceFormat+" "+targetEncoding);
         if (sourceFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED) && targetEncoding instanceof FlacEncoding) {
             if (sourceFormat.getChannels() > 2 || sourceFormat.getChannels() <= 0 || sourceFormat.isBigEndian()) {
                 AudioFormat[] formats = {};
@@ -163,7 +158,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * is not supported.
      */
     public AudioInputStream getAudioInputStream(AudioFormat.Encoding targetEncoding, AudioInputStream sourceStream) {
-        System.out.println("getAudioInputStream1 "+targetEncoding+" vs "+sourceStream.getFormat());
         if (isConversionSupported(targetEncoding, sourceStream.getFormat())) {
             AudioFormat[] formats = getTargetFormats(targetEncoding, sourceStream.getFormat());
             if (formats != null && formats.length > 0) {
@@ -172,7 +166,7 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
                 if (sourceFormat.equals(targetFormat)) {
                     return sourceStream;
                 } else if (sourceFormat.getEncoding() instanceof FlacEncoding && targetFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)) {
-                    try { sourceStream.reset(); } catch (Exception e) {System.out.println("Reset: "+e);}
+                    //try { sourceStream.reset(); } catch (Exception e) {System.out.println("Reset: "+e);}
                     return new Flac2PcmAudioInputStream(sourceStream, targetFormat, -1);
                 } else if (sourceFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED) && targetFormat.getEncoding() instanceof FlacEncoding) {
                     //return new Pcm2FlacAudioInputStream(sourceStream, targetFormat, -1);
@@ -199,7 +193,6 @@ public class FlacFormatConvertionProvider extends FormatConversionProvider {
      * is not supported.
      */
     public AudioInputStream getAudioInputStream(AudioFormat targetFormat, AudioInputStream sourceStream) {
-        System.out.println("getAudioInputStream1 "+targetFormat+" vs "+sourceStream.getFormat());
         if (isConversionSupported(targetFormat, sourceStream.getFormat())) {
             AudioFormat[] formats = getTargetFormats(
                     targetFormat.getEncoding(), sourceStream.getFormat());

@@ -27,7 +27,7 @@ package org.kc7bfi.jflac.util;
 public final class CRC16 {
 
     // CRC-16, poly = x^16 + x^15 + x^2 + x^0, init = 0
-    private static final short[] CRC16Table =
+    private static final short[] CRC16_TABLE =
         new short[] {
             (short) 0x0000,
             (short) 0x8005,
@@ -294,7 +294,7 @@ public final class CRC16 {
      * @return      The updated CRC value
      */
     public static short update(byte data, short crc) {
-        crc = (short) ((crc << 8) ^ CRC16Table[((crc >> 8) ^ data) & 0xff]);
+        crc = (short) ((crc << 8) ^ CRC16_TABLE[((crc >> 8) ^ data) & 0xff]);
         return crc;
     }
 
@@ -308,7 +308,7 @@ public final class CRC16 {
      */
     public static short updateBlock(byte[] data, int len, short crc) {
         for (int i = 0; i < len; i++)
-            crc = (short) ((crc << 8) ^ CRC16Table[(crc >> 8) ^ data[i]]);
+            crc = (short) ((crc << 8) ^ CRC16_TABLE[(crc >> 8) ^ data[i]]);
         return crc;
     }
 
@@ -324,7 +324,7 @@ public final class CRC16 {
         short crc = 0;
 
         for (int i = 0; i < len; i++)
-            crc = (short) ((crc << 8) ^ CRC16Table[(crc >> 8) ^ data[i]]);
+            crc = (short) ((crc << 8) ^ CRC16_TABLE[(crc >> 8) ^ data[i]]);
 
         return crc;
     }

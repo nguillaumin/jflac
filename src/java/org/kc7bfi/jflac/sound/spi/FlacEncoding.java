@@ -26,7 +26,7 @@ import javax.sound.sampled.AudioFormat;
  * Encodings used by the Flac audio decoder.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FlacEncoding extends AudioFormat.Encoding {
 

@@ -34,7 +34,7 @@ import org.kc7bfi.jflac.util.ByteSpace;
  * Converts an Flac bitstream into a PCM 16bits/sample audio stream.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements PCMProcessor {
 
@@ -62,7 +62,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
     private StreamInfo streamInfo;
     
     /** Decode thread. */
-    Thread decodeThread = null;
+    private Thread decodeThread = null;
 
     /** The frame size, in samples. */
     //private int frameSize;
@@ -87,7 +87,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
     //private boolean first;
 
     /**
-     * Constructor
+     * Constructor.
      * 
      * @param in
      *            the underlying input stream.
@@ -101,7 +101,7 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
     }
 
     /**
-     * Constructor
+     * Constructor.
      * 
      * @param in
      *            the underlying input stream.
@@ -111,8 +111,6 @@ public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements 
      *            the length in sample frames of the data in this stream.
      * @param size
      *            the buffer size.
-     * @exception IllegalArgumentException
-     *                if size <= 0.
      */
     public Flac2PcmAudioInputStream(InputStream in, AudioFormat format, long length, int size) {
         super(in, format, length, size);

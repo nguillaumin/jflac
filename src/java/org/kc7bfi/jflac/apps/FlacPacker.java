@@ -150,7 +150,7 @@ public class FlacPacker extends JFrame {
                 albumFiles.add(aFile);
                 decoder.decode();
                 long frameEndOffs = decoder.getTotalBytesRead();
-                appendMsg(frameStartOffs+" "+frameEndOffs);
+                appendMsg(frameStartOffs + " " + frameEndOffs);
                 lastSampleNumber += decoder.getSamplesDecoded();
                 lastStreamOffset += frameEndOffs - frameStartOffs;
             } catch (FileNotFoundException e) {
