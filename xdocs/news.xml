@@ -4,6 +4,21 @@
     <title>News</title>
   </properties>
 	<body>
+	    <!--
+		<section name="XXth June 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.4</a> released!</p>
+			<p>I am pleased to announce an updated release of the jFLAC library.</p>
+			<p>This release includes bug fixes and some cleanup to the jFLAC library:
+			<ul>
+   				<li>A fix was made to Player.java to flush all output to the device before closing the line.</li>
+   				<li>Modified the Player.java app so that one instance can play back multiple files.</li>
+   				<li>Added a decodeStreamInfo and decodeFrame function to StreamDecoder.</li>
+			</ul></p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
+		-->
 		<section name="3rd June 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.4</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
