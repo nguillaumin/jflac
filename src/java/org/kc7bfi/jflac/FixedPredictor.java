@@ -24,7 +24,7 @@ public class FixedPredictor {
 
     private static final double M_LN2 = 0.69314718055994530942;
 
-    static public int computeBestPredictor(int[] data, int dataLen, double[] residualBitsPerSample) {
+    public static int computeBestPredictor(int[] data, int dataLen, double[] residualBitsPerSample) {
         int lastError0 = data[-1];
         int lastError1 = data[-1] - data[-2];
         int lastError2 = lastError1 - (data[-2] - data[-3]);
@@ -77,7 +77,7 @@ public class FixedPredictor {
         return order;
     }
 
-    static public int computeBestPredictorWide(int[] data, int dataLen, double[] residual_bits_per_sample) {
+    public static int computeBestPredictorWide(int[] data, int dataLen, double[] residual_bits_per_sample) {
         int lastError0 = data[-1];
         int lastError1 = data[-1] - data[-2];
         int lastError2 = lastError1 - (data[-2] - data[-3]);
@@ -135,7 +135,7 @@ public class FixedPredictor {
         return order;
     }
 
-    static public void computeResidual(int data[], int dataLen, int order, int residual[]) {
+    public static void computeResidual(int data[], int dataLen, int order, int residual[]) {
         int idataLen = (int) dataLen;
 
         switch (order) {
@@ -171,7 +171,7 @@ public class FixedPredictor {
                 }
     }
 
-    static public void restoreSignal(int residual[], int dataLen, int order, int data[], int startAt) {
+    public static void restoreSignal(int residual[], int dataLen, int order, int data[], int startAt) {
         int idataLen = (int) dataLen;
 
         switch (order) {

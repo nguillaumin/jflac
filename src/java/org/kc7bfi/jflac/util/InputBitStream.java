@@ -25,18 +25,12 @@ import java.io.InputStream;
 
 
 public class InputBitStream {
-    static private final int BITS_PER_BLURB = 8;
-    static private final int BITS_PER_BLURB_LOG2 = 3;
-    static private final int BYTES_PER_BLURB = 1;
-    //static private final byte BLURB_ALL_ONES = ((byte) 0xff);
-    static private final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
-    //static private final int BLURB_BIT_TO_MASK(b) (((blurb)'\x80') >> (b))
-    //static private final int CRC16_UPDATE_BLURB(bb, blurb, crc)
-    // CRC16_UPDATE((blurb), (crc));
-    //#define FLAC__CRC16_UPDATE(data, crc) (crc) = ((crc)<<8) ^
-    // FLAC__crc16_table[((crc)>>8) ^ (data)];
-    static private final int BITBUFFER_DEFAULT_CAPACITY = ((65536 - 64) * 8) / BITS_PER_BLURB;
-    static final long[] mask32 = new long[]{0, 0x0000000000000001, 0x0000000000000003, 0x0000000000000007, 0x000000000000000F,
+    private static final int BITS_PER_BLURB = 8;
+    private static final int BITS_PER_BLURB_LOG2 = 3;
+    private static final int BYTES_PER_BLURB = 1;
+    private static final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
+    private static final int BITBUFFER_DEFAULT_CAPACITY = ((65536 - 64) * 8) / BITS_PER_BLURB;
+    private static final long[] MASK32 = new long[]{0, 0x0000000000000001, 0x0000000000000003, 0x0000000000000007, 0x000000000000000F,
             0x000000000000001F, 0x000000000000003F, 0x000000000000007F, 0x00000000000000FF, 0x00000000000001FF, 0x00000000000003FF,
             0x00000000000007FF, 0x0000000000000FFF, 0x0000000000001FFF, 0x0000000000003FFF, 0x0000000000007FFF, 0x000000000000FFFF,
             0x000000000001FFFF, 0x000000000003FFFF, 0x000000000007FFFF, 0x00000000000FFFFF, 0x00000000001FFFFF, 0x00000000003FFFFF,
@@ -49,21 +43,18 @@ public class InputBitStream {
             0x003FFFFFFFFFFFFFL, 0x007FFFFFFFFFFFFFL, 0x00FFFFFFFFFFFFFFL, 0x01FFFFFFFFFFFFFFL, 0x03FFFFFFFFFFFFFFL,
             0x07FFFFFFFFFFFFFFL, 0x0FFFFFFFFFFFFFFFL, 0x1FFFFFFFFFFFFFFFL, 0x3FFFFFFFFFFFFFFFL, 0x7FFFFFFFFFFFFFFFL,
             0xFFFFFFFFFFFFFFFFL};
-    //#define BLURBS_TO_BITS(blurbs) ((blurbs) << BITS_PER_BLURB_LOG2)
-    private byte[] buffer;
-    private int capacity; // in blurbs
-    private int blurbs;
-    private int bits;
-    private int totalBits; /* must always == BITS_PER_BLURB*blurbs+bits */
-    private int consumedBlurbs;
-    private int consumedBits;
-    private int totalConsumedBits; /*
-                                    * must always ==
-                                    * BITS_PER_BLURB*consumed_blurbs+consumed_bits
-                                    */
-    private short readCRC16;
-    //private blurb save_head, save_tail;
+    
+    private byte[] buffer = new byte[0];
+    private int capacity = 0; // in blurbs
+    private int blurbs = 0;
+    private int bits = 0;
+    private int totalBits = 0; // must always == BITS_PER_BLURB*blurbs+bits
+    private int consumedBlurbs = 0;
+    private int consumedBits = 0;
+    private int totalConsumedBits = 0;
+    private short readCRC16 = 0;
     private InputStream is;
+    
     /*
      * WATCHOUT: The current implentation is not friendly to shrinking, i.e. it
      * does not shift left what is consumed, it just chops off the end, whether
@@ -72,8 +63,7 @@ public class InputBitStream {
      * fixups here.
      */
     private boolean resize(int newCapacity) {
-        if (capacity == newCapacity)
-            return true;
+        if (capacity == newCapacity) return true;
         byte[] newBuffer = new byte[newCapacity];
         System.arraycopy(buffer, 0, newBuffer, 0, Math.min(blurbs + ((bits != 0) ? 1 : 0), newCapacity));
         if (newCapacity < blurbs + ((bits != 0) ? 1 : 0)) {
@@ -90,19 +80,21 @@ public class InputBitStream {
         capacity = newCapacity;
         return true;
     }
+    
     private boolean grow(int minBlurbsToAdd) {
         int new_capacity = Math.max(capacity * 2, capacity + minBlurbsToAdd);
         return resize(new_capacity);
     }
+    
     private boolean ensureSize(int bitsToAdd) {
         if ((capacity << 3) < totalBits + bitsToAdd)
             return grow((bitsToAdd >> 3) + 2);
         else
             return true;
     }
+    
     private int readFromStream() throws IOException {
-        // first shift the unconsumed buffer data toward the front as much as
-        // possible
+        // first shift the unconsumed buffer data toward the front as much as possible
         if (totalConsumedBits >= BITS_PER_BLURB) {
             int l = 0;
             int r = consumedBlurbs;
@@ -116,144 +108,93 @@ public class InputBitStream {
             consumedBlurbs = 0;
             totalConsumedBits = consumedBits;
         }
+        
         // grow if we need to
-        if (capacity <= 1) {
-            resize(16);
-        }
+        if (capacity <= 1) resize(16);
+        
         // set the target for reading, taking into account blurb alignment
         // blurb == byte, so no gyrations necessary:
         int bytes = capacity - blurbs;
+        
         // finally, read in some data
         bytes = is.read(buffer, blurbs, bytes);
-        if (bytes <=0 ) throw new EOFException();
+        if (bytes <=0) throw new EOFException();
+        
         // now we have to handle partial blurb cases:
         // blurb == byte, so no gyrations necessary:
         blurbs += bytes;
         totalBits += bytes << 3;
         return bytes;
     }
-    /***************************************************************************
-     * 
-     * Class constructor/destructor
-     *  
-     **************************************************************************/
+
+    /**
+     * The constructor
+     * @param is    The InputStream to read bits from
+     */
     public InputBitStream(InputStream is) {
         this.is = is;
-        init();
-    }
-    /***************************************************************************
-     * 
-     * Public class methods
-     *  
-     **************************************************************************/
-    private boolean init() {
-        buffer = null;
-        capacity = 0;
-        blurbs = 0;
-        bits = 0;
-        totalBits = 0;
-        consumedBlurbs = 0;
-        consumedBits = 0;
-        totalConsumedBits = 0;
-        return clear();
     }
     
-    /*
-    private boolean initFrom(byte[] inBuffer, int bytes) {
-        if (!init())
-            return false;
-        if (!ensureSize(bytes << 3))
-            return false;
-        System.arraycopy(inBuffer, 0, buffer, 0, bytes);
-        blurbs = bytes / BYTES_PER_BLURB;
-        bits = (bytes % BYTES_PER_BLURB) << 3;
-        totalBits = bytes << 3;
-        return true;
-    }
-    */
-    
+    /**
+     * Concatinate one InputBitStream to the end of this one.
+     * @param src   The inputBitStream to copy
+     * @return      True if copy was successful
+     */
     public boolean concatenateAligned(InputBitStream src) {
-        int bits_to_add = src.totalBits - src.totalConsumedBits;
-        if (bits_to_add == 0)
-            return true;
-        if (bits != src.consumedBits)
-            return false;
-        if (!ensureSize(bits_to_add))
-            return false;
+        int bitsToAdd = src.totalBits - src.totalConsumedBits;
+        if (bitsToAdd == 0) return true;
+        if (bits != src.consumedBits) return false;
+        if (!ensureSize(bitsToAdd)) return false;
         if (bits == 0) {
-            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, blurbs, (src.blurbs - src.consumedBlurbs + ((src.bits != 0)
-                    ? 1
-                    : 0)));
-        } else if (bits + bits_to_add > BITS_PER_BLURB) {
+            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, blurbs, 
+                    (src.blurbs - src.consumedBlurbs + ((src.bits != 0) ? 1 : 0)));
+        } else if (bits + bitsToAdd > BITS_PER_BLURB) {
             buffer[blurbs] <<= (BITS_PER_BLURB - bits);
             buffer[blurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - bits)) - 1));
             System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, blurbs + 11,
                     (src.blurbs - src.consumedBlurbs - 1 + ((src.bits != 0) ? 1 : 0)));
         } else {
-            buffer[blurbs] <<= bits_to_add;
-            buffer[blurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bits_to_add) - 1));
+            buffer[blurbs] <<= bitsToAdd;
+            buffer[blurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
         }
         bits = src.bits;
-        totalBits += bits_to_add;
+        totalBits += bitsToAdd;
         blurbs = totalBits / BITS_PER_BLURB;
         return true;
     }
-    public void free() {
-        buffer = null;
-        capacity = 0;
-        blurbs = bits = totalBits = 0;
-        consumedBlurbs = consumedBits = totalConsumedBits = 0;
-    }
-    public boolean clear() {
-        if (buffer == null) {
-            capacity = BITBUFFER_DEFAULT_CAPACITY;
-            buffer = new byte[capacity];
-        } else {
-            for (int i = 0; i < blurbs + ((bits != 0) ? 1 : 0); i++)
-                buffer[i] = 0;
-        }
-        blurbs = bits = totalBits = 0;
-        consumedBlurbs = consumedBits = totalConsumedBits = 0;
-        return true;
-    }
-    /*
-     * DRR FIX boolean clone(BitBuffer8 * dest, const BitBuffer * src) {
-     * ASSERT(0 != dest); ASSERT(0 != dest - > buffer); ASSERT(0 != src);
-     * ASSERT(0 != src - > buffer);
-     * 
-     * if (dest - > capacity < src - > capacity) if (!bitbuffer_resize_(dest,
-     * src - > capacity)) return false; memcpy(dest - > buffer, src - > buffer,
-     * sizeof(blurb) * min(src - > capacity, src - > blurbs + 1)); dest - >
-     * blurbs = src - > blurbs; dest - > bits = src - > bits; dest - >
-     * total_bits = src - > total_bits; dest - > consumed_blurbs = src - >
-     * consumed_blurbs; dest - > consumed_bits = src - > consumed_bits; dest - >
-     * total_consumed_bits = src - > total_consumed_bits; dest - > read_crc16 =
-     * src - > read_crc16; return true; }
-     */
+
     public void resetReadCRC16(short seed) {
         readCRC16 = seed;
     }
+
     public short getReadCRC16() {
         return readCRC16;
     }
+
     public short getWriteCRC16() {
         return CRC16.calc(buffer, blurbs);
     }
+
     public byte getWriteCRC8() {
         return CRC8.calc(buffer, blurbs);
     }
+    
     public boolean isByteAligned() {
         return ((bits & 7) == 0);
     }
+    
     public boolean isConsumedByteAligned() {
         return ((consumedBits & 7) == 0);
     }
+    
     public int bitsLeftForByteAlignment() {
         return 8 - (consumedBits & 7);
     }
+    
     public int getInputBytesUnconsumed() {
         return (totalBits - totalConsumedBits) >> 3;
     }
+    
     /*
      * DRR FIX void get_buffer(const byte * * buffer, unsigned * bytes) {
      * ASSERT((bb - > consumed_bits & 7) == 0 && (bb - > bits & 7) == 0); buffer =
@@ -356,7 +297,7 @@ public class InputBitStream {
             return true;
         if (!ensureSize(bits))
             return false;
-        val &= mask32[bits];
+        val &= MASK32[bits];
         totalBits += bits;
         while (bits > 0) {
             if (bits == 0) {

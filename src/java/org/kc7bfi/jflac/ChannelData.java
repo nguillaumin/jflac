@@ -20,13 +20,22 @@ package org.kc7bfi.jflac;
  * Boston, MA  02111-1307, USA.
  */
 
-import org.kc7bfi.jflac.frame.*;
+import org.kc7bfi.jflac.frame.EntropyPartitionedRiceContents;
 
 public class ChannelData {
-    public int[] output = null;
-    public int[] residual = null;
-    public EntropyPartitionedRiceContents partitionedRiceContents = null;
+    /** The output signal */
+    public int[] output;
+    
+    /** the risidual signal */
+    public int[] residual;
+    
+    /** The Entropy signal */
+    public EntropyPartitionedRiceContents partitionedRiceContents;
 
+    /**
+     * The default constructor.
+     * @param size  The block size
+     */
     public ChannelData(int size) {
         output = new int[size];
         residual = new int[size];
