@@ -4,6 +4,18 @@
     <title>News</title>
   </properties>
 	<body>
+		<section name="3rd June 2004">
+			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.4</a> released!</p>
+			<p>I am pleased to announce an updated release of the jFLAC library.</p>
+			<p>This release features a new player application that will play a flac file
+			using the Java sound API. I've also added new listener interfaces to the library.
+			The FrameListener is called after every flac packet is processed. This is now
+			used by the Analyser application. The PCMProcessor is called after every frame
+			is decoded. This is now used by the Decoder application</p>
+			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
+			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
+			encoder is not currently supported. Any comments, suggestions, and help is welcome.</p>
+		</section>
 		<section name="28th May 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.3</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
