@@ -23,7 +23,7 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * Verbatim FLAC subframe (channel).
@@ -41,7 +41,7 @@ public class ChannelVerbatim extends Channel {
      * @param wastedBits    The bits waisted in the frame
      * @throws IOException  Thrown if error reading from the InputBitStream
      */
-    public ChannelVerbatim(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
+    public ChannelVerbatim(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
         super(header, wastedBits);
 
         data = channelData.getResidual();

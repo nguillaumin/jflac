@@ -23,7 +23,7 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * FLAC Constant Subframe (Channel) data.
@@ -44,7 +44,7 @@ public class ChannelConstant extends Channel {
      * @param wastedBits    The bits waisted in the frame
      * @throws IOException  Thrown if error reading from the InputBitStream
      */
-    public ChannelConstant(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
+    public ChannelConstant(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
         super(header, wastedBits);
 
         value = is.readRawInt(bps);

@@ -22,8 +22,8 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
-import org.kc7bfi.jflac.util.OutputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
+import org.kc7bfi.jflac.io.BitOutputStream;
 
 /**
  * SeekTable Metadata block.
@@ -40,7 +40,7 @@ public class SeekTable extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public SeekTable(InputBitStream is, int length) throws IOException {
+    public SeekTable(BitInputStream is, int length) throws IOException {
         int numPoints = length / SEEKPOINT_LENGTH_BYTES;
 
         points = new SeekPoint[numPoints];
@@ -67,7 +67,7 @@ public class SeekTable extends Metadata {
      * @param isLast    True if this is the last metadata block
      * @throws IOException  Thrown if error writing data
      */
-    public void write(OutputBitStream os, boolean isLast) throws IOException {
+    public void write(BitOutputStream os, boolean isLast) throws IOException {
 
         os.writeRawUInt(isLast, STREAM_METADATA_IS_LAST_LEN);
         os.writeRawUInt(METADATA_TYPE_SEEKTABLE, STREAM_METADATA_TYPE_LEN);

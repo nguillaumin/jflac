@@ -27,11 +27,11 @@ import javax.swing.JTextArea;
 
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.StreamDecoder;
+import org.kc7bfi.jflac.io.BitOutputStream;
 import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.SeekPoint;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
-import org.kc7bfi.jflac.util.OutputBitStream;
 
 
 /**
@@ -179,11 +179,11 @@ public class FlacPacker extends JFrame {
         // get output file
         File outFile = getOutputFile();
         if (outFile == null) return;
-        OutputBitStream os = null;
+        BitOutputStream os = null;
         FileOutputStream fos;
         try {
             fos = new FileOutputStream(outFile);
-            os = new OutputBitStream(fos);
+            os = new BitOutputStream(fos);
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
             return;

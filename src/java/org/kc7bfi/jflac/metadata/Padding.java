@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * Padding Metadata block.
@@ -37,7 +37,7 @@ public class Padding extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Padding(InputBitStream is, int length) throws IOException {
+    public Padding(BitInputStream is, int length) throws IOException {
         this.length = length;
         is.readByteBlockAlignedNoCRC(null, length);
     }

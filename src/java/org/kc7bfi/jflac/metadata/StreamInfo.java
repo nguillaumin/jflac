@@ -22,8 +22,8 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
-import org.kc7bfi.jflac.util.OutputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
+import org.kc7bfi.jflac.io.BitOutputStream;
 
 /**
  * StreamInfo Metadata block.
@@ -58,7 +58,7 @@ public class StreamInfo extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public StreamInfo(InputBitStream is, int length) throws IOException {
+    public StreamInfo(BitInputStream is, int length) throws IOException {
         int usedBits = 0;
 
         minBlockSize = is.readRawUInt(STREAMINFO_MIN_BLOCK_SIZE_LEN);
@@ -99,7 +99,7 @@ public class StreamInfo extends Metadata {
      * @param isLast    True if this is the last metadata block
      * @throws IOException  Thrown if error writing data
      */
-    public void write(OutputBitStream os, boolean isLast) throws IOException {
+    public void write(BitOutputStream os, boolean isLast) throws IOException {
 
         os.writeRawUInt(isLast, STREAM_METADATA_IS_LAST_LEN);
         os.writeRawUInt(METADATA_TYPE_STREAMINFO, STREAM_METADATA_TYPE_LEN);

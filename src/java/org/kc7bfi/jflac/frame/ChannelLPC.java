@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.LPCPredictor;
+import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.util.BitMath;
-import org.kc7bfi.jflac.util.InputBitStream;
 
 /**
  * LPC FLAC subframe (channel).
@@ -54,7 +54,7 @@ public class ChannelLPC extends Channel {
      * @param order         The predicate order
      * @throws IOException  Thrown if error reading from the InputBitStream
      */
-    public ChannelLPC(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
+    public ChannelLPC(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
 
         this.residual = channelData.getResidual();

@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * Unknown Metadata block.
@@ -37,7 +37,7 @@ public class Unknown extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Unknown(InputBitStream is, int length) throws IOException {
+    public Unknown(BitInputStream is, int length) throws IOException {
         if (length > 0) {
             data = new byte[length];
             is.readByteBlockAlignedNoCRC(data, length);

@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import org.kc7bfi.jflac.ChannelData;
 import org.kc7bfi.jflac.FixedPredictor;
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * Fixed FLAC subframe (channel).
@@ -48,7 +48,7 @@ public class ChannelFixed extends Channel {
      * @param order         The predicate order
      * @throws IOException  Thrown if error reading from the InputBitStream
      */
-    public ChannelFixed(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
+    public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
         
         this.residual = channelData.getResidual();

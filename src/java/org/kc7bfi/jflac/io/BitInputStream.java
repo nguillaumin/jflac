@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.util;
+package org.kc7bfi.jflac.io;
 
 /**
  * libFLAC - Free Lossless Audio Codec library Copyright (C) 2000,2001,2002,2003
@@ -23,12 +23,15 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.kc7bfi.jflac.util.ByteSpace;
+import org.kc7bfi.jflac.util.CRC16;
+
 
 /**
  * Bit-wide input stream.
  * @author kc7bfi
  */
-public class InputBitStream {
+public class BitInputStream {
     private static final int BITS_PER_BLURB = 8;
     private static final int BITS_PER_BLURB_LOG2 = 3;
     private static final byte BLURB_TOP_BIT_ONE = ((byte) 0x80);
@@ -46,13 +49,12 @@ public class InputBitStream {
             0x07FFFFFFFFFFFFFFL, 0x0FFFFFFFFFFFFFFFL, 0x1FFFFFFFFFFFFFFFL, 0x3FFFFFFFFFFFFFFFL, 0x7FFFFFFFFFFFFFFFL,
             0xFFFFFFFFFFFFFFFFL};
     
-    private byte[] buffer = new byte[256];
-    private int inBlurbs = 0;
-    private int inBits = 0;
-    private int totalBits = 0; // must always == BITS_PER_BLURB*blurbs+bits
-    private int consumedBlurbs = 0;
-    private int consumedBits = 0;
-    private int totalConsumedBits = 0;
+    private static final int BUFFER_CHUNK_SIZE = 1024;
+    private byte[] buffer = new byte[BUFFER_CHUNK_SIZE];
+    private int putByte = 0;
+    private int getByte = 0;
+    private int getBit = 0;
+    private int availBits = 0;
     private int totalBitsRead = 0;
     
     private short readCRC16 = 0;
@@ -63,7 +65,7 @@ public class InputBitStream {
      * The constructor.
      * @param is    The InputStream to read bits from
      */
-    public InputBitStream(InputStream is) {
+    public BitInputStream(InputStream is) {
         this.inStream = is;
     }
     
@@ -71,53 +73,42 @@ public class InputBitStream {
         if (buffer.length >= newCapacity) return;
         System.out.println("RESIZE FROM " + buffer.length + " TO " + newCapacity);
         byte[] newBuffer = new byte[newCapacity];
-        System.arraycopy(buffer, 0, newBuffer, 0, inBlurbs + ((inBits != 0) ? 1 : 0));
+        System.arraycopy(buffer, 0, newBuffer, 0, putByte);
         buffer = newBuffer;
         return;
     }
     
     private void grow(int minBlurbsToAdd) {
-        int newCapacity = (buffer.length + minBlurbsToAdd + 255) / 256;
+        int newCapacity = (buffer.length + minBlurbsToAdd + BUFFER_CHUNK_SIZE - 1) / BUFFER_CHUNK_SIZE;
         resize(newCapacity);
     }
     
     private void ensureSize(int bitsToAdd) {
         int blurbsToAdd = (bitsToAdd + 7) >> 3;
-        if (buffer.length < (inBlurbs + blurbsToAdd))
+        if (buffer.length < (putByte + blurbsToAdd))
             grow(blurbsToAdd);
     }
     
     private int readFromStream() throws IOException {
         // first shift the unconsumed buffer data toward the front as much as possible
-        if (totalConsumedBits >= BITS_PER_BLURB) {
-            int l = 0;
-            int r = consumedBlurbs;
-            int rEnd = inBlurbs + ((inBits != 0) ? 1 : 0);
-            for (; r < rEnd; l++, r++)
-                buffer[l] = buffer[r];
-            for (; l < rEnd; l++)
-                buffer[l] = 0;
-            inBlurbs -= consumedBlurbs;
-            totalBits -= consumedBlurbs << 3;
-            consumedBlurbs = 0;
-            totalConsumedBits = consumedBits;
+        if (getByte > 0 && putByte > getByte) {
+            System.arraycopy(buffer, getByte, buffer, 0, putByte - getByte);
         }
-        
-        // grow if we need to
-        if (buffer.length <= 1) resize(16);
+        putByte -= getByte;
+        getByte = 0;
         
         // set the target for reading, taking into account blurb alignment
         // blurb == byte, so no gyrations necessary:
-        int bytes = buffer.length - inBlurbs;
+        int bytes = buffer.length - putByte;
         
         // finally, read in some data
-        bytes = inStream.read(buffer, inBlurbs, bytes);
+        bytes = inStream.read(buffer, putByte, bytes);
         if (bytes <= 0) throw new EOFException();
         
         // now we have to handle partial blurb cases:
         // blurb == byte, so no gyrations necessary:
-        inBlurbs += bytes;
-        totalBits += bytes << 3;
+        putByte += bytes;
+        availBits += bytes << 3;
         return bytes;
     }
     
@@ -125,40 +116,10 @@ public class InputBitStream {
      * Reset the bit stream.
      */
     public void reset() {
-        inBlurbs = 0;
-        inBits = 0;
-        totalBits = 0;
-        consumedBlurbs = 0;
-        consumedBits = 0;
-        totalConsumedBits = 0;
-    }
-    
-    /**
-     * Concatinate one InputBitStream to the end of this one.
-     * @param src   The inputBitStream to copy
-     * @return      True if copy was successful
-     */
-    public boolean concatenateAligned(InputBitStream src) {
-        int bitsToAdd = src.totalBits - src.totalConsumedBits;
-        if (bitsToAdd == 0) return true;
-        if (inBits != src.consumedBits) return false;
-        ensureSize(bitsToAdd);
-        if (inBits == 0) {
-            System.arraycopy(src.buffer, src.consumedBlurbs, buffer, inBlurbs, 
-                    (src.inBlurbs - src.consumedBlurbs + ((src.inBits != 0) ? 1 : 0)));
-        } else if (inBits + bitsToAdd > BITS_PER_BLURB) {
-            buffer[inBlurbs] <<= (BITS_PER_BLURB - inBits);
-            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << (BITS_PER_BLURB - inBits)) - 1));
-            System.arraycopy(src.buffer, src.consumedBlurbs + 1, buffer, inBlurbs + 11,
-                    (src.inBlurbs - src.consumedBlurbs - 1 + ((src.inBits != 0) ? 1 : 0)));
-        } else {
-            buffer[inBlurbs] <<= bitsToAdd;
-            buffer[inBlurbs] |= (src.buffer[src.consumedBlurbs] & ((1 << bitsToAdd) - 1));
-        }
-        inBits = src.inBits;
-        totalBits += bitsToAdd;
-        inBlurbs = totalBits / BITS_PER_BLURB;
-        return true;
+        getByte = 0;
+        getBit = 0;
+        putByte = 0;
+        availBits = 0;
     }
     
     /**
@@ -178,19 +139,11 @@ public class InputBitStream {
     }
     
     /**
-     * Test if the Bit Stream is byte aligned.
-     * @return  True of bit stream is byte aligned
-     */
-    public boolean isByteAligned() {
-        return ((inBits & 7) == 0);
-    }
-    
-    /**
      * Test if the Bit Stream consumed bits is byte aligned.
      * @return  True of bit stream consumed bits is byte aligned
      */
     public boolean isConsumedByteAligned() {
-        return ((consumedBits & 7) == 0);
+        return ((getBit & 7) == 0);
     }
     
     /**
@@ -198,7 +151,7 @@ public class InputBitStream {
      * @return  The number of bits to align the byte
      */
     public int bitsLeftForByteAlignment() {
-        return 8 - (consumedBits & 7);
+        return 8 - (getBit & 7);
     }
     
     /**
@@ -206,70 +159,9 @@ public class InputBitStream {
      * @return  The number of bytes left to read
      */
     public int getInputBytesUnconsumed() {
-        return (totalBits - totalConsumedBits) >> 3;
-    }
-    
-    
-    public int riceBits(int val, int parameter) {
-        int msbs, uval;
-        // fold signed to unsigned
-        if (val < 0) {
-            // equivalent to (unsigned)(((--val) < < 1) - 1); but without the overflow problem at MININT
-            uval = (int) (((-(++val)) << 1) + 1);
-        } else {
-            uval = (int) (val << 1);
-        }
-        msbs = uval >> parameter;
-        return 1 + parameter + msbs;
-    }
-    /*
-     * DRR FIX # ifdef SYMMETRIC_RICE boolean
-     * write_symmetric_rice_signed(BitBuffer8 * bb, int val, unsigned parameter) {
-     * unsigned total_bits, interesting_bits, msbs; uint32 pattern;
-     * 
-     * ASSERT(0 != bb); ASSERT(0 != buffer); ASSERT(parameter <= 31); // init
-     * pattern with the unary end bit and the sign bit if (val < 0) { pattern =
-     * 3; val = -val; } else pattern = 2;
-     * 
-     * msbs = val >> parameter; interesting_bits = 2 + parameter; total_bits =
-     * interesting_bits + msbs; pattern < <= parameter; pattern |= (val & ((1 < <
-     * parameter) - 1)); // the binary LSBs
-     * 
-     * if (total_bits <= 32) { if (!write_raw_uint32(bb, pattern, total_bits))
-     * return false; } else { // write the unary MSBs if (!write_zeroes(bb,
-     * msbs)) return false; // write the unary end bit, the sign bit, and binary
-     * LSBs if (!write_raw_uint32(bb, pattern, interesting_bits)) return false; }
-     * return true; }
-     * 
-     * boolean write_symmetric_rice_signed_escape(BitBuffer8 * bb, int val,
-     * unsigned parameter) { unsigned total_bits, val_bits; uint32 pattern;
-     * 
-     * ASSERT(0 != bb); ASSERT(0 != buffer); ASSERT(parameter <= 31);
-     * 
-     * val_bits = bitmath_silog2(val); total_bits = 2 + parameter + 5 +
-     * val_bits;
-     * 
-     * if (total_bits <= 32) { pattern = 3; pattern < <= (parameter + 5);
-     * pattern |= val_bits; pattern < <= val_bits; pattern |= (val & ((1 < <
-     * val_bits) - 1)); if (!write_raw_uint32(bb, pattern, total_bits)) return
-     * false; } else { // write the '-0' escape code first if
-     * (!write_raw_uint32(bb, 3 u < < parameter, 2 + parameter)) return false; //
-     * write the length if (!write_raw_uint32(bb, val_bits, 5)) return false; //
-     * write the value if (!write_raw_int32(bb, val, val_bits)) return false; }
-     * return true; } # endif // ifdef SYMMETRIC_RICE
-     */
-    
-    
-    /*
-     * DRR FIX boolean peek_bit(unsigned * val, boolean(* read_callback) (byte
-     * buffer[], unsigned * bytes, void * client_data), void * client_data) {
-     * 
-     * while (1) { if (total_consumed_bits < total_bits) { val =
-     * (buffer[consumed_blurbs] & BLURB_BIT_TO_MASK(consumed_bits)) ? 1 : 0;
-     * return true; } else { if (!read_from_client_(bb, read_callback,
-     * client_data)) return false; } } }
-     */
-    
+        return availBits >> 3;
+    }   
+        
     /**
      * skip over bits in bit stream without updating CRC.
      * @param bits  Number of bits to skip
@@ -277,16 +169,15 @@ public class InputBitStream {
      */
     public void skipBitsNoCRC(int bits) throws IOException {
         if (bits == 0) return;
-        int n = consumedBits & 7;
-        int m;
-        if (n != 0) {
-            m = Math.min(8 - n, bits);
-            readRawUInt(m);
-            bits -= m;
+        int bitsToAlign = getBit & 7;
+        if (bitsToAlign != 0) {
+            int bitsToTake = Math.min(8 - bitsToAlign, bits);
+            readRawUInt(bitsToTake);
+            bits -= bitsToTake;
         }
-        m = bits / 8;
-        if (m > 0) {
-            readByteBlockAlignedNoCRC(null, m);
+        int bytesNeeded = bits / 8;
+        if (bytesNeeded > 0) {
+            readByteBlockAlignedNoCRC(null, bytesNeeded);
             bits %= 8;
         }
         if (bits > 0) {
@@ -301,15 +192,15 @@ public class InputBitStream {
      */
     public int readBit() throws IOException {
         while (true) {
-            if (totalConsumedBits < totalBits) {
-                int val = ((buffer[consumedBlurbs] & (0x80 >> consumedBits)) != 0) ? 1 : 0;
-                consumedBits++;
-                if (consumedBits == BITS_PER_BLURB) {
-                    readCRC16 = CRC16.update(buffer[consumedBlurbs], readCRC16);
-                    consumedBlurbs++;
-                    consumedBits = 0;
+            if (availBits > 0) {
+                int val = ((buffer[getByte] & (0x80 >> getBit)) != 0) ? 1 : 0;
+                getBit++;
+                if (getBit == BITS_PER_BLURB) {
+                    readCRC16 = CRC16.update(buffer[getByte], readCRC16);
+                    getByte++;
+                    getBit = 0;
                 }
-                totalConsumedBits++;
+                availBits--;
                 totalBitsRead++;
                 return val;
             } else {
@@ -328,16 +219,16 @@ public class InputBitStream {
      */
     public int readBitToInt(int val) throws IOException {
         while (true) {
-            if (totalConsumedBits < totalBits) {
+            if (availBits > 0) {
                 val <<= 1;
-                val |= ((buffer[consumedBlurbs] & (0x80 >> consumedBits)) != 0) ? 1 : 0;
-                consumedBits++;
-                if (consumedBits == BITS_PER_BLURB) {
-                    readCRC16 = CRC16.update(buffer[consumedBlurbs], readCRC16);
-                    consumedBlurbs++;
-                    consumedBits = 0;
+                val |= ((buffer[getByte] & (0x80 >> getBit)) != 0) ? 1 : 0;
+                getBit++;
+                if (getBit == BITS_PER_BLURB) {
+                    readCRC16 = CRC16.update(buffer[getByte], readCRC16);
+                    getByte++;
+                    getBit = 0;
                 }
-                totalConsumedBits++;
+                availBits--;
                 totalBitsRead++;
                 return val;
             } else {
@@ -357,13 +248,13 @@ public class InputBitStream {
      */
     public int peekBitToInt(int val, int bit) throws IOException {
         while (true) {
-            if ((totalConsumedBits + bit) < totalBits) {
+            if (bit < availBits) {
                 val <<= 1;
-                if ((consumedBits + bit) >= BITS_PER_BLURB) {
-                    bit = (consumedBits + bit) % BITS_PER_BLURB;
-                    val |= ((buffer[consumedBlurbs + 1] & (0x80 >> bit)) != 0) ? 1 : 0;
+                if ((getBit + bit) >= BITS_PER_BLURB) {
+                    bit = (getBit + bit) % BITS_PER_BLURB;
+                    val |= ((buffer[getByte + 1] & (0x80 >> bit)) != 0) ? 1 : 0;
                 } else {
-                    val |= ((buffer[consumedBlurbs] & (0x80 >> (consumedBits + bit))) != 0) ? 1 : 0;
+                    val |= ((buffer[getByte] & (0x80 >> (getBit + bit))) != 0) ? 1 : 0;
                 }
                 return val;
             } else {
@@ -382,16 +273,16 @@ public class InputBitStream {
      */
     public long readBitToLong(long val) throws IOException {
         while (true) {
-            if (totalConsumedBits < totalBits) {
+            if (availBits > 0) {
                 val <<= 1;
-                val |= ((buffer[consumedBlurbs] & (0x80 >> consumedBits)) != 0) ? 1 : 0;
-                consumedBits++;
-                if (consumedBits == BITS_PER_BLURB) {
-                    readCRC16 = CRC16.update(buffer[consumedBlurbs], readCRC16);
-                    consumedBlurbs++;
-                    consumedBits = 0;
+                val |= ((buffer[getByte] & (0x80 >> getBit)) != 0) ? 1 : 0;
+                getBit++;
+                if (getBit == BITS_PER_BLURB) {
+                    readCRC16 = CRC16.update(buffer[getByte], readCRC16);
+                    getByte++;
+                    getBit = 0;
                 }
-                totalConsumedBits++;
+                availBits--;
                 totalBitsRead++;
                 return val;
             } else {
@@ -436,20 +327,20 @@ public class InputBitStream {
      */
     public int readRawInt(int bits) throws IOException { 
         if (bits == 0) { return 0; }
-        int v = 0;
+        int uval = 0;
         for (int i = 0; i < bits; i++) {
-            v = readBitToInt(v);
+            uval = readBitToInt(uval);
         }
         
         // fix the sign
         int val;
-        int i = 32 - bits;
-        if (i != 0) {
-            v <<= i;
-            val = (int) v;
-            val >>= i;
+        int bitsToleft = 32 - bits;
+        if (bitsToleft != 0) {
+            uval <<= bitsToleft;
+            val = uval;
+            val >>= bitsToleft;
         } else {
-            val = (int) v;
+            val = uval;
         }
         return val;
     }
@@ -492,14 +383,15 @@ public class InputBitStream {
      */
     public void readByteBlockAlignedNoCRC(byte[] val, int nvals) throws IOException {
         while (nvals > 0) {
-            int chunk = Math.min(nvals, inBlurbs - consumedBlurbs);
+            int chunk = Math.min(nvals, putByte - getByte);
             if (chunk == 0) {
                 readFromStream();
             } else {
-                if (val != null) System.arraycopy(buffer, consumedBlurbs, val, 0, chunk);
+                if (val != null) System.arraycopy(buffer, getByte, val, 0, chunk);
                 nvals -= chunk;
-                consumedBlurbs += chunk;
-                totalConsumedBits = (consumedBlurbs << BITS_PER_BLURB_LOG2);
+                getByte += chunk;
+                //totalConsumedBits = (getByte << BITS_PER_BLURB_LOG2);
+                availBits -= (chunk << BITS_PER_BLURB_LOG2);
                 totalBitsRead += (chunk << BITS_PER_BLURB_LOG2);
             }
         }
@@ -520,51 +412,28 @@ public class InputBitStream {
         return val;
     }
     
-    /*
-     * # ifdef SYMMETRIC_RICE boolean read_symmetric_rice_signed( BitBuffer8 *
-     * bb, int * val, unsigned parameter, boolean(* read_callback) (byte
-     * buffer[], unsigned * bytes, void * client_data), void * client_data) {
-     * uint32 sign = 0, lsbs = 0, msbs = 0;
-     * 
-     * ASSERT(0 != bb); ASSERT(0 != buffer); ASSERT(parameter <= 31); // read
-     * the unary MSBs and end bit if (!read_unary_unsigned(bb, & msbs,
-     * read_callback, client_data)) return false; // read the sign bit if
-     * (!read_bit_to_uint32(bb, & sign, read_callback, client_data)) return
-     * false; // read the binary LSBs if (!read_raw_uint32(bb, & lsbs,
-     * parameter, read_callback, client_data)) return false; // compose the
-     * value val = (msbs < < parameter) | lsbs; if (sign) val = - (* val);
-     * 
-     * return true; } # endif // ifdef SYMMETRIC_RICE
-     * 
-     * boolean read_rice_signed( BitBuffer8 * bb, int * val, unsigned parameter,
-     * boolean(* read_callback) (byte buffer[], unsigned * bytes, void *
-     * client_data), void * client_data) { uint32 lsbs = 0, msbs = 0; unsigned
-     * uval;
-     * 
-     * ASSERT(0 != bb); ASSERT(0 != buffer); ASSERT(parameter <= 31); // read
-     * the unary MSBs and end bit if (!read_unary_unsigned(bb, & msbs,
-     * read_callback, client_data)) return false; // read the binary LSBs if
-     * (!read_raw_uint32(bb, & lsbs, parameter, read_callback, client_data))
-     * return false; // compose the value uval = (msbs < < parameter) | lsbs; if
-     * (uval & 1) val = - ((int) (uval >> 1)) - 1; else val = (int) (uval >> 1);
-     * 
-     * return true; }
+    /**
+     * Read a Rice Signal Block
+     * @param vals  The values to be returned
+     * @param pos   The starting position in the vals array
+     * @param nvals The number of values to return
+     * @param parameter The Rice parameter
+     * @throws IOException  On read error
      */
-    
     public void readRiceSignedBlock(int[] vals, int pos, int nvals, int parameter) throws IOException {
-        int i, j, valI = 0;
+        int j, valI = 0;
         int cbits = 0, uval = 0, msbs = 0, lsbsLeft = 0;
         byte blurb, saveBlurb;
         int state = 0; // 0 = getting unary MSBs, 1 = getting binary LSBs
         if (nvals == 0) return;
-        i = consumedBlurbs;
+        int i = getByte;
         
-        long startBits = consumedBlurbs * 8 + consumedBits;
+        long startBits = getByte * 8 + getBit;
         
         // We unroll the main loop to take care of partially consumed blurbs here.
-        if (consumedBits > 0) {
+        if (getBit > 0) {
             saveBlurb = blurb = buffer[i];
-            cbits = consumedBits;
+            cbits = getBit;
             blurb <<= cbits;
             while (true) {
                 if (state == 0) {
@@ -640,15 +509,15 @@ public class InputBitStream {
                 }
             }
             i++;
-            consumedBlurbs = i;
-            consumedBits = cbits;
-            totalConsumedBits = (i << BITS_PER_BLURB_LOG2) | cbits;
+            getByte = i;
+            getBit = cbits;
+            //totalConsumedBits = (i << BITS_PER_BLURB_LOG2) | cbits;
             //totalBitsRead += (BITS_PER_BLURB) | cbits;
         }
         
         // Now that we are blurb-aligned the logic is slightly simpler
         while (valI < nvals) {
-            for (; i < inBlurbs && valI < nvals; i++) {
+            for (; i < putByte && valI < nvals; i++) {
                 saveBlurb = blurb = buffer[i];
                 cbits = 0;
                 while (true) {
@@ -723,25 +592,27 @@ public class InputBitStream {
                     }
                 }
             }
-            consumedBlurbs = i;
-            consumedBits = cbits;
-            totalConsumedBits = (i << BITS_PER_BLURB_LOG2) | cbits;
+            getByte = i;
+            getBit = cbits;
+            //totalConsumedBits = (i << BITS_PER_BLURB_LOG2) | cbits;
             //totalBitsRead += (BITS_PER_BLURB) | cbits;
             if (valI < nvals) {
-                long endBits = totalConsumedBits;
+                long endBits = getByte * 8 + getBit;
                 //System.out.println("SE0 "+startBits+" "+endBits);
                 totalBitsRead += endBits - startBits;
+                availBits -=  endBits - startBits;
                 readFromStream();
                 // these must be zero because we can only get here if we got to
                 // the end of the buffer
                 i = 0;
-                startBits = totalConsumedBits;
+                startBits = getByte * 8 + getBit;
             }
         }
         
-        long endBits = totalConsumedBits;
+        long endBits = getByte * 8 + getBit;
         //System.out.println("SE1 "+startBits+" "+endBits);
         totalBitsRead += endBits - startBits;
+        availBits -= endBits - startBits;
     }
     
     /**
@@ -855,18 +726,10 @@ public class InputBitStream {
     }
     
     /**
-     * Consumed Blurbs.
-     * @return Returns the consumedBlurbs.
-     */
-    public int getConsumedBlurbs() {
-        return consumedBlurbs;
-    }
-    
-    /**
      * Total Blurbs read.
      * @return Returns the total blurbs read.
      */
-    public int getTotalBlurbsRead() {
+    public int getTotalBytesRead() {
         return ((totalBitsRead + 7) / 8);
     }
 }

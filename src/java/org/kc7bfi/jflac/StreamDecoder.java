@@ -33,6 +33,7 @@ import org.kc7bfi.jflac.frame.ChannelLPC;
 import org.kc7bfi.jflac.frame.ChannelVerbatim;
 import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.frame.Header;
+import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.io.RandomFileInputStream;
 import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
@@ -45,13 +46,12 @@ import org.kc7bfi.jflac.metadata.Unknown;
 import org.kc7bfi.jflac.metadata.VorbisComment;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC16;
-import org.kc7bfi.jflac.util.InputBitStream;
 
 public class StreamDecoder {
     private static final int FRAME_FOOTER_CRC_LEN = 16; /* bits */
     private static final byte[] ID3V2_TAG_ = new byte[] { 'I', 'D', '3' };
     
-    private InputBitStream is;
+    private BitInputStream is;
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
     private int outputCapacity = 0;
     private int outputChannels = 0;
@@ -91,7 +91,7 @@ public class StreamDecoder {
      */
     public StreamDecoder(InputStream inputStream) {
         this.inputStream = inputStream;
-        this.is = new InputBitStream(inputStream);
+        this.is = new BitInputStream(inputStream);
         state = STREAM_DECODER_UNINITIALIZED;
         lastFrameNumber = 0;
         samplesDecoded = 0;
@@ -114,7 +114,7 @@ public class StreamDecoder {
         return channelData;
     }
     
-    public InputBitStream getInputBitStream() {
+    public BitInputStream getInputBitStream() {
         return is;
     }
     
@@ -406,16 +406,16 @@ public class StreamDecoder {
      * Bytes consumed.
      * @return  The number of bytes read
      */
-    public long getBytesConsumed() {
-        return is.getConsumedBlurbs();
-    }
+    //public long getBytesConsumed() {
+    //    return is.getConsumedBlurbs();
+    //}
     
     /**
      * Bytes read.
      * @return  The number of bytes read
      */
     public long getTotalBytesRead() {
-        return is.getTotalBlurbsRead();
+        return is.getTotalBytesRead();
     }
     
     /*

@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * An entry into the cue track.
@@ -42,7 +42,7 @@ public class CueIndex {
      * @param is                The InputBitStream
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public CueIndex(InputBitStream is) throws IOException {
+    public CueIndex(BitInputStream is) throws IOException {
         offset = is.readRawULong(CUESHEET_INDEX_OFFSET_LEN);
         number = (byte) is.readRawUInt(CUESHEET_INDEX_NUMBER_LEN);
         is.skipBitsNoCRC(CUESHEET_INDEX_RESERVED_LEN);

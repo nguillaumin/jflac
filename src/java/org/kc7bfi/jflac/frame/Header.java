@@ -23,10 +23,10 @@ package org.kc7bfi.jflac.frame;
 import java.io.IOException;
 
 import org.kc7bfi.jflac.Constants;
+import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteSpace;
 import org.kc7bfi.jflac.util.CRC8;
-import org.kc7bfi.jflac.util.InputBitStream;
 
 public class Header {
     
@@ -63,7 +63,7 @@ public class Header {
      * @throws IOException          Thrown on error reading InputBitStream
      * @throws BadHeaderException   Thrown if header is bad
      */
-    public Header(InputBitStream is, byte[] headerWarmup, StreamInfo streamInfo) throws IOException, BadHeaderException {
+    public Header(BitInputStream is, byte[] headerWarmup, StreamInfo streamInfo) throws IOException, BadHeaderException {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
         ByteSpace rawHeader = new ByteSpace(16); // MAGIC NUMBER based on the maximum frame header size, including CRC

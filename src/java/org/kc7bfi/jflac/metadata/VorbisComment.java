@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * VorbisComment Metadata block.
@@ -42,7 +42,7 @@ public class VorbisComment extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public VorbisComment(InputBitStream is, int length) throws IOException {
+    public VorbisComment(BitInputStream is, int length) throws IOException {
         // read vendor string
         int len = is.readRawIntLittleEndian();
         vendorString = new byte[len];

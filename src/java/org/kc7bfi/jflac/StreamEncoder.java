@@ -21,7 +21,7 @@ package org.kc7bfi.jflac;
  */
 
 import org.kc7bfi.jflac.frame.EntropyPartitionedRiceContents;
-import org.kc7bfi.jflac.util.OutputBitStream;
+import org.kc7bfi.jflac.io.BitOutputStream;
 
 public class StreamEncoder {
     
@@ -155,7 +155,7 @@ public class StreamEncoder {
     //uint32 *abs_residual;                       /* workspace where abs(candidate residual) is stored */
     //uint64 *abs_residual_partition_sums;        /* workspace where the sum of abs(candidate residual) for each partition is stored */
     //unsigned *raw_bits_per_partition;                 /* workspace where the sum of silog2(candidate residual) for each partition is stored */
-    OutputBitStream frame = new OutputBitStream();                           /* the current frame being worked on */
+    BitOutputStream frame = new BitOutputStream();                           /* the current frame being worked on */
     double loose_mid_side_stereo_frames_exact;        /* exact number of frames the encoder will use before trying both independent and mid/side frames again */
     int loose_mid_side_stereo_frames;            /* rounded number of frames the encoder will use before trying both independent and mid/side frames again */
     int loose_mid_side_stereo_frame_count;       /* number of frames using the current channel assignment */

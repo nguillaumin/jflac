@@ -1,4 +1,4 @@
-package org.kc7bfi.jflac.util;
+package org.kc7bfi.jflac.io;
 
 /**
  * libFLAC - Free Lossless Audio Codec library Copyright (C) 2000,2001,2002,2003
@@ -22,8 +22,11 @@ package org.kc7bfi.jflac.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.kc7bfi.jflac.util.CRC16;
+import org.kc7bfi.jflac.util.CRC8;
 
-public class OutputBitStream {
+
+public class BitOutputStream {
     private static final int BITS_PER_BLURB = 8;
     private static final int BITS_PER_BLURB_LOG2 = 3;
     private static final int BYTES_PER_BLURB = 1;
@@ -131,10 +134,10 @@ public class OutputBitStream {
      * The constructor
      * @param is    The InputStream to read bits from
      */
-    public OutputBitStream(OutputStream os) {
+    public BitOutputStream(OutputStream os) {
         this.os = os;
     }
-    public OutputBitStream() {
+    public BitOutputStream() {
     }
     
     /** TODO
@@ -148,7 +151,7 @@ public class OutputBitStream {
      * @param src   The inputBitStream to copy
      * @return      True if copy was successful
      */
-    public boolean concatenateAligned(OutputBitStream src) {
+    public boolean concatenateAligned(BitOutputStream src) {
         int bitsToAdd = src.totalBits - src.totalConsumedBits;
         if (bitsToAdd == 0) return true;
         if (outBits != src.consumedBits) return false;

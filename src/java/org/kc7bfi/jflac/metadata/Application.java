@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * Application Metadata block.
@@ -41,7 +41,7 @@ public class Application extends Metadata {
      * @param length            Length of the record
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public Application(InputBitStream is, int length) throws IOException {
+    public Application(BitInputStream is, int length) throws IOException {
         is.readByteBlockAlignedNoCRC(id, APPLICATION_ID_LEN / 8);
         length -= APPLICATION_ID_LEN / 8;
 

@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.metadata;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * An entry into the Vorbis comment.
@@ -38,7 +38,7 @@ public class VorbisString {
      * @param is                The InputBitStream
      * @throws IOException      Thrown if error reading from InputBitStream
      */
-    public VorbisString(InputBitStream is) throws IOException {
+    public VorbisString(BitInputStream is) throws IOException {
         int elen = is.readRawIntLittleEndian();
         if (elen == 0) return;
         entry = new byte[elen];

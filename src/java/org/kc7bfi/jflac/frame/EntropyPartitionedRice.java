@@ -22,7 +22,7 @@ package org.kc7bfi.jflac.frame;
 
 import java.io.IOException;
 
-import org.kc7bfi.jflac.util.InputBitStream;
+import org.kc7bfi.jflac.io.BitInputStream;
 
 /**
  * This class holds the Entropy Partitioned Rice contents.
@@ -46,7 +46,7 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
      * @param residual          The residual signal (output)
      * @throws IOException      On error reading from InputBitStream
      */
-    void readResidual(InputBitStream is, int predictorOrder, int partitionOrder, Header header, int[] residual) throws IOException {
+    void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual) throws IOException {
         //System.out.println("readREsidual Pred="+predictorOrder+" part="+partitionOrder);
         int sample = 0;
         int partitions = 1 << partitionOrder;
