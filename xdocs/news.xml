@@ -13,6 +13,8 @@
    				<li>A fix was made to Player.java to flush all output to the device before closing the line.</li>
    				<li>Modified the Player.java app so that one instance can play back multiple files.</li>
    				<li>Added a decodeStreamInfo and decodeFrame function to StreamDecoder.</li>
+				<li>Added a processError to the FrameListener interface.</li>
+				<li>Added a Tester sample application that counts and prints out internal FLAC errors.</li>
 			</ul></p>
 			<p>jFLAC is a java port of the <a href="http://flac.sourceforge.net">Free Lossless Audio Codec</a> which
 			is also hosted on SourceForge. The current code base support decoding FLAC files to WAV files. The
