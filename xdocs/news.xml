@@ -4,7 +4,7 @@
     <title>News</title>
   </properties>
 	<body>
-		<section name="24th May 2004">
+		<section name="28th May 2004">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 0.3</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
 			<p>This release fixes four separate bugs with the library:
