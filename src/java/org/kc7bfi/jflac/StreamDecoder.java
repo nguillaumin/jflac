@@ -188,14 +188,14 @@ public class StreamDecoder {
             space = new ByteSpace(frame.header.blockSize * channels);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
-                    space.append((byte) (channelData[channel].output[i] + 0x80));
+                    space.append((byte) (channelData[channel].getOutput()[i] + 0x80));
                 }
             }
         } else if (streamInfo.bitsPerSample == 16) {
             space = new ByteSpace(frame.header.blockSize * channels * 2);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
-                    short val = (short) (channelData[channel].output[i]);
+                    short val = (short) (channelData[channel].getOutput()[i]);
                     space.append((byte) (val & 0xff));
                     space.append((byte) ((val >> 8) & 0xff));
                 }
@@ -204,7 +204,7 @@ public class StreamDecoder {
             space = new ByteSpace(frame.header.blockSize * channels * 3);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
-                    int val = (channelData[channel].output[i]);
+                    int val = (channelData[channel].getOutput()[i]);
                     space.append((byte) (val & 0xff));
                     space.append((byte) ((val >> 8) & 0xff));
                     space.append((byte) ((val >> 16) & 0xff));
@@ -573,25 +573,25 @@ public class StreamDecoder {
                 break;
             case Constants.CHANNEL_ASSIGNMENT_LEFT_SIDE :
                 for (i = 0; i < frame.header.blockSize; i++)
-                    channelData[1].output[i] = channelData[0].output[i] - channelData[1].output[i];
+                    channelData[1].getOutput()[i] = channelData[0].getOutput()[i] - channelData[1].getOutput()[i];
             break;
             case Constants.CHANNEL_ASSIGNMENT_RIGHT_SIDE :
                 for (i = 0; i < frame.header.blockSize; i++)
-                    channelData[0].output[i] += channelData[1].output[i];
+                    channelData[0].getOutput()[i] += channelData[1].getOutput()[i];
             break;
             case Constants.CHANNEL_ASSIGNMENT_MID_SIDE :
                 for (i = 0; i < frame.header.blockSize; i++) {
-                    mid = channelData[0].output[i];
-                    side = channelData[1].output[i];
-                    //if (i < 20) System.out.print(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
+                    mid = channelData[0].getOutput()[i];
+                    side = channelData[1].getOutput()[i];
+                    //if (i < 20) System.out.print(Integer.toHexString(channelData[0].getOutput()[i])+" "+Integer.toHexString(channelData[1].getOutput()[i])+" ");
                     mid <<= 1;
                     if ((side & 1) != 0) // i.e. if 'side' is odd...
                         mid++;
                     left = mid + side;
                     right = mid - side;
-                    channelData[0].output[i] = left >> 1;
-                    channelData[1].output[i] = right >> 1;
-                    //if (i < 20) System.out.println(Integer.toHexString(channelData[0].output[i])+" "+Integer.toHexString(channelData[1].output[i])+" ");
+                    channelData[0].getOutput()[i] = left >> 1;
+                    channelData[1].getOutput()[i] = right >> 1;
+                    //if (i < 20) System.out.println(Integer.toHexString(channelData[0].getOutput()[i])+" "+Integer.toHexString(channelData[1].getOutput()[i])+" ");
                 }
             //System.exit(1);
             break;
@@ -603,7 +603,7 @@ public class StreamDecoder {
             System.out.println("CRC Error: "+Integer.toHexString(frameCRC)+" vs " + Integer.toHexString(frame.crc));
             for (channel = 0; channel < frame.header.channels; channel++) {
                 for (int j = 0; j < frame.header.blockSize; j++)
-                    channelData[channel].output[j] = 0;
+                    channelData[channel].getOutput()[j] = 0;
                 // memset(output[channel], 0, sizeof(int32) * frame.header.blocksize);
             }
         }
@@ -664,7 +664,7 @@ public class StreamDecoder {
             int i;
             x = frame.subframes[channel].WastedBits();
             for (i = 0; i < frame.header.blockSize; i++)
-                channelData[channel].output[i] <<= x;
+                channelData[channel].getOutput()[i] <<= x;
         }
     }
     

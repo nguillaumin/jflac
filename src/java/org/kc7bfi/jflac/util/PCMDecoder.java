@@ -87,27 +87,27 @@ public class PCMDecoder {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            //System.out.print("("+(int)((byte)(channelData[channel].output[wideSample] + 0x80))+")");
-                            buf.s8buffer[sample++] = (byte) (channelData[channel].output[wideSample] + 0x80);
+                            //System.out.print("("+(int)((byte)(channelData[channel].getOutput()[wideSample] + 0x80))+")");
+                            buf.s8buffer[sample++] = (byte) (channelData[channel].getOutput()[wideSample] + 0x80);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++)
-                            buf.s8buffer[sample++] = (byte) (channelData[channel].output[wideSample]);
+                            buf.s8buffer[sample++] = (byte) (channelData[channel].getOutput()[wideSample]);
                 }
                 buf.len = sample;
             } else if (bps == 16) {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short) (channelData[channel].output[wideSample] + 0x8000);
+                            short val = (short) (channelData[channel].getOutput()[wideSample] + 0x8000);
                             buf.s8buffer[sample++] = (byte) (val & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                         }
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            short val = (short) (channelData[channel].output[wideSample]);
+                            short val = (short) (channelData[channel].getOutput()[wideSample]);
                             buf.s8buffer[sample++] = (byte) (val & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                         }
@@ -117,7 +117,7 @@ public class PCMDecoder {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            int val = (channelData[channel].output[wideSample] + 0x800000);
+                            int val = (channelData[channel].getOutput()[wideSample] + 0x800000);
                             buf.s8buffer[sample++] = (byte) (val & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 16) & 0xff);
@@ -125,7 +125,7 @@ public class PCMDecoder {
                 } else {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)
                         for (channel = 0; channel < channels; channel++) {
-                            int val = (channelData[channel].output[wideSample]);
+                            int val = (channelData[channel].getOutput()[wideSample]);
                             buf.s8buffer[sample++] = (byte) (val & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 8) & 0xff);
                             buf.s8buffer[sample++] = (byte) ((val >> 16) & 0xff);

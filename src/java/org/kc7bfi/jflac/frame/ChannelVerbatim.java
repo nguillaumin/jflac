@@ -40,14 +40,14 @@ public class ChannelVerbatim extends Channel {
     public ChannelVerbatim(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits) throws IOException {
         super(header, wastedBits);
 
-        data = channelData.residual;
+        data = channelData.getResidual();
 
         for (int i = 0; i < header.blockSize; i++) {
             data[i] = is.readRawInt(bps);
         }
 
         // decode the subframe
-        System.arraycopy(data, 0, channelData.output, 0, header.blockSize);
+        System.arraycopy(data, 0, channelData.getOutput(), 0, header.blockSize);
     }
     
     /**

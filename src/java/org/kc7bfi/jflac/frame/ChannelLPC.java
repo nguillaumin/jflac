@@ -54,7 +54,7 @@ public class ChannelLPC extends Channel {
     public ChannelLPC(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
 
-        this.residual = channelData.residual;
+        this.residual = channelData.getResidual();
         this.order = order;
 
         // read warm-up samples
@@ -88,7 +88,7 @@ public class ChannelLPC extends Channel {
             case Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE :
                 entropyCodingMethod = new EntropyPartitionedRice();
                 ((EntropyPartitionedRice) entropyCodingMethod).order = is.readRawUInt(Constants.ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
-                ((EntropyPartitionedRice) entropyCodingMethod).contents = channelData.partitionedRiceContents;
+                ((EntropyPartitionedRice) entropyCodingMethod).contents = channelData.getPartitionedRiceContents();
                 break;
             default :
                 throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM");
@@ -100,7 +100,7 @@ public class ChannelLPC extends Channel {
                 order,
                 ((EntropyPartitionedRice) entropyCodingMethod).order,
                 header,
-                channelData.residual);
+                channelData.getResidual());
         }
         
         //System.out.println();
@@ -110,14 +110,14 @@ public class ChannelLPC extends Channel {
         //System.out.println();
 
         // decode the subframe
-        System.arraycopy(warmup, 0, channelData.output, 0, order);
+        System.arraycopy(warmup, 0, channelData.getOutput(), 0, order);
         if (bps + qlpCoeffPrecision + BitMath.ilog2(order) <= 32) {
             if (bps <= 16 && qlpCoeffPrecision <= 16)
-                LPCPredictor.restoreSignal(channelData.residual, header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.output, order);
+                LPCPredictor.restoreSignal(channelData.getResidual(), header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.getOutput(), order);
             else
-                LPCPredictor.restoreSignal(channelData.residual, header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.output, order);
+                LPCPredictor.restoreSignal(channelData.getResidual(), header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.getOutput(), order);
         } else {
-            LPCPredictor.restoreSignalWide(channelData.residual, header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.output, order);
+            LPCPredictor.restoreSignalWide(channelData.getResidual(), header.blockSize - order, qlpCoeff, order, quantizationLevel, channelData.getOutput(), order);
         }
     }
     

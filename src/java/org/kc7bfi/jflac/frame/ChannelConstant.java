@@ -43,7 +43,7 @@ public class ChannelConstant extends Channel {
         value = is.readRawInt(bps);
 
         // decode the subframe
-        for (int i = 0; i < header.blockSize; i++) channelData.output[i] = value;
+        for (int i = 0; i < header.blockSize; i++) channelData.getOutput()[i] = value;
     }
     
     /**

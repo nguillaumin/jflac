@@ -48,7 +48,7 @@ public class ChannelFixed extends Channel {
     public ChannelFixed(InputBitStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
         
-        this.residual = channelData.residual;
+        this.residual = channelData.getResidual();
         this.order = order;
 
         // read warm-up samples
@@ -65,16 +65,16 @@ public class ChannelFixed extends Channel {
                 pr = new EntropyPartitionedRice();
                 entropyCodingMethod = pr;
                 pr.order = u32;
-                pr.contents = channelData.partitionedRiceContents;
-                pr.readResidual(is, order, pr.order, header, channelData.residual);
+                pr.contents = channelData.getPartitionedRiceContents();
+                pr.readResidual(is, order, pr.order, header, channelData.getResidual());
                 break;
             default :
                 throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM");
         }
 
         // decode the subframe
-        System.arraycopy(warmup, 0, channelData.output, 0, order);
-        FixedPredictor.restoreSignal(residual, header.blockSize - order, order, channelData.output, order);
+        System.arraycopy(warmup, 0, channelData.getOutput(), 0, order);
+        FixedPredictor.restoreSignal(residual, header.blockSize - order, order, channelData.getOutput(), order);
     }
     
     /**
