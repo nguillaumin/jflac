@@ -47,6 +47,13 @@ public class StreamInfo extends MetadataBase {
     public int bitsPerSample;
     public long totalSamples;
     
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public StreamInfo(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
         
@@ -79,18 +86,21 @@ public class StreamInfo extends MetadataBase {
         is.readByteBlockAlignedNoCRC(md5sum, STREAMINFO_MD5SUM_LEN / 8);
         usedBits += 16 * 8;
 
-        /* skip the rest of the block */
+        // skip the rest of the block
         length -= (usedBits / 8);
         is.readByteBlockAlignedNoCRC(null, length);
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         return "StreamInfo:" 
-            + " BlockSize="+minBlockSize+"-"+maxBlockSize
-            + " FrameSize"+minFrameSize+"-"+maxFrameSize
-            + " SampelRate="+sampleRate
-            + " Channels="+channels
-            + " BPS="+bitsPerSample
-            + " TotalSamples="+totalSamples;
+            + " BlockSize=" + minBlockSize + "-" + maxBlockSize
+            + " FrameSize" + minFrameSize + "-" + maxFrameSize
+            + " SampelRate=" + sampleRate
+            + " Channels=" + channels
+            + " BPS=" + bitsPerSample
+            + " TotalSamples=" + totalSamples;
     }
 }

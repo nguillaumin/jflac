@@ -27,8 +27,13 @@ import org.kc7bfi.jflac.util.InputBitStream;
 public class VorbisString {
     static final private int VORBIS_COMMENT_ENTRY_LENGTH_LEN = 32; // bits
 
-    protected byte[] entry = null;
+    protected byte[] entry;
 
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public VorbisString(InputBitStream is) throws IOException {
         int elen = is.readRawIntLittleEndian();
         if (elen == 0) return;
@@ -36,6 +41,9 @@ public class VorbisString {
         is.readByteBlockAlignedNoCRC(entry, entry.length);
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
         return new String(entry);
     }

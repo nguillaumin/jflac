@@ -32,6 +32,13 @@ public class VorbisComment extends MetadataBase {
     protected int numComments = 0;
     protected VorbisString[] comments;
 
+    /**
+     * The constructor.
+     * @param is                The InputBitStream
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public VorbisComment(InputBitStream is, boolean isLast, int length) throws IOException {
         super(isLast, length);
 
@@ -48,10 +55,13 @@ public class VorbisComment extends MetadataBase {
         }
     }
     
+    /**
+     * @see java.lang.Object#toString()
+     */
     public String toString() {
-        StringBuffer sb = new StringBuffer("VorbisComment (count="+numComments+")");
+        StringBuffer sb = new StringBuffer("VorbisComment (count=" + numComments + ")");
         for (int i = 0; i < numComments; i++) {
-            sb.append("\n\t"+comments[i].toString());
+            sb.append("\n\t" + comments[i].toString());
         }
 
         return sb.toString();

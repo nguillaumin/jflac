@@ -22,9 +22,17 @@ package org.kc7bfi.jflac.metadata;
 
 public abstract class MetadataBase {
 
-    protected boolean isLast; // true if this metadata block is the last, else false
-    protected int length; // Length, in bytes, of the block data as it appears in the stream.
+    /** true if this metadata block is the last, else false */
+    protected boolean isLast;
+    /** Length, in bytes, of the block data as it appears in the stream. */
+    protected int length;
     
+    /**
+     * The constructor.
+     * @param isLast            True if last metadata record
+     * @param length            Length of the record
+     * @throws IOException      Thrown if error reading from InputBitStream
+     */
     public MetadataBase(boolean isLast, int length) {
         this.isLast = isLast;
         this.length = length;
