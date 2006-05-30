@@ -382,12 +382,13 @@ public class BitInputStream {
      * @throws IOException  Thrown if error reading input stream
      */
     public void readByteBlockAlignedNoCRC(byte[] val, int nvals) throws IOException {
+        int destlength = nvals;
         while (nvals > 0) {
             int chunk = Math.min(nvals, putByte - getByte);
             if (chunk == 0) {
                 readFromStream();
             } else {
-                if (val != null) System.arraycopy(buffer, getByte, val, 0, chunk);
+                if (val != null) System.arraycopy(buffer, getByte, val, destlength - nvals, chunk);
                 nvals -= chunk;
                 getByte += chunk;
                 //totalConsumedBits = (getByte << BITS_PER_BLURB_LOG2);
