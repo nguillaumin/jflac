@@ -71,4 +71,18 @@ public class VorbisComment extends Metadata {
         return sb.toString();
         
     }
+    
+    public String [] getCommentByName( String key )  {
+        if (key == null ) return null;
+        java.util.Vector sbuff = new java.util.Vector();
+        for( int i=0; i < comments.length; i++ )  {
+            String comment = comments[i].toString();
+            int eqpos = comment.indexOf(0x3D); //Find the equals
+            if (eqpos != -1 )
+                if( comment.substring(0, eqpos).equalsIgnoreCase(key) )
+                    sbuff.add( comment.substring(eqpos+1, comment.length()) );
+        }
+        return (String [])sbuff.toArray(new String[0]);
+        //return null;
+    }
 }
