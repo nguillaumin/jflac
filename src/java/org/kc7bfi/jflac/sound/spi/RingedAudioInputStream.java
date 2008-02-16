@@ -36,7 +36,8 @@ import org.kc7bfi.jflac.util.RingBuffer;
  * read out by the stream user.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.3 $
+ * @author Florian Bomers
+ * @version $Revision: 1.4 $
  */
 public abstract class RingedAudioInputStream extends AudioInputStream {
 
@@ -157,7 +158,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
     }
 
     /**
-     * Creates a <code>FilteredAudioInputStream</code> and saves its argument,
+     * Creates a <code>RingedAudioInputStream</code> and saves its argument,
      * the input stream <code>in</code>, for later use. An internal buffer
      * array is created and stored in <code>buf</code>.
      * 
@@ -173,7 +174,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
     }
 
     /**
-     * Creates a <code>FilteredAudioInputStream</code> with the specified
+     * Creates a <code>RingedAudioInputStream</code> with the specified
      * buffer size, and saves its argument, the inputstream <code>in</code>
      * for later use. An internal buffer array of length <code>size</code> is
      * created and stored in <code>buf</code>.
@@ -192,7 +193,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
     }
 
     /**
-     * Creates a <code>FilteredAudioInputStream</code> with the specified
+     * Creates a <code>RingedAudioInputStream</code> with the specified
      * buffer size, and saves its argument, the inputstream <code>in</code>
      * for later use. An internal buffer array of length <code>size</code> is
      * created and stored in <code>buf</code>.
@@ -324,8 +325,38 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      */
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         checkIfStillOpen();
-        fill();
-        int bytesRead = buffer.get(b, off, len);
+        int frameSize = getFormat().getFrameSize();
+        int bytesRead = 0;
+        // can only read integral number of frames
+        len -= (len % frameSize);
+        // do a best effort to fill the buffer
+        while (len > 0) {
+            int thisLen = len;
+        	if (thisLen > buffer.getAvailable()) {
+        		thisLen = buffer.getAvailable();
+            }
+        	if (thisLen < frameSize) {
+        		fill();
+        		if (buffer.getAvailable() < frameSize) {
+        			break;
+        		}
+        		continue;
+        	}
+            // can only read integral number of frames
+        	thisLen -= (thisLen % frameSize);
+        	
+        	int thisBytesRead = buffer.get(b, off, thisLen);
+        	if (thisBytesRead < frameSize) {
+        		break;
+        	}
+        	off += thisBytesRead;
+        	len -= thisBytesRead;
+        	bytesRead += thisBytesRead;
+        }
+        	
+        if (bytesRead == 0 && buffer.isEOF()) {
+        	return -1;
+        }
         return bytesRead;
     }
 
@@ -365,7 +396,9 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      */
     public synchronized int available() throws IOException {
         checkIfStillOpen();
-        fill();
+        if (buffer.getAvailable() < getFormat().getFrameSize()) {
+        	fill();
+        }
         return buffer.getAvailable();
     }
 
