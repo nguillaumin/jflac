@@ -27,6 +27,8 @@ import javax.sound.sampled.AudioFormat;
 
 import org.kc7bfi.jflac.PCMProcessor;
 import org.kc7bfi.jflac.FLACDecoder;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.kc7bfi.jflac.util.ByteData;
 
@@ -34,133 +36,111 @@ import org.kc7bfi.jflac.util.ByteData;
  * Converts an Flac bitstream into a PCM 16bits/sample audio stream.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.5 $
+ * @author Florian Bomers
+ * @version $Revision: 1.6 $
  */
-public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements PCMProcessor {
+public class Flac2PcmAudioInputStream extends RingedAudioInputStream implements
+		PCMProcessor {
 
-    // audio parameters
-    /** The sample rate of the audio, in samples per seconds (Hz). */
-    //private int sampleRate;
+	/** Flac Decoder. */
+	private FLACDecoder decoder;
 
-    /** The number of audio channels (1=mono, 2=stereo). */
-    //private int channelCount;
+	private ByteData pcmData;
 
-    // Flac variables
-    /** Array containing the decoded audio samples. */
-    //private float[] decodedData;
+	/** StreamInfo MetaData. */
+	private StreamInfo streamInfo;
 
-    /** Array containing the decoded audio samples converted into bytes. */
-    //private byte[] outputData;
+	/** the meta data from the stream */
+	private Metadata[] metaData;
 
-    /** Flac bit packing and unpacking class. */
-    //private Bits bits;
+	/**
+	 * Constructor.
+	 * 
+	 * @param in the underlying input stream.
+	 * @param format the target format of this stream's audio data.
+	 * @param length the length in sample frames of the data in this stream.
+	 */
+	public Flac2PcmAudioInputStream(InputStream in, AudioFormat format,
+			long length) {
+		this(in, format, length, DEFAULT_BUFFER_SIZE);
+	}
 
-    /** Flac Decoder. */
-    private FLACDecoder decoder;
-    
-    /** StreamInfo MetaData. */
-    private StreamInfo streamInfo;
-    
-    /** Decode thread. */
-    private Thread decodeThread = null;
+	/**
+	 * Constructor.
+	 * 
+	 * @param in the underlying input stream.
+	 * @param format the target format of this stream's audio data.
+	 * @param length the length in sample frames of the data in this stream.
+	 * @param size the buffer size.
+	 */
+	public Flac2PcmAudioInputStream(InputStream in, AudioFormat format,
+			long length, int size) {
+		super(in, format, length, size);
+	}
 
-    /** The frame size, in samples. */
-    //private int frameSize;
+	/**
+	 * called from the super class whenever more PCM data is needed.
+	 */
+	protected void fill() throws IOException {
+		if (decoder == null) {
+			initDecoder();
+		}
+		if (decoder.isEOF()) {
+			buffer.setEOF(true);
+		} else {
+			Frame frame = decoder.readNextFrame();
+			if (frame != null) {
+				pcmData = decoder.decodeFrame(frame, pcmData);
+				processPCM(pcmData);
+			}
+		}
+	}
 
-    /** The number of Flac frames that will be put in each packet. */
-    //private int framesPerPacket;
+	/**
+	 * Initialize the Flac Decoder after reading the Header.
+	 * 
+	 * @exception IOException
+	 */
+	protected void initDecoder() throws IOException {
+		decoder = new FLACDecoder(in);
+		decoder.addPCMProcessor(this);
+		metaData = decoder.readMetadata();
+	}
 
-    // variables
-    /** A unique serial number that identifies the stream. */
-    //private int streamSerialNumber;
+	/**
+	 * Process the StreamInfo block.
+	 * 
+	 * @param streamInfo the StreamInfo block
+	 * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
+	 */
+	public void processStreamInfo(StreamInfo streamInfo) {
+		this.streamInfo = streamInfo;
+	}
 
-    /** The number of packets that are in each page. */
-    //private int packetsPerOggPage;
+	/**
+	 * Process the decoded PCM bytes. This is called synchronously from the
+	 * fill() method.
+	 * 
+	 * @param pcm The decoded PCM data
+	 * @see org.kc7bfi.jflac.PCMProcessor#processPCM(ByteData)
+	 */
+	public void processPCM(ByteData pcm) {
+		buffer.resize(pcm.getLen() * 2);
+		buffer.put(pcm.getData(), 0, pcm.getLen());
+	}
 
-    /** The number of packets that have been decoded in the current page. */
-    //private int packetCount;
+	/**
+	 * @return the streamInfo
+	 */
+	public StreamInfo getStreamInfo() {
+		return streamInfo;
+	}
 
-    /** Array containing the sizes of packets in the current page. */
-    //private byte[] packetSizes;
+	/**
+	 * @return the metaData
+	 */
+	public Metadata[] getMetaData() {
+		return metaData;
+	}
 
-    /** Flag to indicate if this is the first time a decode method is called. */
-    //private boolean first;
-
-    /**
-     * Constructor.
-     * 
-     * @param in
-     *            the underlying input stream.
-     * @param format
-     *            the target format of this stream's audio data.
-     * @param length
-     *            the length in sample frames of the data in this stream.
-     */
-    public Flac2PcmAudioInputStream(InputStream in, AudioFormat format, long length) {
-        this(in, format, length, DEFAULT_BUFFER_SIZE);
-    }
-
-    /**
-     * Constructor.
-     * 
-     * @param in
-     *            the underlying input stream.
-     * @param format
-     *            the target format of this stream's audio data.
-     * @param length
-     *            the length in sample frames of the data in this stream.
-     * @param size
-     *            the buffer size.
-     */
-    public Flac2PcmAudioInputStream(InputStream in, AudioFormat format, long length, int size) {
-        super(in, format, length, size);
-        //bits = new Bits();
-        //packetSizes = new byte[256];
-        //first = true;
-    }
-    
-    protected void fill() throws IOException {
-        if (decodeThread == null) initDecoder();
-    }
-
-    /**
-     * Initialise the Flac Decoder after reading the Header.
-     * @exception IOException
-     */
-    protected void initDecoder() throws IOException {
-        decoder = new FLACDecoder(in);
-        decoder.addPCMProcessor(this);
-        decodeThread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    decoder.decode();
-                    System.out.println("Frames decoded");
-                    buffer.setEOF(true);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        });
-        decodeThread.start();
-    }
-    
-    /**
-     * Process the StreamInfo block.
-     * @param streamInfo the StreamInfo block
-     * @see org.kc7bfi.jflac.PCMProcessor#processStreamInfo(org.kc7bfi.jflac.metadata.StreamInfo)
-     */
-    public void processStreamInfo(StreamInfo streamInfo) {
-        this.streamInfo = streamInfo;
-    }
-    
-    /**
-     * Process the decoded PCM bytes.
-     * @param pcm The decoded PCM data
-     * @see org.kc7bfi.jflac.PCMProcessor#processPCM(org.kc7bfi.jflac.util.ByteSpace)
-     */
-    public void processPCM(ByteData pcm) {
-        buffer.resize(pcm.getLen() * 2);
-        buffer.put(pcm.getData(), 0, pcm.getLen());
-    }
 }
