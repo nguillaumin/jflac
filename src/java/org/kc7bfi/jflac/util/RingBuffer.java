@@ -26,11 +26,11 @@ package org.kc7bfi.jflac.util;
  */
 public class RingBuffer {
     protected static final int DEFAULT_BUFFER_SIZE = 2048;
-    protected int bufferSize = 0;
+    protected volatile int bufferSize = 0;
     protected byte[] buffer = null;
-    protected int putHere = 0;
-    protected int getHere = 0;
-    protected boolean eof = false;
+    protected volatile int putHere = 0;
+    protected volatile int getHere = 0;
+    protected volatile boolean eof = false;
     protected Object signal = new Object();
     
     /**
