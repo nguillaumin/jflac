@@ -73,4 +73,15 @@ public class ByteData {
     public int getLen() {
         return len;
     }
+    
+    /**
+     * Set the length of this ByteData object without re-allocating the underlying array.
+     * It is not possible to set the length larger than the underlying byte array. 
+     */
+    public void setLen(int len) {
+    	if (len > data.length) {
+    		len = data.length;
+    	}
+    	this.len = len;
+    }
 }
