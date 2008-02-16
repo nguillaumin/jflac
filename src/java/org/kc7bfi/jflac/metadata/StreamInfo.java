@@ -159,7 +159,7 @@ public class StreamInfo extends Metadata {
         return "StreamInfo:" 
             + " BlockSize=" + minBlockSize + "-" + maxBlockSize
             + " FrameSize" + minFrameSize + "-" + maxFrameSize
-            + " SampelRate=" + sampleRate
+            + " SampleRate=" + sampleRate
             + " Channels=" + channels
             + " BPS=" + bitsPerSample
             + " TotalSamples=" + totalSamples;
