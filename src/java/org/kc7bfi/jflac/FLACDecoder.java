@@ -160,35 +160,50 @@ public class FLACDecoder {
     }
     
     private void callPCMProcessors(Frame frame) {
-        ByteData space = null;
+    	ByteData bd = decodeFrame(frame, null);
+        pcmProcessors.processPCM(bd);
+    }
+    
+    /**
+     * Fill the given ByteData object with PCM data from the frame.
+     *
+     * @param frame the frame to send to the PCM processors
+     * @param pcmData the byte data to be filled, or null if it should be allocated
+     * @return the ByteData that was filled (may be a new instance from <code>space</code>) 
+     */
+    public ByteData decodeFrame(Frame frame, ByteData pcmData) {
+    	// required size of the byte buffer
+    	int byteSize = frame.header.blockSize * channels * ((streamInfo.getBitsPerSample() + 7) / 2);
+    	if (pcmData == null || pcmData.getData().length < byteSize ) {
+    		pcmData = new ByteData(byteSize);
+    	} else {
+    		pcmData.setLen(0);
+    	}
         if (streamInfo.getBitsPerSample() == 8) {
-            space = new ByteData(frame.header.blockSize * channels);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
-                    space.append((byte) (channelData[channel].getOutput()[i] + 0x80));
+                    pcmData.append((byte) (channelData[channel].getOutput()[i] + 0x80));
                 }
             }
         } else if (streamInfo.getBitsPerSample() == 16) {
-            space = new ByteData(frame.header.blockSize * channels * 2);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     short val = (short) (channelData[channel].getOutput()[i]);
-                    space.append((byte) (val & 0xff));
-                    space.append((byte) ((val >> 8) & 0xff));
+                    pcmData.append((byte) (val & 0xff));
+                    pcmData.append((byte) ((val >> 8) & 0xff));
                 }
             }
         } else if (streamInfo.getBitsPerSample() == 24) {
-            space = new ByteData(frame.header.blockSize * channels * 3);
             for (int i = 0; i < frame.header.blockSize; i++) {
                 for (int channel = 0; channel < channels; channel++) {
                     int val = (channelData[channel].getOutput()[i]);
-                    space.append((byte) (val & 0xff));
-                    space.append((byte) ((val >> 8) & 0xff));
-                    space.append((byte) ((val >> 16) & 0xff));
+                    pcmData.append((byte) (val & 0xff));
+                    pcmData.append((byte) ((val >> 8) & 0xff));
+                    pcmData.append((byte) ((val >> 16) & 0xff));
                 }
             }
         }
-        pcmProcessors.processPCM(space);
+        return pcmData;
     }
     
     /**
