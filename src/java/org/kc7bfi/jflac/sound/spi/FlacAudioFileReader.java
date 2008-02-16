@@ -48,10 +48,12 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
     
+	private static final boolean DEBUG = false;
+	
     private FLACDecoder decoder;
     private StreamInfo streamInfo;
 
@@ -237,9 +239,14 @@ public class FlacAudioFileReader extends AudioFileReader {
         try {
             decoder = new FLACDecoder(bitStream);
             streamInfo = decoder.readStreamInfo();
-            if (streamInfo == null) throw new UnsupportedAudioFileException("No StreamInfo found");
+            if (streamInfo == null) {
+            	if (DEBUG) {
+            		System.out.println("FLAC file reader: no stream info found");
+            	}
+            	throw new UnsupportedAudioFileException("No StreamInfo found");
+            }
             
-            format = new AudioFormat(FlacEncoding.FLAC, (float) streamInfo.getSampleRate(), streamInfo.getBitsPerSample(), streamInfo.getChannels(), /*streamInfo.maxFrameSize*/AudioSystem.NOT_SPECIFIED, AudioSystem.NOT_SPECIFIED, false);
+            format = new FlacAudioFormat(streamInfo);
         //} catch (UnsupportedAudioFileException e) {
             // reset the stream for other providers
             //if (bitStream.markSupported()) {
@@ -248,12 +255,18 @@ public class FlacAudioFileReader extends AudioFileReader {
             // just rethrow this exception
         //    throw e;
         } catch (IOException ioe) {
+        	if (DEBUG) {
+        		System.out.println("FLAC file reader: not a FLAC stream");
+        	}
             // reset the stream for other providers
             //if (bitStream.markSupported()) {
             //    bitStream.reset();
             //}
             throw new UnsupportedAudioFileException(ioe.getMessage());
         }
+    	if (DEBUG) {
+    		System.out.println("FLAC file reader: got stream with format "+format);
+    	}
         return new AudioFileFormat(FlacFileFormatType.FLAC, format, AudioSystem.NOT_SPECIFIED);
     }
 
