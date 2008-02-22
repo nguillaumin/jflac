@@ -3,6 +3,7 @@ package org.kc7bfi.jflac.metadata;
 /**
  * libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001,2002,2003  Josh Coalson
+ * Modified 2007 Bruce MacNaughton (added PICTURE metadata type)
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -44,8 +45,8 @@ public abstract class Metadata {
     /** CueSheet Metatdata type. */
     public static final int METADATA_TYPE_CUESHEET = 5;
     
-    /** Undefined Metatdata type. */
-    public static final int METADATA_TYPE_UNDEFINED = 6;
+    /** Picture Metatdata type. */
+    public static final int METADATA_TYPE_PICTURE = 6;
     
     /** Metadata IsLast field length. */
     public static final int STREAM_METADATA_IS_LAST_LEN = 1; // bits
