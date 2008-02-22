@@ -38,6 +38,7 @@ import org.kc7bfi.jflac.metadata.Application;
 import org.kc7bfi.jflac.metadata.CueSheet;
 import org.kc7bfi.jflac.metadata.Metadata;
 import org.kc7bfi.jflac.metadata.Padding;
+import org.kc7bfi.jflac.metadata.Picture;
 import org.kc7bfi.jflac.metadata.SeekPoint;
 import org.kc7bfi.jflac.metadata.SeekTable;
 import org.kc7bfi.jflac.metadata.StreamInfo;
@@ -601,7 +602,9 @@ public class FLACDecoder {
         } else if (type == Metadata.METADATA_TYPE_VORBIS_COMMENT) {
             metadata = new VorbisComment(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_CUESHEET) {
-            metadata = new CueSheet(bitStream, length, isLast);
+	    metadata = new CueSheet(bitStream, length, isLast);
+	} else if (type == Metadata.METADATA_TYPE_PICTURE) {
+	    metadata = new Picture(bitStream, length, isLast);
         } else {
             metadata = new Unknown(bitStream, length, isLast);
         }
