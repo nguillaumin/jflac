@@ -21,6 +21,7 @@ package org.kc7bfi.jflac.metadata;
  */
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.kc7bfi.jflac.io.BitInputStream;
 
@@ -49,6 +50,12 @@ public class VorbisString {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return new String(entry);
+        String s;
+        try {
+            s = new String(entry, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            s = new String("");
+        }
+        return s;
     }
 }
