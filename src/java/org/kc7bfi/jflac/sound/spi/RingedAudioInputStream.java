@@ -37,7 +37,7 @@ import org.kc7bfi.jflac.util.RingBuffer;
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
  * @author Florian Bomers
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class RingedAudioInputStream extends AudioInputStream {
 
@@ -261,7 +261,6 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      *         stream is reached.
      * @exception IOException
      *                if an I/O error occurs.
-     * @see #in
      */
     public synchronized int read() throws IOException {
         fill();
@@ -392,7 +391,6 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      *         without blocking.
      * @exception IOException
      *                if an I/O error occurs.
-     * @see #in
      */
     public synchronized int available() throws IOException {
         checkIfStillOpen();

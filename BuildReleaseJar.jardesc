@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="E:/Progs/WorkspaceMaster/jFLAC/build/jflac-1.3beta.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/jFLAC/BuildReleaseJar.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" manifestLocation="/NerveSound.Mixblendr/misc/AudioFileRenamer2Manifest.mf" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/jFLAC/LICENSE.txt"/>
+        <javaElement handleIdentifier="=jFLAC/src\/java"/>
+        <folder path="/jFLAC/META-INF"/>
+    </selectedElements>
+</jardesc>

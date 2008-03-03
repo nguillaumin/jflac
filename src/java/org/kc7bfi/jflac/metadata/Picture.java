@@ -111,7 +111,7 @@ public class Picture extends Metadata {
      * @return  A string representation of the Picture metadata
      */
 
-    @Override
+    //@Override
     public String toString() {
         return "Picture: " 
             + " Type=" + pictureType
