@@ -28,6 +28,7 @@ import org.kc7bfi.jflac.io.BitInputStream;
 /**
  * Picture Metadata block.
  * @author BMacNaughton
+ * @version $Revision: 1.3 $
  */
 public class Picture extends Metadata {
     private int pictureType;
