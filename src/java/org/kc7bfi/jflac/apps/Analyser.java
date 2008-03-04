@@ -29,7 +29,8 @@ import org.kc7bfi.jflac.frame.Frame;
 import org.kc7bfi.jflac.metadata.Metadata;
 
 /**
- * Analyze FLAC file application.
+ * Analyser reads all metadata and frame blocks in a FLAC file and outputs a text
+ * representation of them.
  * @author kc7bfi
  */
 public class Analyser implements FrameListener {
