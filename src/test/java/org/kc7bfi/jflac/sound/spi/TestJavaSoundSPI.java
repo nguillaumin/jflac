@@ -1,3 +1,5 @@
+package org.kc7bfi.jflac.sound.spi;
+
 import java.io.ByteArrayInputStream;
 
 import javax.sound.sampled.AudioFormat;

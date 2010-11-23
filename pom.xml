@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>jflac</groupId>
   <artifactId>jflac</artifactId>
   <name>Java FLAC Codec</name>
-  <version>1.3</version>
+  <version>1.4.0-SNAPSHOT</version>
   <description>jFLAC is a port of the Free Lossless Audio Codec (FLAC) library to Java. This allows Java developers to
      and write programs that use the FLAC files and the FLAC algorithms.
   </description>
@@ -114,6 +117,15 @@
       </plugin>
     </plugins>
   </build>
+  <dependencies>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.8.2</version>
+  		<type>jar</type>
+  		<scope>test</scope>
+  	</dependency>
+  </dependencies>
   <reporting>
     <plugins>
       <plugin>
