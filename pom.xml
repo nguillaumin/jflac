@@ -12,6 +12,9 @@
      and write programs that use the FLAC files and the FLAC algorithms.
   </description>
   <url>http://jflac.sourceforge.net/</url>
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <ciManagement>
     <notifiers>
       <notifier>
@@ -66,28 +69,24 @@
        </roles>
        <timezone>+1</timezone>
     </developer>
+    <developer>
+    	<id>alanraison</id>
+    	<name>Alan Raison</name>
+    	<roles>
+    		<role>Developer</role>
+    	</roles>
+    	<timezone>0</timezone>
+    </developer>
   </developers>
   <scm>
-    <connection>scm:cvs:pserver:anonymous:@jflac.cvs.sourceforge.net:/cvsroot/jflac/:jflac</connection>
+    <connection>scm:git://jflac.git.sourceforge.net:/gitroot/jflac/jflac</connection>
   </scm>
-  <organization>
-    <name>Open Roads Consulting, Inc.</name>
-    <url>http://openroadsconsulting.com/</url>
-  </organization>
   <build>
-    <sourceDirectory>src/java</sourceDirectory>
-<!--    <testSourceDirectory>src/test</testSourceDirectory>-->
-    <testResources>
-      <testResource>
-        <directory>testdata</directory>
-        <includes>
-          <include>*.flac</include>
-        </includes>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -95,27 +94,14 @@
         </configuration>
       </plugin>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
         <configuration>
           <source>1.6</source>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <includes>
-<!--            <include>**/*Test.java</include>-->
-          </includes>
-        </configuration>
-      </plugin>
-      <plugin>
-	 <artifactId>maven-resources-plugin</artifactId>
-	 <version>RELEASE</version>
-	 <configuration>
-	    <encoding>UTF-8</encoding>
-	 </configuration>
-      </plugin>
-    </plugins>
+     </plugins>
   </build>
   <dependencies>
   	<dependency>
@@ -129,36 +115,54 @@
   <reporting>
     <plugins>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changelog-plugin</artifactId>
+        <version>2.2</version>
       </plugin>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changes-plugin</artifactId>
-        <configuration>
-          <xmlPath>${basedir}/xdocs/changes.xml</xmlPath>
-        </configuration>
+        <version>2.3</version>
       </plugin>
+      <!--
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.6</version>
         <configuration>
           <configLocation>${basedir}/checkstyle.xml</configLocation>
         </configuration>
       </plugin>
+      -->
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
       </plugin>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.2</version>
       </plugin>
       <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
+        <version>2.5</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
+        <version>2.0-beta-2</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>taglist-maven-plugin</artifactId>
+        <version>2.4</version>
+      </plugin>
+      <plugin>
+      	<groupId>org.apache.maven.plugins</groupId>
+      	<artifactId>maven-site-plugin</artifactId>
+      	<version>2.1.1</version>
       </plugin>
     </plugins>
   </reporting>
@@ -166,32 +170,13 @@
     <repository>
       <id>default</id>
       <name>Default Repository</name>
-      <url>projects.sourceforge.net//home/groups/j/jf/jflac/htdocs/repository</url>
+      <url>projects.sourceforge.net/home/groups/j/jf/jflac/htdocs/repository</url>
     </repository>
     <site>
       <id>default</id>
       <name>Default Site</name>
       <url>scp://shell.sourceforge.net/home/groups/j/jf/jflac/htdocs/</url>
     </site>
+    <downloadUrl>http://sourceforge.net/projects/jflac/files</downloadUrl>
   </distributionManagement>
 </project>
-
-<!--
-
-This library allows java developers to experiment and write programs that use the 
-FLAC algorithms.&lt;/p&gt;
-
-&lt;p&gt;The jFLAC library now also provides a Java Sound SPI class. To use the Java Sound SPI
-simply include the jFLAC jar file into your class path.&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href="http://sourceforge.net/projects/jflac"&gt;jFLAC project&lt;/a&gt; is hosted by &lt;a href="http://sourceforge.net"&gt;SourceForge&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;You may want to explore the Java &lt;a href="xref/index.html"&gt;source code&lt;/a&gt;
-and the &lt;a href="apidocs/index.html"&gt;javadoc&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The origional code for the Free Lossless Audio Codec (FLAC) can be found &lt;a href="http://flac.sourceforge.net/"&gt;here&lt;/a&gt;
-on SourceForge&lt;/p&gt;
-
-&lt;hr/&gt;
-&lt;A href="http://sourceforge.net"&gt; &lt;IMG src="http://sourceforge.net/sflogo.php?group_id=106536" border="0" alt="SourceForge.net Logo" /&gt;&lt;/A&gt;</description>
--->
