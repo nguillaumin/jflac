@@ -2,6 +2,11 @@ Java FLAC Codec
 
  jFLAC is a port of the {{{http://flac.sourceforge.net}Free Lossless Audio Codec (FLAC)}} library to Java.
 
- jFLAC was originally ported by David R. Robison of {{{http://openroadsconsulting.com}Open Roads Consulting}}} in 2004.
+ jFLAC was originally ported by David R. Robison of {{{http://openroadsconsulting.com}Open Roads Consulting}} in 2004.
 
  Since then {{{http://sourceforge.net/project/memberlist.php?group_id=106536}these developers}} have made contributions to the project.
+ 
+New Development
+
+ jFLAC is undergoing a new phase of development!  For more details see the {{{news.html}News Page}} or the
+ {{{http://sourceforge.net/projects/jflac}SourceForge Project page}}.

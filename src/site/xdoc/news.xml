@@ -4,6 +4,15 @@
     <title>News</title>
   </properties>
 	<body>
+		<section name="27th November 2010">
+			<p>Welcome to the jFLAC project! After a lengthy period without development, a new wave of development has begun.
+			As part of this, the source code has moved to a Git source repository, 
+			<a href="http://jflac.git.sourceforge.net">http://jflac.git.sourceforge.net</a>.</p>
+			<p>During this phase of development, the information on this website may be slightly out of date.
+			This will hopefully be resolved quickly, but in case of any doubt, please contact the developers on the 
+			<a href="https://sourceforge.net/projects/jflac/forums">jFLAC forums</a> or <a href="https://sourceforge.net/mail/?group_id=106536">mailing lists</a>.</p>
+			<p>Thanks for your interest in jFLAC!</p>
+		</section>
 		<section name="29th July 2005">
 			<p><a href="https://sourceforge.net/project/showfiles.php?group_id=106536">Version 1.2</a> released!</p>
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>

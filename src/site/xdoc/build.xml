@@ -1,9 +1,16 @@
 <?xml version="1.0" ?>
-<document>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
     <title>Build</title>
   </properties>
 	<body>
+		<section name="New Setup">
+			<p><strong>The jFLAC project has changed.  Information on this page needs updating!</strong></p>
+			<p>jFLAC source code is now available as a Maven 2 project in the jFLAC Git repository at
+			<a href="http://jflac.git.sourceforge.net/jflac/jflac">http://jflac.git.sourceforge.net/jflac/jflac</a></p>
+		</section>
 		<section name="Building jFLAC">
 			<p><strong>Contents:</strong></p>
 			<ul>
@@ -22,7 +29,7 @@
 			</ul>
 			<p><strong>Steps</strong></p>
 			<ol>
-				<li><a href="download.html">Download</a> or retrieve the jFLAC source code from <a href="https://sourceforge.net/cvs/?group_id=74580">CVS</a>.<p/></li>
+				<li><a href="download.html">Download</a> or retrieve the jFLAC source code from <a href="https://jflac.git.sourceforge.net/">Git</a>.<p/></li>
 				<li>Using a shell, run your desired Maven target from the jsdsi directory, e.g.<source>maven jar:install</source><p/></li>
 				<li>Make a cuppa tea :-)<p/></li>
 			</ol>
