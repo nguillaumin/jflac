@@ -41,14 +41,14 @@ public class FlacAudioFormat extends AudioFormat {
 	 */
 	public static final String KEY_BLOCKSIZE_MAX = "blocksize_max";
 
-	private HashMap props;
+	private Map<String, Object> props;
 
 	public FlacAudioFormat(StreamInfo streamInfo) {
 		super(FlacEncoding.FLAC, streamInfo.getSampleRate(),
 				streamInfo.getBitsPerSample(), streamInfo.getChannels(),
 				/* streamInfo.maxFrameSize */AudioSystem.NOT_SPECIFIED,
 				AudioSystem.NOT_SPECIFIED, false);
-		props = new HashMap();
+		props = new HashMap<String, Object>();
 		props.put(KEY_FRAMESIZE_MIN, new Integer(streamInfo.getMinFrameSize()));
 		props.put(KEY_FRAMESIZE_MAX, new Integer(streamInfo.getMaxFrameSize()));
 		props.put(KEY_BLOCKSIZE_MIN, new Integer(streamInfo.getMinBlockSize()));
@@ -59,19 +59,19 @@ public class FlacAudioFormat extends AudioFormat {
 	 * Java 5.0 compatible method to get the full map of properties. The
 	 * properties use the KEY_ keys defined in this class.
 	 */
-	public Map properties() {
-		Map ret;
+	@Override
+	public Map<String, Object> properties() {
 		if (props == null) {
-			ret = new HashMap(0);
+			return Collections.emptyMap();
 		} else {
-			ret = (HashMap) (props.clone());
+			return Collections.unmodifiableMap(new HashMap<String,Object>(props));
 		}
-		return Collections.unmodifiableMap(ret);
 	}
 
 	/**
 	 * Java 5.0 compatible method to get a property. As key use the KEY_ constants defined in this class.
 	 */
+	@Override
 	public Object getProperty(String key) {
 		if (props == null) {
 			return null;
