@@ -6,6 +6,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
+import org.junit.Ignore;
+
 /**
  * 
  */
@@ -21,6 +23,7 @@ import javax.sound.sampled.AudioSystem;
  * 
  * @author Florian Bomers
  */
+@Ignore("Not a JUnit Test class")
 public class TestJavaSoundSPI {
 
 	private static boolean isSameBitsChannelSampleRate(AudioFormat af1,
