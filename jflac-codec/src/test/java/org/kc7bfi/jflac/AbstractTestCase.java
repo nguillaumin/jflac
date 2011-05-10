@@ -1,8 +1,8 @@
 package org.kc7bfi.jflac;
 
-import java.io.File;
-
 import junit.framework.TestCase;
+
+import java.io.File;
 
 /**
  * Abstract base class for test cases.
@@ -19,14 +19,18 @@ public abstract class AbstractTestCase extends TestCase {
     /**
      * Constructor.
      */
-    public AbstractTestCase(String testName) {
+    protected AbstractTestCase(String testName) {
         super(testName);
     }
-    
+
+    protected AbstractTestCase() {
+    }
+
     /**
      * Get test input file.
      *
      * @param path Path to test input file.
+     * @return file relative to basedir
      */
     public String getTestFile(String path) {
         return new File(basedir,path).getAbsolutePath();

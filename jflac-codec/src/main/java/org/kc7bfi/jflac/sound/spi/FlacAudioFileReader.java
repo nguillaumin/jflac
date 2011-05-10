@@ -20,27 +20,16 @@ package org.kc7bfi.jflac.sound.spi;
  * Boston, MA  02111-1307, USA.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.net.URL;
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.sound.sampled.spi.AudioFileReader;
-
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FLACDecoder;
 import org.kc7bfi.jflac.io.BitInputStream;
 import org.kc7bfi.jflac.io.BitOutputStream;
 import org.kc7bfi.jflac.metadata.StreamInfo;
+
+import javax.sound.sampled.*;
+import javax.sound.sampled.spi.AudioFileReader;
+import java.io.*;
+import java.net.URL;
 
 /**
  * Provider for Flac audio file reading services. This implementation can parse
@@ -48,6 +37,7 @@ import org.kc7bfi.jflac.metadata.StreamInfo;
  * streams from files of this type.
  * 
  * @author Marc Gimpel, Wimba S.A. (marc@wimba.com)
+ * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  * @version $Revision: 1.8 $
  */
 public class FlacAudioFileReader extends AudioFileReader {
@@ -77,7 +67,7 @@ public class FlacAudioFileReader extends AudioFileReader {
             inputStream = new FileInputStream(file);
             return getAudioFileFormat(inputStream, (int) file.length());
         } finally {
-            inputStream.close();
+            if (inputStream != null) inputStream.close();
         }
     }
 
@@ -119,30 +109,23 @@ public class FlacAudioFileReader extends AudioFileReader {
      *                if an I/O exception occurs.
      */
     public AudioFileFormat getAudioFileFormat(InputStream stream) throws UnsupportedAudioFileException, IOException {
-        return getAudioFileFormat(stream, AudioSystem.NOT_SPECIFIED);
+        if (!stream.markSupported()) {
+            // see AudioSystem#getAudioFileFormat(InputStream stream) javadocs for contract
+            throw new IOException("InputStream must support mark(), but doesn't: " + stream);
+        }
+        stream.mark(256); // should be more than enough for the magic FLAC header, see FLACDecoder#readStreamSync()
+        try {
+            return getAudioFileFormat(stream, AudioSystem.NOT_SPECIFIED);
+        } catch (UnsupportedAudioFileException e) {
+            stream.reset();
+            throw e;
+        }
     }
-
-    /**
-     * Return the AudioFileFormat from the given InputStream.
-     * 
-     * @param stream
-     *            the input stream from which the AudioInputStream should be
-     *            constructed.
-     * @param medialength
-     * @return an AudioInputStream object based on the audio file data contained
-     *         in the input stream.
-     * @exception UnsupportedAudioFileException
-     *                if the File does not point to a valid audio file data
-     *                recognized by the system.
-     * @exception IOException
-     *                if an I/O exception occurs.
-     */
 
     /**
      * Return the AudioFileFormat from the given InputStream. Implementation.
      * 
      * @param bitStream
-     * @param baos
      * @param mediaLength
      * @return an AudioInputStream object based on the audio file data contained
      *         in the input stream.
@@ -262,7 +245,9 @@ public class FlacAudioFileReader extends AudioFileReader {
             //if (bitStream.markSupported()) {
             //    bitStream.reset();
             //}
-            throw new UnsupportedAudioFileException(ioe.getMessage());
+            final UnsupportedAudioFileException unsupportedAudioFileException = new UnsupportedAudioFileException(ioe.getMessage());
+            unsupportedAudioFileException.initCause(ioe);
+            throw unsupportedAudioFileException;
         }
     	if (DEBUG) {
     		System.out.println("FLAC file reader: got stream with format "+format);
@@ -289,10 +274,18 @@ public class FlacAudioFileReader extends AudioFileReader {
         try {
             return getAudioInputStream(inputStream, (int) file.length());
         } catch (UnsupportedAudioFileException e) {
-            inputStream.close();
+            try {
+                inputStream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             throw e;
         } catch (IOException e) {
-            inputStream.close();
+            try {
+                inputStream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             throw e;
         }
     }
@@ -314,12 +307,20 @@ public class FlacAudioFileReader extends AudioFileReader {
     public AudioInputStream getAudioInputStream(URL url) throws UnsupportedAudioFileException, IOException {
         InputStream inputStream = url.openStream();
         try {
-            return getAudioInputStream(inputStream);
+            return getAudioInputStream(inputStream, AudioSystem.NOT_SPECIFIED);
         } catch (UnsupportedAudioFileException e) {
-            inputStream.close();
+            try {
+                inputStream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             throw e;
         } catch (IOException e) {
-            inputStream.close();
+            try {
+                inputStream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             throw e;
         }
     }
@@ -339,8 +340,18 @@ public class FlacAudioFileReader extends AudioFileReader {
      * @exception IOException
      *                if an I/O exception occurs.
      */
-    public AudioInputStream getAudioInputStream(InputStream stream) throws UnsupportedAudioFileException, IOException {
-        return getAudioInputStream(stream, AudioSystem.NOT_SPECIFIED);
+    public AudioInputStream getAudioInputStream(final InputStream stream) throws UnsupportedAudioFileException, IOException {
+        if (!stream.markSupported()) {
+            // see AudioSystem#getAudioInputStream(InputStream stream) javadocs for contract
+            throw new IOException("InputStream must support mark(), but doesn't: " + stream);
+        }
+        stream.mark(256); // should be more than enough for the magic FLAC header, see FLACDecoder#readStreamSync()
+        try {
+            return getAudioInputStream(stream, AudioSystem.NOT_SPECIFIED);
+        } catch (UnsupportedAudioFileException e) {
+            stream.reset();
+            throw e;
+        }
     }
 
     /**
