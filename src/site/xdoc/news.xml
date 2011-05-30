@@ -4,6 +4,13 @@
     <title>News</title>
   </properties>
 	<body>
+		<section name="28th May 2011">
+			<p>Development continues on the jFLAC project, with the creating of a 
+			<a href="http://jflac.git.sourceforge.net/git/gitweb.cgi?p=jflac/jflac;a=shortlog;h=refs/heads/jflac-2.0">
+			version 2.0 branch</a> in Git</p>
+			<p>This is still very experimental and probably won't actually work for some time.  If you have some
+			development capacity, why not lend a hand?</p>
+		</section>
 		<section name="27th November 2010">
 			<p>Welcome to the jFLAC project! After a lengthy period without development, a new wave of development has begun.
 			As part of this, the source code has moved to a Git source repository, 
@@ -83,7 +90,7 @@
 			<p>I am pleased to announce an updated release of the jFLAC library.</p>
 			<p>This release fixes four separate bugs with the library:
 			<ul>
-   				<li>There was a problem decoding subframes with waisted bits.</li>
+   				<li>There was a problem decoding subframes with wasted bits.</li>
    				<li>There was a problem reading the block size of the last frame.</li>
 				<li>There was a problem performing a wide signal restoration from LPC compression.</li>
 				<li>There was a problem with 24 bps files.</li>
