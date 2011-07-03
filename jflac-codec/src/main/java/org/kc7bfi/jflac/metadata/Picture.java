@@ -77,7 +77,7 @@ public class Picture extends Metadata {
             try {
                 descString = new String(data, "UTF-8");
             } catch (UnsupportedEncodingException e) {}
-            usedBits += 32;
+            usedBits += descStringByteCount*8;
         } else {
             descString = new String("");
         }
