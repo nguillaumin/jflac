@@ -123,5 +123,29 @@ public class Picture extends Metadata {
             + " Color Count=" + picColorCount
             + " Picture Size (bytes)=" + picByteCount;
     }
- 
+
+    public int getPictureType() {
+        return pictureType;
+    }
+    public String getMimeString() {
+        return mimeString;
+    }
+    public String getDescString() {
+        return descString;
+    }
+    public int getPicPixelWidth() {
+        return picPixelWidth;
+    }
+    public int getPicPixelHeight() {
+        return picPixelHeight;
+    }
+    public int getPicBitsPerPixel() {
+        return picBitsPerPixel;
+    }
+    public int getPicColorCount() {
+        return picColorCount;
+    }
+    public byte[] getImage() {
+        return image;
+    }
 }
