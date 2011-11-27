@@ -1,24 +1,20 @@
-package org.kc7bfi.jflac.sound.spi;
-
-/**
- * libFLAC - Free Lossless Audio Codec library
- * Copyright (C) 2001,2002,2003  Josh Coalson
+/*
+ * Copyright 2011 The jFLAC Project
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Library General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA  02111-1307, USA.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+package org.kc7bfi.jflac.sound.spi;
 
 import org.kc7bfi.jflac.Constants;
 import org.kc7bfi.jflac.FLACDecoder;
@@ -30,6 +26,7 @@ import javax.sound.sampled.*;
 import javax.sound.sampled.spi.AudioFileReader;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  * Provider for Flac audio file reading services. This implementation can parse
@@ -44,6 +41,11 @@ public class FlacAudioFileReader extends AudioFileReader {
     
 	private static final boolean DEBUG = false;
 	
+    /**
+     * Property key for the duration in microseconds.
+     */
+    public static final String KEY_DURATION = "duration";
+
     private FLACDecoder decoder;
     private StreamInfo streamInfo;
 
@@ -252,7 +254,12 @@ public class FlacAudioFileReader extends AudioFileReader {
     	if (DEBUG) {
     		System.out.println("FLAC file reader: got stream with format "+format);
     	}
-        return new AudioFileFormat(FlacFileFormatType.FLAC, format, AudioSystem.NOT_SPECIFIED);
+        final HashMap<String, Object> props = new HashMap<String, Object>();
+        if (streamInfo.getSampleRate() > 0) {
+            final long duration = (streamInfo.getTotalSamples() * 1000L * 1000L) / streamInfo.getSampleRate();
+            props.put(KEY_DURATION, duration);
+        }
+        return new AudioFileFormat(FlacFileFormatType.FLAC, format, (int)streamInfo.getTotalSamples(), props);
     }
 
     /**
