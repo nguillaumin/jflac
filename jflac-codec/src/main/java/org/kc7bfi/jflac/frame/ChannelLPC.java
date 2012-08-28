@@ -104,7 +104,8 @@ public class ChannelLPC extends Channel {
                 order,
                 ((EntropyPartitionedRice) entropyCodingMethod).order,
                 header,
-                channelData.getResidual());
+                channelData.getResidual(), 
+                (codingType == ENTROPY_CODING_METHOD_PARTITIONED_RICE2));
         }
         
         //System.out.println();

@@ -44,10 +44,14 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
      * @param partitionOrder    The partition order
      * @param header            The FLAC Frame Header
      * @param residual          The residual signal (output)
+     * @param b 
      * @throws IOException      On error reading from InputBitStream
      */
-    void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual) throws IOException {
+    void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual, boolean isExtended) throws IOException {
         //System.out.println("readREsidual Pred="+predictorOrder+" part="+partitionOrder);
+    	
+    	// TODO handle RICE2
+    	
         int sample = 0;
         int partitions = 1 << partitionOrder;
         int partitionSamples = partitionOrder > 0 ? header.blockSize >> partitionOrder : header.blockSize - predictorOrder;

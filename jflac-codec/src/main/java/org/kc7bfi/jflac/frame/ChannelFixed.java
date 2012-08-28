@@ -51,6 +51,8 @@ public class ChannelFixed extends Channel {
     public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
         
+        // TODO handle RICE2
+        
         this.residual = channelData.getResidual();
         this.order = order;
 
@@ -69,7 +71,8 @@ public class ChannelFixed extends Channel {
                 entropyCodingMethod = pr;
                 pr.order = u32;
                 pr.contents = channelData.getPartitionedRiceContents();
-                pr.readResidual(is, order, pr.order, header, channelData.getResidual());
+                pr.readResidual(is, order, pr.order, header, channelData.getResidual(), 
+                		(type == ENTROPY_CODING_METHOD_PARTITIONED_RICE2));
                 break;
             default :
                 throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM");
