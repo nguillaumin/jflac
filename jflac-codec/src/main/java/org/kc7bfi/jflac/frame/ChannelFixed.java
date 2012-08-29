@@ -50,9 +50,7 @@ public class ChannelFixed extends Channel {
      */
     public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
-        
-        // TODO handle RICE2
-        
+
         this.residual = channelData.getResidual();
         this.order = order;
 
@@ -65,7 +63,8 @@ public class ChannelFixed extends Channel {
         int type = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         EntropyPartitionedRice pr;
         switch (type) {
-            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+        	case ENTROPY_CODING_METHOD_PARTITIONED_RICE2 :
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :            
                 int u32 = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 pr = new EntropyPartitionedRice();
                 entropyCodingMethod = pr;

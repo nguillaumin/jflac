@@ -75,15 +75,15 @@ public class Header {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
         ByteData rawHeader = new ByteData(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
-        boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() != streamInfo.getMaxBlockSize());
-        boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() == streamInfo.getMaxBlockSize());
+        // boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() != streamInfo.getMaxBlockSize());
+        // boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() == streamInfo.getMaxBlockSize());
         
         // init the raw header with the saved bits from synchronization
         rawHeader.append(headerWarmup[0]);
         rawHeader.append(headerWarmup[1]);
         
-        // check to make sure that the reserved bits are 0
-        if ((rawHeader.getData(1) & 0x03) != 0) { // MAGIC NUMBER
+        // check to make sure that the reserved bit is 0
+        if ((rawHeader.getData(1) & 0x02) != 0) { // MAGIC NUMBER
             throw new BadHeaderException("Bad Magic Number: " + (rawHeader.getData(1) & 0xff));
         }
         
@@ -101,11 +101,8 @@ public class Header {
         
         int bsType = (rawHeader.getData(2) >> 4) & 0x0f;
         switch (bsType) {
-            case 0 :
-                if (!isKnownFixedBlockSizeStream)
-                    throw new BadHeaderException("Unknown Block Size (0)");
-                blockSize = streamInfo.getMinBlockSize();
-                break;
+            case 0 :                
+                throw new BadHeaderException("Unknown Block Size (0)");                
             case 1 :
                 blockSize = 192;
                 break;
@@ -142,9 +139,14 @@ public class Header {
                 sampleRate = streamInfo.getSampleRate();
                 break;
             case 1 :
+            	sampleRate = 88200;
+                break;
             case 2 :
+            	sampleRate = 176400;
+                break;
             case 3 :
-                throw new BadHeaderException("Bad Sample Rate (" + srType + ")");
+            	sampleRate = 192000;
+                break;
             case 4 :
                 sampleRate = 8000;
                 break;
@@ -231,22 +233,30 @@ public class Header {
                 break;
         }
         
-        if ((rawHeader.getData(3) & 0x01) != 0) { // this should be a zero padding bit
-            throw new BadHeaderException("this should be a zero padding bit");
+        /* check to make sure that reserved bit is 0 */        
+        if ((rawHeader.getData(3) & 0x01) != 0) { /* MAGIC NUMBER */
+        	throw new BadHeaderException("Bad Magic Number: " + (rawHeader.getData(3) & 0x01));
         }
         
-        if ((blocksizeHint != 0) && isKnownVariableBlockSizeStream) {
+        /* read the frame's starting sample number (or frame number as the case may be) */
+    	if(
+    		(rawHeader.getData(1) & 0x01) != 0 ||
+    		/*@@@ this clause is a concession to the old way of doing variable blocksize; the only known implementation is flake and can probably be removed without inconveniencing anyone */
+    		(streamInfo != null && streamInfo.getMinBlockSize() != streamInfo.getMaxBlockSize())
+    	) { /* variable blocksize */
             sampleNumber = is.readUTF8Long(rawHeader);
             if (sampleNumber == 0xffffffffffffffffL) { // i.e. non-UTF8 code...
                 throw new BadHeaderException("Bad Sample Number");
             }
-        } else {
+    	}
+    	else
+    	{ /* fixed blocksize */
             int lastFrameNumber = is.readUTF8Int(rawHeader);
             if (lastFrameNumber == 0xffffffff) { // i.e. non-UTF8 code...
                 throw new BadHeaderException("Bad Last Frame");
             }
             sampleNumber = (long) streamInfo.getMinBlockSize() * (long) lastFrameNumber;
-        }
+    	}
         
         if (blocksizeHint != 0) {
             int blockSizeCode = is.readRawUInt(8);
@@ -281,6 +291,32 @@ public class Header {
         if (CRC8.calc(rawHeader.getData(), rawHeader.getLen()) != crc8) {
             throw new BadHeaderException("STREAM_DECODER_ERROR_STATUS_BAD_HEADER");
         }
+        
+//        /* calculate the sample number from the frame number if needed */
+//        decoder->private_->next_fixed_block_size = 0;
+//    	if(decoder->private_->frame.header.number_type == FLAC__FRAME_NUMBER_TYPE_FRAME_NUMBER) {
+//    		x = decoder->private_->frame.header.number.frame_number;
+//    		decoder->private_->frame.header.number_type = FLAC__FRAME_NUMBER_TYPE_SAMPLE_NUMBER;
+//    		if(decoder->private_->fixed_block_size)
+//    			decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->fixed_block_size * (FLAC__uint64)x;
+//    		else if(decoder->private_->has_stream_info) {
+//    			if(decoder->private_->stream_info.data.stream_info.min_blocksize == decoder->private_->stream_info.data.stream_info.max_blocksize) {
+//    				decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->stream_info.data.stream_info.min_blocksize * (FLAC__uint64)x;
+//    				decoder->private_->next_fixed_block_size = decoder->private_->stream_info.data.stream_info.max_blocksize;
+//    			}
+//    			else
+//    				is_unparseable = true;
+//    		}
+//    		else if(x == 0) {
+//    			decoder->private_->frame.header.number.sample_number = 0;
+//    			decoder->private_->next_fixed_block_size = decoder->private_->frame.header.blocksize;
+//    		}
+//    		else {
+//    			/* can only get here if the stream has invalid frame numbering and no STREAMINFO, so assume it's not the last (possibly short) frame */
+//    			decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->frame.header.blocksize * (FLAC__uint64)x;
+//    		}
+//    	}
+        
     }
     
     /**
