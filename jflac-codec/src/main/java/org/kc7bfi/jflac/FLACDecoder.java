@@ -59,8 +59,8 @@ public class FLACDecoder {
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
     private int outputCapacity = 0;
     private int outputChannels = 0;
-    private int fixedBlockSize = 0;
-    private int nextFixedBlockSize = 0;    
+    // private int fixedBlockSize = 0;
+    // private int nextFixedBlockSize = 0;    
     private long samplesDecoded = 0;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
@@ -100,8 +100,8 @@ public class FLACDecoder {
         this.inputStream = inputStream;
         this.bitStream = new BitInputStream(inputStream);
         //state = DECODER_SEARCH_FOR_METADATA;
-        fixedBlockSize = 0;
-        nextFixedBlockSize = 0;        
+        // fixedBlockSize = 0;
+        // nextFixedBlockSize = 0;        
         samplesDecoded = 0;
         //state = DECODER_SEARCH_FOR_METADATA;
     }
@@ -760,8 +760,7 @@ public class FLACDecoder {
                     mid = channelData[0].getOutput()[i];
                     side = channelData[1].getOutput()[i];
                     mid <<= 1;
-                    if ((side & 1) != 0) // i.e. if 'side' is odd...
-                        mid++;                    
+                    mid |= (side & 1); /* i.e. if 'side' is odd... */                    
                     channelData[0].getOutput()[i] = (mid + side) >> 1;
                     channelData[1].getOutput()[i] = (mid - side) >> 1;
                 }
@@ -782,8 +781,8 @@ public class FLACDecoder {
         }
         
     	/* we wait to update fixed_block_size until here, when we're sure we've got a proper frame and hence a correct blocksize */
-        if (nextFixedBlockSize != 0)
-        	fixedBlockSize = nextFixedBlockSize;
+//        if (nextFixedBlockSize != 0)
+//        	fixedBlockSize = nextFixedBlockSize;
         
         // put the latest values into the public section of the decoder instance
         channels = frame.header.channels;
