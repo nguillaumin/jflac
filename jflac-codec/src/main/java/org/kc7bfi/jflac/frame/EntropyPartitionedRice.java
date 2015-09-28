@@ -29,7 +29,6 @@ import org.kc7bfi.jflac.io.BitInputStream;
  * @author kc7bfi
  */
 public class EntropyPartitionedRice extends EntropyCodingMethod {
-    // private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN = 4; /* bits */
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN = 4; /* bits */
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN = 5; /* bits */
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN = 5; /* bits */
@@ -38,8 +37,6 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
     /**< == (1<<FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN)-1 */    
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER = 31;
     /**< == (1<<FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN)-1 */
-    
-    // private static final int ENTROPY_CODING_METHOD_TYPE_LEN = 2; /* bits */
     
     protected int order; // The partition order, i.e. # of contexts = 2 ^ order.
     protected EntropyPartitionedRiceContents contents; // The context's Rice parameters and/or raw bits.
@@ -52,7 +49,7 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
      * @param partitionOrder    The partition order
      * @param header            The FLAC Frame Header
      * @param residual          The residual signal (output)
-     * @param b 
+     * @param isExtended		The RICE2 indicator flag 
      * @throws IOException      On error reading from InputBitStream
      */
     void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual, boolean isExtended) throws IOException {

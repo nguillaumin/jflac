@@ -75,8 +75,6 @@ public class Header {
         int blocksizeHint = 0;
         int sampleRateHint = 0;
         ByteData rawHeader = new ByteData(16); // MAGIC NUMBER based on the maximum frame header size, including CRC
-        // boolean isKnownVariableBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() != streamInfo.getMaxBlockSize());
-        // boolean isKnownFixedBlockSizeStream = (streamInfo != null && streamInfo.getMinBlockSize() == streamInfo.getMaxBlockSize());
         
         // init the raw header with the saved bits from synchronization
         rawHeader.append(headerWarmup[0]);
@@ -291,32 +289,6 @@ public class Header {
         if (CRC8.calc(rawHeader.getData(), rawHeader.getLen()) != crc8) {
             throw new BadHeaderException("STREAM_DECODER_ERROR_STATUS_BAD_HEADER");
         }
-        
-//        /* calculate the sample number from the frame number if needed */
-//        decoder->private_->next_fixed_block_size = 0;
-//    	if(decoder->private_->frame.header.number_type == FLAC__FRAME_NUMBER_TYPE_FRAME_NUMBER) {
-//    		x = decoder->private_->frame.header.number.frame_number;
-//    		decoder->private_->frame.header.number_type = FLAC__FRAME_NUMBER_TYPE_SAMPLE_NUMBER;
-//    		if(decoder->private_->fixed_block_size)
-//    			decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->fixed_block_size * (FLAC__uint64)x;
-//    		else if(decoder->private_->has_stream_info) {
-//    			if(decoder->private_->stream_info.data.stream_info.min_blocksize == decoder->private_->stream_info.data.stream_info.max_blocksize) {
-//    				decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->stream_info.data.stream_info.min_blocksize * (FLAC__uint64)x;
-//    				decoder->private_->next_fixed_block_size = decoder->private_->stream_info.data.stream_info.max_blocksize;
-//    			}
-//    			else
-//    				is_unparseable = true;
-//    		}
-//    		else if(x == 0) {
-//    			decoder->private_->frame.header.number.sample_number = 0;
-//    			decoder->private_->next_fixed_block_size = decoder->private_->frame.header.blocksize;
-//    		}
-//    		else {
-//    			/* can only get here if the stream has invalid frame numbering and no STREAMINFO, so assume it's not the last (possibly short) frame */
-//    			decoder->private_->frame.header.number.sample_number = (FLAC__uint64)decoder->private_->frame.header.blocksize * (FLAC__uint64)x;
-//    		}
-//    	}
-        
     }
     
     /**
