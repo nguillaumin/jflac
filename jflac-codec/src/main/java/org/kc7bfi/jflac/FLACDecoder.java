@@ -59,7 +59,6 @@ public class FLACDecoder {
     private ChannelData[] channelData = new ChannelData[Constants.MAX_CHANNELS];
     private int outputCapacity = 0;
     private int outputChannels = 0;
-    private int lastFrameNumber;
     private long samplesDecoded = 0;
     private StreamInfo streamInfo;
     private Frame frame = new Frame();
@@ -98,8 +97,7 @@ public class FLACDecoder {
     public FLACDecoder(InputStream inputStream) {
         this.inputStream = inputStream;
         this.bitStream = new BitInputStream(inputStream);
-        //state = DECODER_SEARCH_FOR_METADATA;
-        lastFrameNumber = 0;
+        //state = DECODER_SEARCH_FOR_METADATA;     
         samplesDecoded = 0;
         //state = DECODER_SEARCH_FOR_METADATA;
     }
@@ -687,7 +685,7 @@ public class FLACDecoder {
         boolean gotAFrame = false;
         int channel;
         int i;
-        int mid, side, left, right;
+        int mid, side;
         short frameCRC; /* the one we calculate from the input stream */
         //int x;
         
@@ -758,12 +756,9 @@ public class FLACDecoder {
                     mid = channelData[0].getOutput()[i];
                     side = channelData[1].getOutput()[i];
                     mid <<= 1;
-                    if ((side & 1) != 0) // i.e. if 'side' is odd...
-                        mid++;
-                    left = mid + side;
-                    right = mid - side;
-                    channelData[0].getOutput()[i] = left >> 1;
-                    channelData[1].getOutput()[i] = right >> 1;
+                    mid |= (side & 1); /* i.e. if 'side' is odd... */                    
+                    channelData[0].getOutput()[i] = (mid + side) >> 1;
+                    channelData[1].getOutput()[i] = (mid - side) >> 1;
                 }
             //System.exit(1);
             break;

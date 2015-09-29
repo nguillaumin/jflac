@@ -50,7 +50,7 @@ public class ChannelFixed extends Channel {
      */
     public ChannelFixed(BitInputStream is, Header header, ChannelData channelData, int bps, int wastedBits, int order) throws IOException {
         super(header, wastedBits);
-        
+
         this.residual = channelData.getResidual();
         this.order = order;
 
@@ -63,13 +63,15 @@ public class ChannelFixed extends Channel {
         int type = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         EntropyPartitionedRice pr;
         switch (type) {
-            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+        	case ENTROPY_CODING_METHOD_PARTITIONED_RICE2 :
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :            
                 int u32 = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 pr = new EntropyPartitionedRice();
                 entropyCodingMethod = pr;
                 pr.order = u32;
                 pr.contents = channelData.getPartitionedRiceContents();
-                pr.readResidual(is, order, pr.order, header, channelData.getResidual());
+                pr.readResidual(is, order, pr.order, header, channelData.getResidual(), 
+                		(type == ENTROPY_CODING_METHOD_PARTITIONED_RICE2));
                 break;
             default :
                 throw new IOException("STREAM_DECODER_UNPARSEABLE_STREAM");

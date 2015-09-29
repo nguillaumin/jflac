@@ -87,8 +87,9 @@ public class ChannelLPC extends Channel {
         // read entropy coding method info
         int codingType = is.readRawUInt(ENTROPY_CODING_METHOD_TYPE_LEN);
         //System.out.println("codingType="+codingType);
-        switch (codingType) {
-            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :
+        switch (codingType) {            
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE2 :
+            case ENTROPY_CODING_METHOD_PARTITIONED_RICE :	
                 entropyCodingMethod = new EntropyPartitionedRice();
                 ((EntropyPartitionedRice) entropyCodingMethod).order = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_ORDER_LEN);
                 ((EntropyPartitionedRice) entropyCodingMethod).contents = channelData.getPartitionedRiceContents();
@@ -103,7 +104,8 @@ public class ChannelLPC extends Channel {
                 order,
                 ((EntropyPartitionedRice) entropyCodingMethod).order,
                 header,
-                channelData.getResidual());
+                channelData.getResidual(), 
+                (codingType == ENTROPY_CODING_METHOD_PARTITIONED_RICE2));
         }
         
         //System.out.println();

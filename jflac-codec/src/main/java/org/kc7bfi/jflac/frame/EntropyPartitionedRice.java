@@ -30,9 +30,14 @@ import org.kc7bfi.jflac.io.BitInputStream;
  */
 public class EntropyPartitionedRice extends EntropyCodingMethod {
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN = 4; /* bits */
+    private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN = 5; /* bits */
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN = 5; /* bits */
+    
     private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER = 15;
-
+    /**< == (1<<FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN)-1 */    
+    private static final int ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER = 31;
+    /**< == (1<<FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN)-1 */
+    
     protected int order; // The partition order, i.e. # of contexts = 2 ^ order.
     protected EntropyPartitionedRiceContents contents; // The context's Rice parameters and/or raw bits.
 
@@ -44,24 +49,33 @@ public class EntropyPartitionedRice extends EntropyCodingMethod {
      * @param partitionOrder    The partition order
      * @param header            The FLAC Frame Header
      * @param residual          The residual signal (output)
+     * @param isExtended		The RICE2 indicator flag 
      * @throws IOException      On error reading from InputBitStream
      */
-    void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual) throws IOException {
+    void readResidual(BitInputStream is, int predictorOrder, int partitionOrder, Header header, int[] residual, boolean isExtended) throws IOException {
         //System.out.println("readREsidual Pred="+predictorOrder+" part="+partitionOrder);
-        int sample = 0;
+    	
+        int sample;
         int partitions = 1 << partitionOrder;
         int partitionSamples = partitionOrder > 0 ? header.blockSize >> partitionOrder : header.blockSize - predictorOrder;
+        
+        int pLen = isExtended ? ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN : ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+    	int pEsc = isExtended ? ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER : ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
+        
         contents.ensureSize(Math.max(6, partitionOrder));
         contents.parameters = new int[partitions];
 
+        sample = 0;
         for (int partition = 0; partition < partitions; partition++) {
-            int riceParameter = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN);
+            int riceParameter = is.readRawUInt(pLen);
             contents.parameters[partition] = riceParameter;
-            if (riceParameter < ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER) {
+            if (riceParameter < pEsc) {
+            	contents.rawBits[partition] = 0;
                 int u = (partitionOrder == 0 || partition > 0) ? partitionSamples : partitionSamples - predictorOrder;
                 is.readRiceSignedBlock(residual, sample, u, riceParameter);
                 sample += u;
             } else {
+            	System.out.println("readResidual elsecase, pEsc = " + pEsc);
                 riceParameter = is.readRawUInt(ENTROPY_CODING_METHOD_PARTITIONED_RICE_RAW_LEN);
                 contents.rawBits[partition] = riceParameter;
                 for (int u = (partitionOrder == 0 || partition > 0) ? 0 : predictorOrder; u < partitionSamples; u++, sample++) {
