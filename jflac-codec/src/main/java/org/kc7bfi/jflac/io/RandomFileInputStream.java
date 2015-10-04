@@ -138,4 +138,13 @@ public class RandomFileInputStream extends InputStream {
     public void seek(long pos) throws IOException {
         randomFile.seek(pos);
     }
+    
+    /**
+     * Return the length (in bytes) of the file
+     * @return number of bytes length of the file
+     * @throws IOException On file error
+     */
+    public long getLength() throws IOException {
+    	return randomFile.length();
+    }
 }
