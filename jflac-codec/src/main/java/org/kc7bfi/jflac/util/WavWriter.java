@@ -90,6 +90,26 @@ public class WavWriter {
         this.bps = streamInfo.getBitsPerSample();
         this.sampleRate = streamInfo.getSampleRate();
     }
+
+    /**
+     * The constructor.
+     * @param os            The output sream
+     * @param totalSamples  The total samples to be written
+     * @param channels     Number of channels
+     * @param bps           Number of bits per sample
+     * @param sampleRate    Sample rate per second
+     */
+    public WavWriter(OutputStream os,
+           Long totalSamples, Integer channels,
+           Integer bps, Integer sampleRate) {
+        this.os = new DataOutputStream(os);
+        this.osLE = new LittleEndianDataOutput(this.os);
+        this.totalSamples = totalSamples;
+        this.channels = channels;
+        this.bps = bps;
+        this.sampleRate = sampleRate;
+    }
+
     
     /**
      * The constructor.
