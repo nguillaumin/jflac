@@ -87,4 +87,15 @@ public class VorbisComment extends Metadata {
         return (String [])sbuff.toArray(new String[0]);
         //return null;
     }
+
+    public VorbisString getComment(int index) throws IndexOutOfBoundsException {
+        if ( index < 0 || index > this.numComments-1 )
+            throw new IndexOutOfBoundsException();
+        return this.comments[index];
+    }
+
+    public int getNumComments() {
+        return this.numComments;
+    }  
+
 }
