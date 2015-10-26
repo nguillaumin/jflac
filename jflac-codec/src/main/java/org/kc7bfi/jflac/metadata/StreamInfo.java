@@ -158,7 +158,7 @@ public class StreamInfo extends Metadata {
     public String toString() {
         return "StreamInfo:" 
             + " BlockSize=" + minBlockSize + "-" + maxBlockSize
-            + " FrameSize" + minFrameSize + "-" + maxFrameSize
+            + " FrameSize=" + minFrameSize + "-" + maxFrameSize
             + " SampleRate=" + sampleRate
             + " Channels=" + channels
             + " BPS=" + bitsPerSample

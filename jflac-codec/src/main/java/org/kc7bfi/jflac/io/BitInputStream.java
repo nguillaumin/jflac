@@ -120,6 +120,7 @@ public class BitInputStream {
         getBit = 0;
         putByte = 0;
         availBits = 0;
+        totalBitsRead = 0;
     }
     
     /**

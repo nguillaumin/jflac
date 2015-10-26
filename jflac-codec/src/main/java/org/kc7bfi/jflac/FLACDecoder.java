@@ -23,6 +23,8 @@ package org.kc7bfi.jflac;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import org.kc7bfi.jflac.frame.BadHeaderException;
@@ -60,7 +62,8 @@ public class FLACDecoder {
     private int outputCapacity = 0;
     private int outputChannels = 0;
     private long samplesDecoded = 0;
-    private StreamInfo streamInfo;
+    private StreamInfo streamInfo = null;
+    private SeekTable seekTable = null;
     private Frame frame = new Frame();
     private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
     //private int state;
@@ -441,6 +444,259 @@ public class FLACDecoder {
         }
     }
     
+    /**
+     * Attempt to seek to the requested (absolute) sample position in the file.
+     * Actually seeks to the frame which contains the requested sample position.
+     * @param samplesAbsolute	The number of samples from start of file to seek past
+     * @return 	The new sample position in the file (from which the next frame will be read)
+     * @throws IOException 
+     */
+    public long seek(long samplesAbsolute) throws IOException
+    {
+        // move back to start of file
+        if (!(inputStream instanceof RandomFileInputStream))
+        	throw new IOException("Not a RandomFileInputStream: " + inputStream.getClass().getName());
+        ((RandomFileInputStream)inputStream).seek(0);
+        bitStream.reset();
+        samplesDecoded = 0;
+        
+        // track seek delta (difference between requested and current position in samples)
+        long seekDelta = samplesAbsolute - samplesDecoded;
+        
+        // (re-)read metadata (including stream info and seek table)     	
+    	readMetadata();
+    	// check for stream info
+        if (streamInfo == null)
+        	throw new IOException("Could not obtain stream info required for seeking");
+    
+    	// validate requested (absolute) sample position
+    	if (samplesAbsolute < 0 || samplesAbsolute >= streamInfo.getTotalSamples())
+    		throw new IllegalArgumentException("Invalid sample position for seek");
+    	
+    	// check if seek to start of file (already done above)
+    	if (seekDelta == 0)
+    		return samplesDecoded; // samplesDecoded == 0
+
+    	// use max frame size for seeking backwards
+    	int estimatedFrameSize = streamInfo.getMaxFrameSize();    	
+    	
+    	// use data start and end positions as initial lower and upper bounds for seeking 	
+    	// Note: should be at first data frame immediately after readMetadata()
+    	findFrameSync(); // this reads up to the 2 sync bytes of the first data frame into bitStream
+    	// keep track of current frame starting position
+    	long bytePositionCurrentFrame = bitStream.getTotalBytesRead() - 2;	
+    	// Note: uses virtual temporary SeekPoint variables to store sample/byte offset pairs
+    	long samplePositionUpper = streamInfo.getTotalSamples();
+    	long bytePositionUpper = ((RandomFileInputStream)inputStream).getLength() - estimatedFrameSize
+    							 - bytePositionCurrentFrame;
+    	// Note: maximum frame size used to increase chance of being before final frame
+    	//	 	 (though still may not be if file contains ID3 tags after audio data)
+    	SeekPoint beforeSeekPosition = new SeekPoint(0, 0, estimatedFrameSize);
+    	SeekPoint afterSeekPosition = new SeekPoint(samplePositionUpper, bytePositionUpper,
+    												streamInfo.getMinBlockSize());
+    	
+    	// use seekTable to (greatly) improve these initial lower and upper bounds
+    	if (!(seekTable == null))
+    	{    		
+    		// use actual SeekPoint data from seekTable
+    		for (int i=0; i<seekTable.numberOfPoints(); i++)
+    		{
+    			SeekPoint currentSeekPoint = seekTable.getSeekPoint(i);
+    			// check against requested sample position and current lower and upper bounds
+    			if (currentSeekPoint.getSampleNumber() < samplesAbsolute)
+    			{
+    				// SeekPoint is before requested sample position:    				
+    				// check if closer than current lower bound
+    				if (currentSeekPoint.getSampleNumber() > beforeSeekPosition.getSampleNumber())
+    				{
+    					beforeSeekPosition = currentSeekPoint; // set as new lower bound
+    					
+        				// check if requested sample position is within this SeekPoint
+        				if ( samplesAbsolute < beforeSeekPosition.getSampleNumber() 
+        										+ beforeSeekPosition.getFrameSamples() )
+        				{
+        					afterSeekPosition = currentSeekPoint; // set as new upper bound as well
+        					break; // no need to check any further SeekPoints
+        				}
+    				}    					
+    			}
+    			else if (currentSeekPoint.getSampleNumber() > samplesAbsolute)
+    			{
+    				// SeekPoint is after requested sample position:
+    				// check if closer than current upper bound
+    				if (currentSeekPoint.getSampleNumber() < afterSeekPosition.getSampleNumber())
+    					afterSeekPosition = currentSeekPoint; // set as new upper bound
+    			}
+    			else if (currentSeekPoint.getSampleNumber() == samplesAbsolute)
+    			{
+    				// SeekPoint is exactly the requested sample position:
+    				// set lower and upper bound to this SeekPoint
+    				beforeSeekPosition = currentSeekPoint;
+    				afterSeekPosition = currentSeekPoint;    				
+    				break; // no need to check any further SeekPoints
+    			}
+    			else
+    				continue; // ignore SeekPoint (should never get here)
+    		}    			
+    	}    
+    	
+    	// use lower and upper bounds to estimate position of frame containing sample position:
+    	// set initial estimate as lower bound
+    	long bytePositionEstimate = bytePositionCurrentFrame + beforeSeekPosition.getStreamOffset();    	
+    	// check if sample position not found within lower bound frame
+    	// Note: if it had been found, then upper (after) would equal lower (before) sample position
+    	if (afterSeekPosition.getSampleNumber() > beforeSeekPosition.getSampleNumber() )
+    	{
+        	// calculate estimated position within lower and upper bounds:
+        	double percentBetweenSeekPositions = (samplesAbsolute - beforeSeekPosition.getSampleNumber())
+        										 / (double) (afterSeekPosition.getSampleNumber() 
+        												 	 - beforeSeekPosition.getSampleNumber());
+        	// remove the frame size to seek to before start of frame containing sample position 
+        	long bytePositionBetweenSeekPositions = (long) ((afterSeekPosition.getStreamOffset()
+        							         				- beforeSeekPosition.getStreamOffset())
+        										  			* percentBetweenSeekPositions)
+        											- estimatedFrameSize;
+        	// add estimated position within lower and upper bounds if not negative
+        	// Note: could be negative due to subtraction of estimated frame size
+        	if (bytePositionBetweenSeekPositions > 0 )
+        		bytePositionEstimate += bytePositionBetweenSeekPositions;
+    	}
+
+    	// seek to estimate for frame containing requested sample position
+    	((RandomFileInputStream)inputStream).seek(bytePositionEstimate);
+    	bitStream.reset();
+    	
+    	/* loop until at requested sample position:
+    	 * 0. starts at bytePositionEstimate from above initial logic;
+    	 * 1. find and read the next frame from the current location;
+    	 * 2. get frame sample range:
+    	 * 	  (a) if requested sample position > current frame sample range, goto 1.;
+    	 * 	  (b) if requested sample position < current frame sample range, seek backwards and goto 1.;
+    	 * 	      (to prevent infinite loops, seeks further backwards on each time 2.(b) is reached)
+    	 *    (c) if requested sample position within current frame sample range, exit loop.
+    	 */ 
+    	// Note: exits loop when current frame contains requested sample position
+    	int framesToSeekBack = 1; // number of frames to go back if past requested position
+    	Map<String, Object> seekBackwardsResults = new HashMap<String, Object>();
+    	while (!(seekDelta == 0)) // Note: this condition is not currently used
+    	{
+        	// get the next data frame from the current position    		
+    		findFrameSync(); // positions 2 bytes into the frame (as reads the 2 sync bytes)
+    		// update position of current frame
+    		bytePositionCurrentFrame = bytePositionEstimate + bitStream.getTotalBytesRead() - 2;
+    		try { // attempt to read the current frame
+				readFrame();
+			} catch (FrameDecodeException e) {
+				badFrames++;
+				continue; // try to read next frame
+			}
+    		// update current position to end of frame
+    		bytePositionEstimate += bitStream.getTotalBytesRead();
+    		
+    		if (frame == null)
+    		{
+    			// no frame read from file (likely no data frames remaining)
+    			if (eof)
+    			{
+    				// end of file: attempt to seek back to previous frame (or further if required)
+    				seekBackwardsResults = seekBackwards(bytePositionCurrentFrame, framesToSeekBack,
+    													 estimatedFrameSize);
+    				bytePositionEstimate = ((Long) seekBackwardsResults.get("bytePositionEstimate")).longValue();
+    				framesToSeekBack = ((Integer) seekBackwardsResults.get("framesToSeekBack")).intValue();
+    				// iterate again to get a previous frame
+    				continue;
+    			}
+    			else // not end of file (unexpected file error)
+    				throw new IOException("Fatal seek data frame reading error"); 
+    		}
+    		else
+    		{
+    			// frame read from file:
+    			// use header to update current position
+    			samplesDecoded = frame.header.sampleNumber;
+    			
+    			// update seek delta to determine if further iterations required
+    			seekDelta = samplesAbsolute - samplesDecoded;
+    			if (seekDelta < 0)
+    			{
+    				// requested sample is behind current frame:
+    				// seek backwards (firstly by one frame, then further if required)
+    				seekBackwardsResults = seekBackwards(bytePositionCurrentFrame, framesToSeekBack,
+    													 estimatedFrameSize);
+    				bytePositionEstimate = ((Long) seekBackwardsResults.get("bytePositionEstimate")).longValue();
+    				framesToSeekBack = ((Integer) seekBackwardsResults.get("framesToSeekBack")).intValue();
+    				// iterate again to get a previous frame
+    				continue;
+    			}
+    			else if (seekDelta < frame.header.blockSize) // && seekDelta >= 0
+    			{
+    				// requested sample is in current frame (success):
+    				// reposition pointer to before the frame
+    				((RandomFileInputStream)inputStream).seek(bytePositionCurrentFrame);
+    				bitStream.reset();
+    				// success: exit loop at current position (immediately before frame)
+    				break;
+    			}
+    			else if (seekDelta >= frame.header.blockSize)
+    			{
+    				// requested sample is ahead of current frame:
+    				framesToSeekBack = 0; // should not need to go backwards now
+    				((RandomFileInputStream)inputStream).seek(bytePositionEstimate);
+    				bitStream.reset();
+    				// iterate again to get the next data frame
+    				continue;
+    			}
+    			else // this should not be possible, as above should cover all cases
+    				throw new IOException("Fatal seek logic error");    			
+    		}
+    	}
+    	
+    	// return current sample position in file
+    	return samplesDecoded;
+    }
+    
+    /** Used by seek() to seek backwards, without causing an infinite loop.
+     * @param bytePositionEstimate	The next position to seek to (in bytes)
+     * @param framesToSeekBack		The number of frames to seek backwards
+     * @param estimatedFrameSize	The size (in bytes) of a frame
+     * @return 	Map containing new bytePositionEstimate and framesToSeekBack
+     * @throws IOException
+     */
+    private Map<String, Object> seekBackwards(long bytePositionEstimate, int framesToSeekBack,
+    										  long estimatedFrameSize) 
+    		throws IOException 
+    {
+    	if (framesToSeekBack > 0)
+		{
+			// attempt to seek back to previous frame
+			bytePositionEstimate -= framesToSeekBack * estimatedFrameSize;
+			if (bytePositionEstimate < 0)
+			{
+				// prevent seeking before start of file
+				bytePositionEstimate = 0;
+				// should not need to seek backwards again
+				framesToSeekBack = 0;
+			}
+			else
+			{
+				// seek back by further next time if position past required sample again
+				framesToSeekBack++;
+			}        
+		}
+		else // throw error: was behind (hence framesToSeekBack < 1) and now ahead
+			throw new IOException("Fatal seek error: sample position not found");
+    	
+    	// seek back to new estimated position (should be before previous frame)
+    	((RandomFileInputStream)inputStream).seek(bytePositionEstimate);
+    	bitStream.reset();
+    	
+    	// return new estimated position and frames to seek back
+    	Map<String, Object> returnVariables = new HashMap<String, Object>();
+    	returnVariables.put("bytePositionEstimate", new Long(bytePositionEstimate));
+    	returnVariables.put("framesToSeekBack", new Integer(framesToSeekBack));
+    	return returnVariables;
+	}
+    
     /*
      private boolean processUntilEndOfStream() throws IOException {
      //boolean got_a_frame;
@@ -469,8 +725,8 @@ public class FLACDecoder {
        }
        }
        */
-    
-    /**
+
+	/**
      * Read the next data frame.
      * @return  The next frame
      * @throws IOException  on read error
@@ -592,7 +848,8 @@ public class FLACDecoder {
             metadata = streamInfo;
             pcmProcessors.processStreamInfo((StreamInfo)metadata);
         } else if (type == Metadata.METADATA_TYPE_SEEKTABLE) {
-            metadata = new SeekTable(bitStream, length, isLast);
+        	seekTable = new SeekTable(bitStream, length, isLast);
+            metadata = seekTable;
         } else if (type == Metadata.METADATA_TYPE_APPLICATION) {
             metadata = new Application(bitStream, length, isLast);
         } else if (type == Metadata.METADATA_TYPE_PADDING) {
