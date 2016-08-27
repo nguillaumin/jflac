@@ -16,13 +16,26 @@
 
 package org.jflac.sound.spi;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.*;
+
+import org.junit.Test;
 
 /**
  * FlacAudioFileReaderTest.
@@ -31,7 +44,7 @@ import java.io.*;
  *
  * @author <a href="mailto:hs@tagtraum.com">Hendrik Schreiber</a>
  */
-public class FlacAudioFileReaderTest extends TestCase {
+public class FlacAudioFileReaderTest {
 
     /**
      * Open simple test file and get stream.
@@ -39,6 +52,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws UnsupportedAudioFileException
      * @throws IOException
      */
+    @Test
     public void testGetAudioInputStreamWithFlacFile() throws UnsupportedAudioFileException, IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final AudioInputStream stream = flacAudioFileReader.getAudioInputStream(getFlacTestFile("cymbals.flac"));
@@ -51,6 +65,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws UnsupportedAudioFileException
      * @throws IOException
      */
+    @Test
     public void testGetAudioInputStreamWithBufferedFlacStream() throws UnsupportedAudioFileException, IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File flacTestFile = getFlacTestFile("cymbals.flac");
@@ -62,7 +77,7 @@ public class FlacAudioFileReaderTest extends TestCase {
             final AudioInputStream stream = flacAudioFileReader.getAudioInputStream(in);
             assertNotNull(stream);
             final AudioFormat format = stream.getFormat();
-            assertEquals(44100f, format.getSampleRate());
+            assertEquals(44100f, format.getSampleRate(), 0);
             assertEquals(16, format.getSampleSizeInBits());
             assertEquals(2, format.getChannels());
             assertEquals("FLAC", format.getEncoding().toString());
@@ -83,6 +98,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws java.io.IOException
      * @throws javax.sound.sampled.UnsupportedAudioFileException
      */
+    @Test
     public void testGetAudioInputStreamWithUnbufferedFlacStream() throws IOException, UnsupportedAudioFileException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File flacTestFile = getFlacTestFile("cymbals.flac");
@@ -112,6 +128,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws UnsupportedAudioFileException
      * @throws IOException
      */
+    @Test
     public void testGetAudioFileFormatWithBufferedFlacStream() throws UnsupportedAudioFileException, IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File flacTestFile = getFlacTestFile("cymbals.flac");
@@ -123,7 +140,7 @@ public class FlacAudioFileReaderTest extends TestCase {
             final AudioFileFormat fileFormat = flacAudioFileReader.getAudioFileFormat(in);
             assertNotNull(fileFormat);
             final AudioFormat format = fileFormat.getFormat();
-            assertEquals(44100f, format.getSampleRate());
+            assertEquals(44100f, format.getSampleRate(), 0);
             assertEquals(16, format.getSampleSizeInBits());
             assertEquals(2, format.getChannels());
             assertEquals("FLAC", format.getEncoding().toString());
@@ -144,6 +161,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws java.io.IOException
      * @throws javax.sound.sampled.UnsupportedAudioFileException
      */
+    @Test
     public void testGetAudioFileFormatWithUnbufferedFlacStream() throws IOException, UnsupportedAudioFileException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File flacTestFile = getFlacTestFile("cymbals.flac");
@@ -173,6 +191,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      * @throws UnsupportedAudioFileException
      * @throws IOException
      */
+    @Test
     public void testGetAudioFileFormatWithFlacFile() throws UnsupportedAudioFileException, IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final AudioFileFormat audioFileFormat = flacAudioFileReader.getAudioFileFormat(getFlacTestFile("cymbals.flac"));
@@ -181,7 +200,7 @@ public class FlacAudioFileReaderTest extends TestCase {
         assertEquals(new Long(9338775), audioFileFormat.getProperty("duration"));
         assertEquals(411840, audioFileFormat.getFrameLength());
         final AudioFormat format = audioFileFormat.getFormat();
-        assertEquals(44100f, format.getSampleRate());
+        assertEquals(44100f, format.getSampleRate(), 0);
         assertEquals(16, format.getSampleSizeInBits());
         assertEquals(2, format.getChannels());
         assertEquals("FLAC", format.getEncoding().toString());
@@ -192,6 +211,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      *
      * @throws IOException
      */
+    @Test
     public void testGetAudioInputStreamWithUnsupportedFile() throws IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File file = File.createTempFile("flacTest", ".wav");
@@ -213,6 +233,7 @@ public class FlacAudioFileReaderTest extends TestCase {
      *
      * @throws IOException
      */
+    @Test
     public void testGetAudioFileFormatWithUnsupportedFile() throws IOException {
         final FlacAudioFileReader flacAudioFileReader = new FlacAudioFileReader();
         final File file = File.createTempFile("flacTest", ".wav");
