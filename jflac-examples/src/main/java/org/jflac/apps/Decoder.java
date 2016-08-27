@@ -60,7 +60,6 @@ public class Decoder implements PCMProcessor {
      */
     public void processStreamInfo(StreamInfo info) {
         try {
-            System.out.println("Write WAV header " + info);
             wav.writeHeader(info);
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,7 +73,6 @@ public class Decoder implements PCMProcessor {
      */
     public void processPCM(ByteData pcm) {
         try {
-            System.out.println("Write PCM");
             wav.writePCM(pcm);
         } catch (IOException e) {
             e.printStackTrace();
