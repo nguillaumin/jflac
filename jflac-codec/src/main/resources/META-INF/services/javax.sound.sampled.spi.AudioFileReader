@@ -1,2 +1,2 @@
 # Providers of Speex sound file-reading services
-org.kc7bfi.jflac.sound.spi.FlacAudioFileReader
+org.jflac.sound.spi.FlacAudioFileReader
