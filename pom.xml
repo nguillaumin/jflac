@@ -8,7 +8,7 @@
 	<packaging>pom</packaging>
 
 	<name>Java FLAC Codec</name>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.5.0-SNAPSHOT</version>
 	<description>jFLAC is a port of the Free Lossless Audio Codec (FLAC) library to Java. This allows Java developers to write programs that use the FLAC files and the FLAC algorithms.</description>
 
 	<url>http://jflac.org/</url>
