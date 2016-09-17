@@ -47,10 +47,6 @@ public class WavWriter {
     private int samplesProcessed = 0;
     private int frameCounter = 0;
     
-    private boolean needsFixup = false;
-    private long riffOffset;
-    private long dataOffset;
-    
     private DataOutput os;
     private LittleEndianDataOutput osLE;
     
@@ -128,12 +124,10 @@ public class WavWriter {
         long dataSize = totalSamples * channels * ((bps + 7) / 8);
         if (totalSamples == 0) {
             if (!(os instanceof RandomAccessFile)) throw new IOException("Cannot seek in output stream");
-            needsFixup = true;
         }
         //if (dataSize >= 0xFFFFFFDC) throw new IOException("ERROR: stream is too big to fit in a single file chunk (Datasize="+dataSize+")");
         
         os.write("RIFF".getBytes());
-        if (needsFixup) riffOffset = ((RandomAccessFile) os).getFilePointer();
         
         osLE.writeInt((int) dataSize + 36); // filesize-8
         os.write("WAVEfmt ".getBytes());
@@ -145,7 +139,6 @@ public class WavWriter {
         osLE.writeShort(channels * ((bps + 7) / 8)); // block align
         osLE.writeShort(bps); // bits per sample
         os.write("data".getBytes());
-        if (needsFixup) dataOffset = ((RandomAccessFile) os).getFilePointer();
         
         osLE.writeInt((int) dataSize); // data size
     }

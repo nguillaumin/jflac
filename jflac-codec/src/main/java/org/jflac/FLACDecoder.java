@@ -68,10 +68,6 @@ public class FLACDecoder {
     private byte[] headerWarmup = new byte[2]; // contains the sync code and reserved bits
     //private int state;
     private int channels;
-    private int channelAssignment;
-    private int bitsPerSample;
-    private int sampleRate; // in Hz
-    private int blockSize; // in samples (per channel)
     private InputStream inputStream = null;
     
     private int badFrames;
@@ -1035,10 +1031,6 @@ public class FLACDecoder {
         
         // put the latest values into the public section of the decoder instance
         channels = frame.header.channels;
-        channelAssignment = frame.header.channelAssignment;
-        bitsPerSample = frame.header.bitsPerSample;
-        sampleRate = frame.header.sampleRate;
-        blockSize = frame.header.blockSize;
         
         //samplesDecoded = frame.header.sampleNumber + frame.header.blockSize;
         samplesDecoded += frame.header.blockSize;
