@@ -1,6 +1,18 @@
 language: java
 
+env:
+  global:
+    - secure: "vBc9UI5z5hS6AQMSRclcKhrtxswP8TDkbU1w3VbLk1hZ6wiKd3VYmRNqCiZEbjo1F7x8Xlg9ZRR/BkuHtb/Ef53TKJLjiecPLRtq9dy4ZjOPkiIz7V5/rzeK8g7zaPaP1eErQKmA0QxNhl7enNndgni40KjcODpg3+1zl5Tcg5s="
+
 addons:
   apt:
     packages:
       - flac
+  coverity_scan:
+    project:
+      name: "nguillaumin/jflac"
+      description: "FLAC codec for Java"
+    notification_email: nicolas+github@guillaumin.me
+    build_command_prepend: "mvn clean"
+    build_command:   "mvn -DskipTests=true compile"
+    branch_pattern: coverity
