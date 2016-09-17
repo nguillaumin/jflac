@@ -195,7 +195,7 @@ public class RingBuffer {
      */
     public static void main(String[] args) {
         RingBuffer r = new RingBuffer(9);
-        byte[] b = new String("ABCDEFG").getBytes();
+        byte[] b = "ABCDEFG".getBytes();
         byte[] g = new byte[2];
         System.out.println("Start");
         r.put(b, 0, 3);

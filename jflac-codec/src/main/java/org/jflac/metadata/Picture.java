@@ -79,7 +79,7 @@ public class Picture extends Metadata {
             } catch (UnsupportedEncodingException e) {}
             usedBits += descStringByteCount*8;
         } else {
-            descString = new String("");
+            descString = "";
         }
         
         picPixelWidth = is.readRawUInt(32);
