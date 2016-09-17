@@ -692,8 +692,8 @@ public class FLACDecoder {
     	
     	// return new estimated position and frames to seek back
     	Map<String, Object> returnVariables = new HashMap<String, Object>();
-    	returnVariables.put("bytePositionEstimate", new Long(bytePositionEstimate));
-    	returnVariables.put("framesToSeekBack", new Integer(framesToSeekBack));
+    	returnVariables.put("bytePositionEstimate", bytePositionEstimate);
+    	returnVariables.put("framesToSeekBack", framesToSeekBack);
     	return returnVariables;
 	}
     
