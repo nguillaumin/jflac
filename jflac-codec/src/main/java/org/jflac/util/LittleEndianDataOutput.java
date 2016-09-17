@@ -110,7 +110,7 @@ public class LittleEndianDataOutput implements DataOutput {
      * @see java.io.DataOutput#writeBoolean(boolean)
      */
     public void writeBoolean(boolean arg0) throws IOException {
-        writeBoolean(arg0);
+        out.writeBoolean(arg0);
     }
     
     /**
