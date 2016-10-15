@@ -244,7 +244,7 @@ public class FlacPacker extends JFrame {
      * This class holds the fiels and their seek points.
      * @author kc7bfi
      */
-    private class PackerFile {
+    private static class PackerFile {
         protected File file;
         protected SeekPoint seekPoint;
         protected long firstFrameOffset;

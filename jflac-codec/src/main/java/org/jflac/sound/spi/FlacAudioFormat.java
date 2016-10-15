@@ -49,10 +49,10 @@ public class FlacAudioFormat extends AudioFormat {
 				/* streamInfo.maxFrameSize */AudioSystem.NOT_SPECIFIED,
 				AudioSystem.NOT_SPECIFIED, false);
 		props = new HashMap<String, Object>();
-		props.put(KEY_FRAMESIZE_MIN, new Integer(streamInfo.getMinFrameSize()));
-		props.put(KEY_FRAMESIZE_MAX, new Integer(streamInfo.getMaxFrameSize()));
-		props.put(KEY_BLOCKSIZE_MIN, new Integer(streamInfo.getMinBlockSize()));
-		props.put(KEY_BLOCKSIZE_MAX, new Integer(streamInfo.getMaxBlockSize()));
+		props.put(KEY_FRAMESIZE_MIN, streamInfo.getMinFrameSize());
+		props.put(KEY_FRAMESIZE_MAX, streamInfo.getMaxFrameSize());
+		props.put(KEY_BLOCKSIZE_MIN, streamInfo.getMinBlockSize());
+		props.put(KEY_BLOCKSIZE_MAX, streamInfo.getMaxBlockSize());
 	}
 
 	/**

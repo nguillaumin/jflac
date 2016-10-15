@@ -33,14 +33,9 @@ import org.jflac.metadata.StreamInfo;
 public class PCMDecoder {
     //private static final int MAX_BLOCK_SIZE = 65535;
     
-    private long totalSamples;
     private int channels;
     private int bps;
-    private int sampleRate;
     
-    private int samplesProcessed = 0;
-    private int frameCounter = 0;
-   
     private ByteData buf;
     
     
@@ -49,10 +44,8 @@ public class PCMDecoder {
      * @param streamInfo    The FLAC stream info
      */
     public PCMDecoder(StreamInfo streamInfo) {
-        this.totalSamples = streamInfo.getTotalSamples();
         this.channels = streamInfo.getChannels();
         this.bps = streamInfo.getBitsPerSample();
-        this.sampleRate = streamInfo.getSampleRate();
         this.buf = new ByteData(streamInfo.getMaxFrameSize());
     }
     
@@ -72,8 +65,6 @@ public class PCMDecoder {
         int channel;
         
         if (wideSamples > 0) {
-            samplesProcessed += wideSamples;
-            frameCounter++;
             if (bps == 8) {
                 if (isUnsignedSamples) {
                     for (sample = wideSample = 0; wideSample < wideSamples; wideSample++)

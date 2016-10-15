@@ -45,12 +45,23 @@ public class Decoder implements PCMProcessor {
      */
     public void decode(String inFileName, String outFileName) throws IOException {
         System.out.println("Decode [" + inFileName + "][" + outFileName + "]");
-        FileInputStream is = new FileInputStream(inFileName);
-        FileOutputStream os = new FileOutputStream(outFileName);
-        wav = new WavWriter(os);
-        FLACDecoder decoder = new FLACDecoder(is);
-        decoder.addPCMProcessor(this);
-        decoder.decode();
+        FileInputStream is = null;
+        FileOutputStream os = null;
+        try {
+            is = new FileInputStream(inFileName);
+            os = new FileOutputStream(outFileName);
+            wav = new WavWriter(os);
+            FLACDecoder decoder = new FLACDecoder(is);
+            decoder.addPCMProcessor(this);
+            decoder.decode();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (os != null) {
+                os.close();
+            }
+        }
     }
     
     /**

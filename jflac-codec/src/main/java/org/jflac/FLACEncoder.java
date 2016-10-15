@@ -25,18 +25,6 @@ import org.jflac.io.BitOutputStream;
 
 public class FLACEncoder {
     
-    private class verify_input_fifo {
-        int[][] data = new int[Constants.MAX_CHANNELS][Constants.MAX_BLOCK_SIZE];
-        int size; /* of each data[] in samples */
-        int tail;
-    };
-    
-    private class verify_output {
-        byte[] data;
-        int capacity;
-        int bytes;
-    };
-    
     private static final int ENCODER_IN_MAGIC = 0;
     private static final int ENCODER_IN_METADATA = 1;
     private static final int ENCODER_IN_AUDIO = 2;
@@ -131,91 +119,10 @@ public class FLACEncoder {
      *
      ***********************************************************************/
     
-    int input_capacity;                          /* current size (in samples) of the signal and residual buffers */
-    int[][] integer_signal = new int[Constants.MAX_CHANNELS][Constants.MAX_BLOCK_SIZE];  /* the integer version of the input signal */
-    int[][] integer_signal_mid_side = new int[2][Constants.MAX_BLOCK_SIZE];          /* the integer version of the mid-side input signal (stereo only) */
-    double[][] real_signal = new double[Constants.MAX_CHANNELS][Constants.MAX_BLOCK_SIZE];      /* the floating-point version of the input signal */
-    double[][] real_signal_mid_side = new double[2][Constants.MAX_BLOCK_SIZE];              /* the floating-point version of the mid-side input signal (stereo only) */
-    int[] subframe_bps = new int[Constants.MAX_CHANNELS];        /* the effective bits per sample of the input signal (stream bps - wasted bits) */
-    int[] subframe_bps_mid_side = new int[2];                /* the effective bits per sample of the mid-side input signal (stream bps - wasted bits + 0/1) */
-    int[][] residual_workspace = new int[Constants.MAX_CHANNELS][2]; /* each channel has a candidate and best workspace where the subframe residual signals will be stored */
-    int[][] residual_workspace_mid_side = new int[2][2];
-    //Subframe subframe_workspace[Constants.MAX_CHANNELS][2];
-    //Subframe subframe_workspace_mid_side[2][2];
-    //Subframe *subframe_workspace_ptr[Constants.MAX_CHANNELS][2];
-    //Subframe *subframe_workspace_ptr_mid_side[2][2];
-    EntropyPartitionedRiceContents[][] partitioned_rice_contents_workspace = new EntropyPartitionedRiceContents[Constants.MAX_CHANNELS][2];
-    EntropyPartitionedRiceContents[][] partitioned_rice_contents_workspace_mid_side = new EntropyPartitionedRiceContents[Constants.MAX_CHANNELS][2];
-    EntropyPartitionedRiceContents[][] partitioned_rice_contents_workspace_ptr = new EntropyPartitionedRiceContents[Constants.MAX_CHANNELS][2];
-    EntropyPartitionedRiceContents[][] partitioned_rice_contents_workspace_ptr_mid_side = new EntropyPartitionedRiceContents[Constants.MAX_CHANNELS][2];
-    int[] best_subframe = new int[Constants.MAX_CHANNELS];       /* index into the above workspaces */
-    int[] best_subframe_mid_side = new int[2];
-    int[] best_subframe_bits = new int[Constants.MAX_CHANNELS];  /* size in bits of the best subframe for each channel */
-    int[] best_subframe_bits_mid_side = new int[2];
-    //uint32 *abs_residual;                       /* workspace where abs(candidate residual) is stored */
-    //uint64 *abs_residual_partition_sums;        /* workspace where the sum of abs(candidate residual) for each partition is stored */
-    //unsigned *raw_bits_per_partition;                 /* workspace where the sum of silog2(candidate residual) for each partition is stored */
-    BitOutputStream frame = new BitOutputStream();                           /* the current frame being worked on */
-    double loose_mid_side_stereo_frames_exact;        /* exact number of frames the encoder will use before trying both independent and mid/side frames again */
-    int loose_mid_side_stereo_frames;            /* rounded number of frames the encoder will use before trying both independent and mid/side frames again */
-    int loose_mid_side_stereo_frame_count;       /* number of frames using the current channel assignment */
-    int last_channel_assignment;
-    //StreamMetadata metadata;
-    int current_sample_number;
-    int current_frame_number;
-    //struct MD5Context md5context;
-    //CPUInfo cpuinfo;
-    //unsigned (*local_fixed_compute_best_predictor)(int data[], unsigned data_len, double residual_bits_per_sample[MAX_FIXED_ORDER+1]);
-    //void (*local_lpc_compute_autocorrelation)(double data[], unsigned data_len, unsigned lag, double autoc[]);
-    //void (*local_lpc_compute_residual_from_qlp_coefficients)(int data[], unsigned data_len, int qlp_coeff[], unsigned order, int lp_quantization, int residual[]);
-    //void (*local_lpc_compute_residual_from_qlp_coefficients_64bit)(int data[], unsigned data_len, int qlp_coeff[], unsigned order, int lp_quantization, int residual[]);
-    //void (*local_lpc_compute_residual_from_qlp_coefficients_16bit)(int data[], unsigned data_len, int qlp_coeff[], unsigned order, int lp_quantization, int residual[]);
-    boolean use_wide_by_block;          /* use slow 64-bit versions of some functions because of the block size */
-    boolean use_wide_by_partition;      /* use slow 64-bit versions of some functions because of the min partition order and blocksize */
-    boolean use_wide_by_order;          /* use slow 64-bit versions of some functions because of the lpc order */
     boolean precompute_partition_sums;  /* our initial guess as to whether precomputing the partitions sums will be a speed improvement */
-    boolean disable_constant_subframes;
+
     boolean disable_fixed_subframes;
     boolean disable_verbatim_subframes;
-    //StreamEncoderWriteCallback write_callback;
-    //StreamEncoderMetadataCallback metadata_callback;
-    //void *client_data;
-    /* unaligned (original) pointers to allocated data */
-    int[] integer_signal_unaligned = new int[Constants.MAX_CHANNELS];
-    int[] integer_signal_mid_side_unaligned = new int[2];
-    double[] real_signal_unaligned = new double[Constants.MAX_CHANNELS];
-    double[] real_signal_mid_side_unaligned = new double[2];
-    int[][] residual_workspace_unaligned = new int[Constants.MAX_CHANNELS][2];
-    int[][] residual_workspace_mid_side_unaligned = new int[2][2];
-    //uint32 *abs_residual_unaligned;
-    //uint64 *abs_residual_partition_sums_unaligned;
-    //unsigned *raw_bits_per_partition_unaligned;
-    /*
-     * These fields have been moved here from private function local
-     * declarations merely to save stack space during encoding.
-     */
-    //double[] lp_coeff = new double[Constants.MAX_LPC_ORDER][Constants.MAX_LPC_ORDER]; /* from process_subframe_() */
-    EntropyPartitionedRiceContents[] partitioned_rice_contents_extra = new EntropyPartitionedRiceContents[2]; /* from find_best_partition_order_() */
-    /*
-     * The data for the verify section
-     */
-    private class VerifyData {
-        FLACDecoder decoder;
-        int state_hint;
-        boolean needs_magic_hack;
-        verify_input_fifo input_fifo;
-        verify_output output;
-        private class error_stats {
-            long absolute_sample;
-            int frame_number;
-            int channel;
-            int sample;
-            int expected;
-            int got;
-        }
-    }
-    private VerifyData verifyData = new VerifyData();
-    boolean is_being_deleted; /* if true, call to ..._finish() from ..._delete() will not call the callbacks */
     
     // protected
     int state;
@@ -284,8 +191,6 @@ public class FLACEncoder {
      */
     public FLACEncoder() {
         setDefaults();
-        
-        is_being_deleted = false;
         
         /*
          for (int i = 0; i < Constants.MAX_CHANNELS; i++) {
@@ -871,7 +776,6 @@ public class FLACEncoder {
      */
     public void disableConstantSubframes(boolean value) {
         if (state != STREAM_ENCODER_UNINITIALIZED) return;
-        disable_constant_subframes = value;
     }
     
     public void disableFixedSubframes(boolean value) {
@@ -1140,11 +1044,7 @@ public class FLACEncoder {
         rice_parameter_search_dist = 0;
         total_samples_estimate = 0;
         //metadata = null;
-        num_metadata_blocks = 0;
         
-        disable_constant_subframes = false;
-        disable_fixed_subframes = false;
-        disable_verbatim_subframes = false;
         //write_callback = 0;
         //metadata_callback = 0;
         //client_data = 0;

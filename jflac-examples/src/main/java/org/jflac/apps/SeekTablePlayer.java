@@ -50,7 +50,6 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
     private DataLine.Info info;
     private SourceDataLine line;
     
-    private StreamInfo streamInfo = null;
     private SeekTable seekTable = null;
     
     /**
@@ -93,7 +92,6 @@ public class SeekTablePlayer implements PCMProcessor, FrameListener {
      * @see org.jflac.PCMProcessor#processStreamInfo(org.jflac.metadata.StreamInfo)
      */
     public void processStreamInfo(StreamInfo streamInfo) {
-        this.streamInfo = streamInfo;
         try {
             fmt = streamInfo.getAudioFormat();
             info = new DataLine.Info(SourceDataLine.class, fmt, AudioSystem.NOT_SPECIFIED);

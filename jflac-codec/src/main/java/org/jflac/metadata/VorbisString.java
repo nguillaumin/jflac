@@ -54,7 +54,7 @@ public class VorbisString {
         try {
             s = new String(entry, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            s = new String("");
+            s = "";
         }
         return s;
     }
