@@ -890,7 +890,7 @@ public class FLACDecoder {
         
         // If we know the total number of samples in the stream, stop if we've read that many.
         // This will stop us, for example, from wasting time trying to sync on an ID3V1 tag.
-        if (streamInfo != null && (streamInfo.getTotalSamples() != 0)) {
+        if (streamInfo != null && (streamInfo.getTotalSamples() > 0)) {
             if (samplesDecoded >= streamInfo.getTotalSamples()) {
                 //state = DECODER_END_OF_STREAM;
                 return;

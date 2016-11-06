@@ -398,8 +398,11 @@ public class FlacAudioFileReader extends AudioFileReader {
         
         //ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         SequenceInputStream sequenceInputStream = new SequenceInputStream(byteInStream, inputStream);
-        //return new AudioInputStream(sequenceInputStream, audioFileFormat
-        //        .getFormat(), audioFileFormat.getFrameLength());
-        return new AudioInputStream(sequenceInputStream, audioFileFormat.getFormat(), audioFileFormat.getFrameLength());
+
+        AudioFormat format = audioFileFormat.getFormat();
+        int frameLength = medialength; // if frameSize not specified, use byte length, see AudioInputStream
+        if (!(format.getFrameSize() == AudioSystem.NOT_SPECIFIED || format.getFrameSize() <= 0))
+            frameLength = audioFileFormat.getFrameLength();
+        return new AudioInputStream(sequenceInputStream, format, frameLength);
     }
 }
