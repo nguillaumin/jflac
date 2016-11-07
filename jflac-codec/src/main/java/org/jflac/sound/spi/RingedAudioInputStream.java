@@ -324,7 +324,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      */
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         checkIfStillOpen();
-        int frameSize = (int) getFrameLength();
+        int frameSize = getFormat().getFrameSize();
         int bytesRead = 0;
         // can only read integral number of frames
         len -= (len % frameSize);
@@ -394,7 +394,7 @@ public abstract class RingedAudioInputStream extends AudioInputStream {
      */
     public synchronized int available() throws IOException {
         checkIfStillOpen();
-        if (buffer.getAvailable() < (int) getFrameLength()) {
+        if (buffer.getAvailable() < getFormat().getFrameSize()) {
         	fill();
         }
         return buffer.getAvailable();

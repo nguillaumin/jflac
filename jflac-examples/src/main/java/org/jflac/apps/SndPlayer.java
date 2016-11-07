@@ -97,9 +97,9 @@ public class SndPlayer {
             AudioFormat newFormat = new AudioFormat(
                     AudioFormat.Encoding.PCM_SIGNED, 
                     audioFormat.getSampleRate(),
-                    16,
+                    (audioFormat.getSampleSizeInBits() > 0) ? audioFormat.getSampleSizeInBits() : 16,
                     audioFormat.getChannels(),
-                    audioFormat.getChannels() * 2,
+                    (audioFormat.getSampleSizeInBits() > 0) ? audioFormat.getChannels() * audioFormat.getSampleSizeInBits() / 8 : audioFormat.getChannels() * 2,
                     audioFormat.getSampleRate(),
                     false);
             System.out.println("Converting audio format to " + newFormat);
@@ -127,7 +127,7 @@ public class SndPlayer {
             // Adjust the volume on the output line.
             if (dataLine.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
                 FloatControl volume = (FloatControl) dataLine.getControl(FloatControl.Type.MASTER_GAIN);
-                volume.setValue(100.0F);
+                volume.setValue(volume.getMaximum()/2);
             }
             
             // Allows the line to move data in and out to a port.
