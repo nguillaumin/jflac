@@ -26,14 +26,11 @@ import java.util.List;
 @RunWith(Parameterized.class)
 public class DecoderStreamComparisonTest {
 
-    /** System property to override the FLAC binary location */
-    private static final String SYSPROP_OVERRIDE_BINARY = "jflac.test.flac.binary";
-    
     /** Working folder for the test */
     private static final File OUTDIR = new File("target/test-output/decoder-comparison-stream");
     
     /** Official FLAC binary */
-    private static final File FLAC_BINARY = getFlacBinary();
+    private static final File FLAC_BINARY = DecoderComparisonTest.getFlacBinary();
 
     /** Input FLAC file */
     @Parameter
@@ -59,6 +56,7 @@ public class DecoderStreamComparisonTest {
     @Before
     public void before() throws IOException {
         Assume.assumeNotNull(FLAC_BINARY);
+        Assume.assumeTrue(System.getenv("TRAVIS") == null); // Can't open a line in travis ci
         OUTDIR.mkdirs();
         FileUtils.cleanDirectory(OUTDIR);
     }
@@ -105,7 +103,7 @@ public class DecoderStreamComparisonTest {
         }
 
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-        Assert.assertTrue("Play.playAudioStream does not handle this type of audio on this system.", AudioSystem.isLineSupported(info));
+        Assert.assertTrue("AudioSystem does not handle this type of audio on this system.", AudioSystem.isLineSupported(info));
 
         SourceDataLine dataLine = (SourceDataLine) AudioSystem.getLine(info);
         dataLine.open(audioFormat);
@@ -133,40 +131,6 @@ public class DecoderStreamComparisonTest {
         Assert.assertArrayEquals("Decoded files should be identical",
             FileUtils.readFileToByteArray(flacOut),
             FileUtils.readFileToByteArray(jFlacOut));
-    }
-    
-    /**
-     * Attempt to locate the official FLAC binary either from a provided system
-     * property or by looking in the PATH environment variable.
-     * 
-     * @return FLAC binary, or null if not found
-     */
-    private static File getFlacBinary() {
-        String binaryOverride = System.getProperty(SYSPROP_OVERRIDE_BINARY);
-        if (binaryOverride != null && new File(binaryOverride).exists()) {
-            File binary = new File(binaryOverride);
-            System.out.println("Using provided FLAC binary: " + binary.getAbsolutePath());
-            return binary;
-        }
-        
-        String ext = "";
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            ext = ".exe";
-        }
-        
-        String path = System.getenv("PATH");
-        for (String s: path.split(File.pathSeparator)) {
-            File binary = new File(s, "flac" + ext);
-            if (binary.exists()) {
-                System.out.println("Found FLAC binary: " + binary.getAbsolutePath());
-                return binary;
-            }
-        }
-        
-        System.out.println("Unable to locate FLAC binary. Ensure it's in your PATH, or set "
-            + SYSPROP_OVERRIDE_BINARY + " (e.g. -D" + SYSPROP_OVERRIDE_BINARY + "=C:\\Path\\To\\flac.exe)");
-        
-        return null;
     }
 
 }
