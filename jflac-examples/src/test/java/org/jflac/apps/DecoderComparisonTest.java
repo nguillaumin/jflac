@@ -95,7 +95,7 @@ public class DecoderComparisonTest {
      * 
      * @return FLAC binary, or null if not found
      */
-    private static File getFlacBinary() {
+    public static File getFlacBinary() {
         String binaryOverride = System.getProperty(SYSPROP_OVERRIDE_BINARY);
         if (binaryOverride != null && new File(binaryOverride).exists()) {
             File binary = new File(binaryOverride);
