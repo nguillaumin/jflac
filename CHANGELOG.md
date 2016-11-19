@@ -1,9 +1,9 @@
 # jFLAC Changelog
 
-## Next release
+## v1.5.1 (2016-11-18)
 
 * Various code quality fixes using FindBugs & Coverity
-* Make audio stream playing work (example: SndPlayer.java)
+* Fix audio stream playing (example: `SndPlayer.java`) thanks to @wolfgangasdf
 
 ## v1.5.0 (2016-09-02)
 
