@@ -1,5 +1,9 @@
 # jFLAC Changelog
 
+## Next release
+
+* Fixed license (from Apache to LGPL), see [LICENSE.md](LICENSE.md) for details
+
 ## v1.5.1 (2016-11-18)
 
 * Various code quality fixes using FindBugs & Coverity
