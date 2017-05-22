@@ -1,6 +1,6 @@
 Unfortunately the license story for jFLAC is a bit complicated:
 
-* It's a port of the C++ libFLAC which was initially licensed as LGLP but was
+* It's a port of the C++ libFLAC which was initially licensed as LGPL but was
   [relicensed to BSD](https://git.xiph.org/?p=flac.git;a=commitdiff;h=afd8107872c6a877b66957ee192b43530782c6ec)
   when FLAC moved to the Xiph.Org foundation (2003)
 * jFLAC started in 2004 where the code was already under BSD and used [the same
