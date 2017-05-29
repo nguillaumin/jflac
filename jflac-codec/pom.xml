@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>jflac-parent</artifactId>
 		<groupId>org.jflac</groupId>
-		<version>1.5.2</version>
+		<version>1.5.3-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jflac-codec</artifactId>
