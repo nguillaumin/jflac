@@ -1,6 +1,6 @@
 # jFLAC Changelog
 
-## Next release
+## v1.5.2 (2017-05-29)
 
 * Fixed license (from Apache to LGPL), see [LICENSE.md](LICENSE.md) for details
 
